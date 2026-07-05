@@ -74,7 +74,7 @@ async def run_probe(probe: DependencyProbe, timeout_seconds: float) -> CheckResu
             latency_ms=latency_ms,
             error=f"timed out after {timeout_seconds}s",
         )
-    except Exception as exc:  # noqa: BLE001 — a probe failure must never crash readiness
+    except Exception as exc:
         latency_ms = round((time.perf_counter() - started_at) * 1000, 2)
         return CheckResult(
             name=probe.name,

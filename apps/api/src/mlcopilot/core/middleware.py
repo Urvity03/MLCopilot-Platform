@@ -28,7 +28,8 @@ def _new_request_id() -> str:
 
 
 def _incoming_request_id(scope: Scope) -> str | None:
-    for name, value in scope.get("headers", []):
+    headers: list[tuple[bytes, bytes]] = scope.get("headers", [])
+    for name, value in headers:
         if name == REQUEST_ID_HEADER:
             candidate = value.decode("latin-1").strip()
             if 0 < len(candidate) <= _MAX_REQUEST_ID_LENGTH:

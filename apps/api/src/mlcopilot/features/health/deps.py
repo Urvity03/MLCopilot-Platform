@@ -8,11 +8,14 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+# FastAPI resolves dependency annotations at runtime, so ``Request`` must be
+# a real runtime import — a TYPE_CHECKING-only import silently degrades the
+# parameter into a required query parameter.
+from fastapi import Request
+
 from mlcopilot.features.health.service import DependencyProbe, PostgresProbe, RedisProbe
 
 if TYPE_CHECKING:
-    from fastapi import Request
-
     from mlcopilot.core.config import Settings
 
 

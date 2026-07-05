@@ -80,7 +80,7 @@ def error_response(
 
 
 async def _handle_domain_error(request: Request, exc: Exception) -> JSONResponse:
-    assert isinstance(exc, DomainError)  # noqa: S101 — registration guarantees this
+    assert isinstance(exc, DomainError)
     status_code = status.HTTP_400_BAD_REQUEST
     for error_type, mapped_status in _DOMAIN_STATUS_MAP:
         if isinstance(exc, error_type):
@@ -96,7 +96,7 @@ async def _handle_domain_error(request: Request, exc: Exception) -> JSONResponse
 
 
 async def _handle_validation_error(request: Request, exc: Exception) -> JSONResponse:
-    assert isinstance(exc, RequestValidationError)  # noqa: S101
+    assert isinstance(exc, RequestValidationError)
     details = [
         {
             "field": ".".join(str(part) for part in error.get("loc", ())),
@@ -114,7 +114,7 @@ async def _handle_validation_error(request: Request, exc: Exception) -> JSONResp
 
 
 async def _handle_http_exception(request: Request, exc: Exception) -> JSONResponse:
-    assert isinstance(exc, StarletteHTTPException)  # noqa: S101
+    assert isinstance(exc, StarletteHTTPException)
     code = _HTTP_STATUS_CODE_MAP.get(exc.status_code, "error")
     headers = dict(exc.headers) if exc.headers else None
     return error_response(
