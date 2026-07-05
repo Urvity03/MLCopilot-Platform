@@ -1,0 +1,19 @@
+pre-commit:
+  parallel: true
+  commands:
+    web-lint:
+      glob: "apps/web/**/*.{ts,tsx}"
+      run: pnpm --filter @mlcopilot/web lint
+    api-lint:
+      glob: "apps/api/**/*.py"
+      root: apps/api/
+      run: ruff check src tests && ruff format --check src tests
+
+pre-push:
+  parallel: true
+  commands:
+    web-typecheck:
+      run: pnpm --filter @mlcopilot/web typecheck
+    api-typecheck:
+      root: apps/api/
+      run: mypy src
