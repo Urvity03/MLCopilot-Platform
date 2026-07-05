@@ -4,10 +4,13 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+# FastAPI resolves dependency annotations at runtime, so ``Request`` must be
+# a real runtime import (see features/health/deps.py for details).
+from fastapi import Request
+
 if TYPE_CHECKING:
     from collections.abc import AsyncIterator
 
-    from fastapi import Request
     from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 

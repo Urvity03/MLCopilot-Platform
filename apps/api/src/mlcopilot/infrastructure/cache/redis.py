@@ -16,7 +16,7 @@ if TYPE_CHECKING:
 
 def create_redis_client(settings: Settings) -> Redis:
     """Build the process-wide async Redis client from ``REDIS_URL``."""
-    return Redis.from_url(  # type: ignore[no-untyped-call]
+    return Redis.from_url(
         settings.redis_url,
         decode_responses=True,
         socket_timeout=settings.redis_socket_timeout_seconds,

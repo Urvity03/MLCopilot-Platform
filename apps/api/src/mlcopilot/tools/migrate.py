@@ -50,7 +50,7 @@ async def _run() -> None:
             try:
                 connection = await engine.connect()
                 break
-            except Exception as exc:  # noqa: BLE001 — retry any connect failure
+            except Exception as exc:
                 logger.warning(
                     "migrate.database_unavailable",
                     attempt=attempt,
@@ -60,7 +60,7 @@ async def _run() -> None:
                 if attempt == _CONNECT_ATTEMPTS:
                     raise
                 await asyncio.sleep(_CONNECT_RETRY_DELAY_SECONDS)
-        assert connection is not None  # noqa: S101 — loop either breaks or raises
+        assert connection is not None
 
         try:
             await connection.execute(
