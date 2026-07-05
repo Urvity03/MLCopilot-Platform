@@ -1,0 +1,105 @@
+[project]
+name = "mlcopilot-api"
+version = "0.1.0"
+description = "MLCopilot API — FastAPI backend for the MLCopilot platform"
+readme = "README.md"
+requires-python = ">=3.12"
+license = { text = "Apache-2.0" }
+dependencies = [
+    "fastapi>=0.115.0",
+    "uvicorn[standard]>=0.32.0",
+    "pydantic>=2.9.0",
+    "pydantic-settings>=2.6.0",
+    "sqlalchemy[asyncio]>=2.0.36",
+    "asyncpg>=0.30.0",
+    "alembic>=1.14.0",
+    "redis>=5.2.0",
+    "structlog>=24.4.0",
+]
+
+[dependency-groups]
+dev = [
+    "ruff>=0.8.0",
+    "mypy>=1.13.0",
+    "pytest>=8.3.0",
+    "pytest-asyncio>=0.24.0",
+    "httpx>=0.28.0",
+    "import-linter>=2.1",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/mlcopilot"]
+
+# ── Ruff ───────────────────────────────────────────────────────────────
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = [
+    "E",   # pycodestyle errors
+    "W",   # pycodestyle warnings
+    "F",   # pyflakes
+    "I",   # isort
+    "B",   # bugbear
+    "UP",  # pyupgrade
+    "N",   # pep8-naming
+    "S",   # bandit
+    "ASYNC",
+    "RUF",
+]
+ignore = [
+    "S101", # assert allowed in tests; enforced per-file below anyway
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["S101", "S106"]
+
+# ── Mypy ───────────────────────────────────────────────────────────────
+
+[tool.mypy]
+python_version = "3.12"
+mypy_path = "src"
+packages = ["mlcopilot"]
+strict = true
+warn_unreachable = true
+show_error_codes = true
+
+[[tool.mypy.overrides]]
+module = "alembic.*"
+ignore_missing_imports = true
+
+# ── Pytest ─────────────────────────────────────────────────────────────
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+addopts = "-ra"
+pythonpath = ["src"]
+
+# ── Import Linter (Clean Architecture contracts, see docs 02) ─────────
+
+[tool.importlinter]
+root_package = "mlcopilot"
+
+[[tool.importlinter.contracts]]
+name = "Domain is pure — imports nothing from other layers"
+type = "forbidden"
+source_modules = ["mlcopilot.domain"]
+forbidden_modules = [
+    "mlcopilot.core",
+    "mlcopilot.infrastructure",
+    "mlcopilot.features",
+]
+
+[[tool.importlinter.contracts]]
+name = "Infrastructure never imports features"
+type = "forbidden"
+source_modules = ["mlcopilot.infrastructure"]
+forbidden_modules = ["mlcopilot.features"]
