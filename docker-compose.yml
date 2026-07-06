@@ -65,6 +65,8 @@ services:
     depends_on:
       api:
         condition: service_healthy
+    healthcheck:
+      disable: true
 
   beat:
     build:
@@ -74,6 +76,8 @@ services:
     depends_on:
       api:
         condition: service_healthy
+    healthcheck:
+      disable: true
 
   postgres:
     image: pgvector/pgvector:pg16

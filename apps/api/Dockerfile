@@ -20,7 +20,7 @@ RUN uv sync --frozen --no-dev --no-install-project
 # Project layer.
 COPY src ./src
 COPY README.md ./
-RUN uv sync --frozen --no-dev
+RUN uv sync --frozen --no-dev --no-editable
 
 # ── Runtime ────────────────────────────────────────────────────────────
 FROM python:3.12-slim AS runtime
@@ -33,6 +33,7 @@ ENV PYTHONUNBUFFERED=1 \
 RUN groupadd --system app && useradd --system --gid app --home-dir /app app
 
 WORKDIR /app
+RUN chown app:app /app
 
 COPY --from=builder /opt/venv /opt/venv
 COPY --chown=app:app alembic.ini ./alembic.ini

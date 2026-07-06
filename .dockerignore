@@ -1,0 +1,40 @@
+# Dependencies
+node_modules
+**/node_modules
+.pnpm-store
+**/.pnpm-store
+
+# Next.js build output
+.next
+**/.next
+out
+**/out
+
+# Python virtual environments and caches
+.venv
+**/.venv
+venv
+**/venv
+.mypy_cache
+**/.mypy_cache
+.pytest_cache
+**/.pytest_cache
+.ruff_cache
+**/.ruff_cache
+__pycache__
+**/__pycache__
+*.py[cod]
+
+# Local environment files
+.env
+.env*.local
+
+# Version control
+.git
+.github
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*

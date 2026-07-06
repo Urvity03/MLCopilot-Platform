@@ -29,7 +29,11 @@ _CONNECT_RETRY_DELAY_SECONDS = 2.0
 
 
 def _alembic_config() -> Config:
-    api_root = Path(__file__).resolve().parents[3]
+    cwd = Path.cwd()
+    if (cwd / "alembic.ini").exists():
+        api_root = cwd
+    else:
+        api_root = Path(__file__).resolve().parents[3]
     config = Config(str(api_root / "alembic.ini"))
     config.set_main_option("script_location", str(api_root / "alembic"))
     return config
