@@ -34,6 +34,12 @@ class ConflictError(DomainError):
     code = "conflict"
 
 
+class AuthenticationError(DomainError):
+    """Authentication failed: bad credentials, expired token, or revoked token."""
+
+    code = "authentication_error"
+
+
 class IllegalStateTransitionError(DomainError):
     """A lifecycle transition that the domain forbids (e.g. finish before start)."""
 
