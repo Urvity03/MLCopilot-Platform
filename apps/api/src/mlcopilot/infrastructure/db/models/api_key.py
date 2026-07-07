@@ -2,6 +2,7 @@ import uuid
 from datetime import datetime
 
 from sqlalchemy import ARRAY, DateTime, ForeignKey, String
+from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
 from mlcopilot.infrastructure.db.base import Base
@@ -13,7 +14,9 @@ class ApiKey(UUIDMixin, TimestampMixin, Base):
     __tablename__ = "api_keys"
 
     user_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
         ForeignKey("users.id", ondelete="CASCADE"),
+        index=True,
         nullable=False,
     )
     name: Mapped[str] = mapped_column(

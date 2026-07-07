@@ -1,4 +1,5 @@
 from sqlalchemy import Boolean, String, text
+from sqlalchemy.dialects.postgresql import CITEXT
 from sqlalchemy.orm import Mapped, mapped_column
 
 from mlcopilot.infrastructure.db.base import Base
@@ -10,7 +11,7 @@ class User(UUIDMixin, TimestampMixin, Base):
     __tablename__ = "users"
 
     email: Mapped[str] = mapped_column(
-        String(255),
+        CITEXT,
         unique=True,
         index=True,
         nullable=False,
