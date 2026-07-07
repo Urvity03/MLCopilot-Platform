@@ -3,3 +3,9 @@
 Never imports from core/, infrastructure/, features/, or workers/
 (enforced by import-linter, see docs/architecture/02-clean-architecture.md).
 """
+
+from mlcopilot.domain.api_key import ApiKey
+from mlcopilot.domain.refresh_token import RefreshToken
+from mlcopilot.domain.user import User
+
+__all__ = ["ApiKey", "RefreshToken", "User"]
