@@ -56,3 +56,13 @@ class UnprocessableError(DomainError):
     """Schema-valid input that is semantically invalid."""
 
     code = "unprocessable"
+
+
+class PermissionDeniedError(DomainError):
+    """The authenticated caller lacks permission to perform the requested action."""
+
+    code = "permission_denied"
+
+    def __init__(self, message: str, code: str = "permission_denied") -> None:
+        super().__init__(message)
+        self.code = code

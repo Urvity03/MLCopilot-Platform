@@ -6,6 +6,7 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING, Literal
 
 if TYPE_CHECKING:
+    from mlcopilot.domain.role import Role
     from mlcopilot.domain.user import User
 
 
@@ -17,7 +18,7 @@ class AuthContext:
     via: Literal["jwt", "api_key"]
     api_key_scopes: list[str] | None = None
 
-    def scopes_allow(self, minimum_role: str) -> bool:
+    def scopes_allow(self, minimum_role: Role | str) -> bool:
         """Enforce API key scope restrictions based on minimum role mappings.
 
         Mapping:
@@ -30,11 +31,18 @@ class AuthContext:
         if not self.api_key_scopes:
             return False
 
-        role = minimum_role.lower()
-        if "read" in self.api_key_scopes and role == "viewer":
+        from mlcopilot.domain.role import Role
+
+        role_str = (
+            minimum_role.value
+            if isinstance(minimum_role, Role)
+            else str(minimum_role).lower()
+        )
+        if "read" in self.api_key_scopes and role_str == "viewer":
             return True
-        if "write" in self.api_key_scopes and role in ("viewer", "member"):
+        if "write" in self.api_key_scopes and role_str in ("viewer", "member"):
             return True
-        if "admin" in self.api_key_scopes and role in ("viewer", "member", "admin"):
+        if "admin" in self.api_key_scopes and role_str in ("viewer", "member", "admin"):
             return True
         return False
+
