@@ -20,6 +20,8 @@ from mlcopilot.core.middleware import (
     RequestLoggingMiddleware,
     SecurityHeadersMiddleware,
 )
+from mlcopilot.features.auth import api_keys_router
+from mlcopilot.features.auth.router import router as auth_router
 from mlcopilot.features.health.router import router as health_router
 from mlcopilot.infrastructure.cache import create_redis_client
 from mlcopilot.infrastructure.db import create_engine, create_session_factory
@@ -85,6 +87,8 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     register_exception_handlers(app)
 
     app.include_router(health_router, prefix=settings.api_v1_prefix)
+    app.include_router(auth_router, prefix=settings.api_v1_prefix)
+    app.include_router(api_keys_router, prefix=settings.api_v1_prefix)
 
     return app
 

@@ -59,12 +59,12 @@ class JWTManager:
                 token, self._secret, algorithms=[_ALGORITHM]
             )
         except jwt.ExpiredSignatureError:
-            raise AuthenticationError("Access token has expired")  # noqa: B904
+            raise AuthenticationError("Access token has expired", code="token_expired")  # noqa: B904
         except jwt.InvalidTokenError:
-            raise AuthenticationError("Invalid access token")  # noqa: B904
+            raise AuthenticationError("Invalid access token", code="unauthenticated")  # noqa: B904
 
         if data.get("type") != "access":
-            raise AuthenticationError("Invalid token type")
+            raise AuthenticationError("Invalid token type", code="unauthenticated")
 
         return TokenPayload(
             sub=uuid.UUID(str(data["sub"])),

@@ -19,6 +19,7 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from mlcopilot.core.logging import get_logger
 from mlcopilot.domain.errors import (
+    AuthenticationError,
     ConflictError,
     DomainError,
     IllegalStateTransitionError,
@@ -33,6 +34,7 @@ logger = get_logger("mlcopilot.errors")
 
 _DOMAIN_STATUS_MAP: tuple[tuple[type[DomainError], int], ...] = (
     (NotFoundError, status.HTTP_404_NOT_FOUND),
+    (AuthenticationError, status.HTTP_401_UNAUTHORIZED),
     (IllegalStateTransitionError, status.HTTP_409_CONFLICT),
     (ConflictError, status.HTTP_409_CONFLICT),
     (UnprocessableError, status.HTTP_422_UNPROCESSABLE_CONTENT),
