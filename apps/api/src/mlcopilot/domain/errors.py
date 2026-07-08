@@ -37,7 +37,13 @@ class ConflictError(DomainError):
 class AuthenticationError(DomainError):
     """Authentication failed: bad credentials, expired token, or revoked token."""
 
-    code = "authentication_error"
+    code = "unauthenticated"
+
+    def __init__(self, message: str, code: str = "unauthenticated") -> None:
+        super().__init__(message)
+        self.code = code
+
+
 
 
 class IllegalStateTransitionError(DomainError):

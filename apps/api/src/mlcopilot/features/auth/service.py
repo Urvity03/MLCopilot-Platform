@@ -106,13 +106,13 @@ class AuthService:
         if user is None:
             # Consume the same time as a real verify to prevent timing attacks.
             self._passwords.verify("dummy", self._dummy_hash)
-            raise AuthenticationError("Invalid email or password")
+            raise AuthenticationError("Invalid email or password", code="unauthenticated")
 
         if not self._passwords.verify(password, user.password_hash):
-            raise AuthenticationError("Invalid email or password")
+            raise AuthenticationError("Invalid email or password", code="unauthenticated")
 
         if not user.is_active:
-            raise AuthenticationError("Account is deactivated")
+            raise AuthenticationError("Account is deactivated", code="unauthenticated")
 
         access_token = self._jwt.create_access_token(user.id)
         raw_refresh, refresh_entity = self._create_refresh_token(user.id)
@@ -137,17 +137,18 @@ class AuthService:
         stored = await self._refresh_tokens.get_by_hash(token_hash)
 
         if stored is None:
-            raise AuthenticationError("Invalid refresh token")
+            raise AuthenticationError("Invalid refresh token", code="unauthenticated")
 
         # Stolen-token detection: already revoked ⇒ reuse attack.
         if stored.revoked_at is not None:
             await self._refresh_tokens.revoke_family(stored.family_id)
             raise AuthenticationError(
-                "Refresh token reuse detected; family revoked"
+                "Refresh token reuse detected; family revoked",
+                code="token_reuse_detected",
             )
 
         if stored.expires_at < datetime.now(UTC):
-            raise AuthenticationError("Refresh token has expired")
+            raise AuthenticationError("Refresh token has expired", code="token_expired")
 
         # Revoke the consumed token.
         stored.revoked_at = datetime.now(UTC)
@@ -174,7 +175,7 @@ class AuthService:
         stored = await self._refresh_tokens.get_by_hash(token_hash)
 
         if stored is None:
-            raise AuthenticationError("Invalid refresh token")
+            raise AuthenticationError("Invalid refresh token", code="unauthenticated")
 
         await self._refresh_tokens.revoke_family(stored.family_id)
 
@@ -208,6 +209,25 @@ class AuthService:
         )
         await self._api_keys.add(api_key)
         return full_key, api_key
+
+    async def list_api_keys(self, *, user_id: uuid.UUID) -> list[ApiKey]:
+        """List all active API keys for user."""
+        return await self._api_keys.list_active_for_user(user_id)
+
+    async def revoke_api_key(self, *, key_id: uuid.UUID, user_id: uuid.UUID) -> None:
+        """Revoke an API key.
+
+        Raises:
+            NotFoundError: if the key does not exist or does not belong to the user.
+        """
+        from mlcopilot.domain.errors import NotFoundError
+
+        key = await self._api_keys.get_by_id(key_id)
+        if key is None or key.user_id != user_id:
+            raise NotFoundError("API key not found")
+
+        key.revoked_at = datetime.now(UTC)
+        await self._api_keys.update(key)
 
     # ── Internal helpers ──────────────────────────────────────────────
 
