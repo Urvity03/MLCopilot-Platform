@@ -24,6 +24,7 @@ from mlcopilot.domain.errors import (
     DomainError,
     IllegalStateTransitionError,
     NotFoundError,
+    PermissionDeniedError,
     UnprocessableError,
 )
 
@@ -35,6 +36,7 @@ logger = get_logger("mlcopilot.errors")
 _DOMAIN_STATUS_MAP: tuple[tuple[type[DomainError], int], ...] = (
     (NotFoundError, status.HTTP_404_NOT_FOUND),
     (AuthenticationError, status.HTTP_401_UNAUTHORIZED),
+    (PermissionDeniedError, status.HTTP_403_FORBIDDEN),
     (IllegalStateTransitionError, status.HTTP_409_CONFLICT),
     (ConflictError, status.HTTP_409_CONFLICT),
     (UnprocessableError, status.HTTP_422_UNPROCESSABLE_CONTENT),
