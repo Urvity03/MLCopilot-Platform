@@ -1,0 +1,22 @@
+{
+  "name": "mlcopilot",
+  "version": "0.1.0",
+  "private": true,
+  "description": "The AI Operating System for Machine Learning Engineering",
+  "license": "Apache-2.0",
+  "packageManager": "pnpm@9.15.0",
+  "scripts": {
+    "dev": "pnpm --filter @mlcopilot/web dev",
+    "build": "pnpm --filter @mlcopilot/web build",
+    "start": "pnpm --filter @mlcopilot/web start",
+    "lint": "pnpm --filter @mlcopilot/web lint",
+    "typecheck": "pnpm -r typecheck",
+    "test": "pnpm -r test",
+    "contracts:generate": "pnpm --filter @mlcopilot/contracts generate"
+  },
+  "pnpm": {
+    "overrides": {
+      "hono": "4.12.25"
+    }
+  }
+}
