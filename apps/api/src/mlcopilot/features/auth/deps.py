@@ -1,6 +1,7 @@
 from typing import Annotated
 
-from fastapi import Depends, Header
+from fastapi import Depends
+from fastapi.security import APIKeyHeader, HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from mlcopilot.core.config import Settings, get_settings
@@ -63,17 +64,22 @@ async def get_auth_service(
     )
 
 
+
+_http_bearer = HTTPBearer(auto_error=False)
+_api_key_header = APIKeyHeader(name="X-API-Key", auto_error=False)
+
+
 async def get_current_user(
     settings: Annotated[Settings, Depends(get_settings)],
     user_repo: Annotated[UserRepository, Depends(get_user_repository)],
     api_key_repo: Annotated[ApiKeyRepository, Depends(get_api_key_repository)],
-    authorization: Annotated[str | None, Header()] = None,
-    x_api_key: Annotated[str | None, Header(alias="X-API-Key")] = None,
+    bearer_auth: Annotated[HTTPAuthorizationCredentials | None, Depends(_http_bearer)] = None,
+    x_api_key: Annotated[str | None, Depends(_api_key_header)] = None,
 ) -> AuthContext:
     """FastAPI dependency to authenticate requests and retrieve the current AuthContext."""
     # 1. Bearer JWT
-    if authorization and authorization.startswith("Bearer "):
-        token = authorization[len("Bearer "):]
+    if bearer_auth:
+        token = bearer_auth.credentials
         jwt_manager = JWTManager(secret=settings.jwt_secret.get_secret_value())
         payload = jwt_manager.decode_access_token(token)
 

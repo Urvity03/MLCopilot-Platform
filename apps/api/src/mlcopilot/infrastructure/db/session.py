@@ -15,15 +15,13 @@ if TYPE_CHECKING:
 
 
 async def get_db_session(request: Request) -> AsyncIterator[AsyncSession]:
-    """Yield one session per request; rollback on error, always close.
-
-    Commits are the responsibility of the unit of work / service layer,
-    never of this dependency.
+    """Yield one session per request; commit on success, rollback on error, always close.
     """
     session_factory: async_sessionmaker[AsyncSession] = request.app.state.db_session_factory
     session = session_factory()
     try:
         yield session
+        await session.commit()
     except Exception:
         await session.rollback()
         raise
