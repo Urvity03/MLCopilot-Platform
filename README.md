@@ -1,6 +1,6 @@
 # MLCopilot Platform
 
-> A production-oriented AI/ML platform for building intelligent machine learning applications with a Clean Architecture backend, scalable infrastructure, and an extensible AI knowledge platform.
+> A production-oriented AI/ML platform for managing machine learning projects, knowledge bases, and AI-powered workflows using a Clean Architecture backend and modern cloud-native infrastructure.
 
 ![Python](https://img.shields.io/badge/Python-3.12-blue)
 ![FastAPI](https://img.shields.io/badge/FastAPI-Backend-009688)
@@ -10,71 +10,68 @@
 
 ---
 
-# Overview
+## Overview
 
-MLCopilot Platform is a production-oriented AI/ML platform designed to provide a scalable foundation for managing machine learning projects, datasets, knowledge bases, and AI-powered workflows.
+MLCopilot Platform is a full-stack AI/ML platform designed to provide a scalable foundation for building intelligent applications. The project emphasizes maintainability, extensibility, and production-ready engineering practices through a Clean Architecture design.
 
-The backend follows **Clean Architecture**, separating business rules, infrastructure, and presentation layers for maintainability, scalability, and testability.
-
-The project is being built incrementally through engineering sprints, with each sprint introducing production-ready functionality.
+The platform is being developed incrementally, with each milestone introducing production-quality functionality.
 
 ---
 
-# Features
+## Features
 
-##  Completed
+### Completed
 
-### Core Infrastructure
+#### Platform Foundation
 
 - Monorepo architecture
-- FastAPI backend foundation
+- FastAPI backend
 - Configuration management
 - Docker development environment
 - Docker Compose orchestration
-- Clean Architecture implementation
+- Clean Architecture
 
-### Database
+#### Database
 
 - PostgreSQL integration
 - SQLAlchemy ORM
 - Alembic migrations
 - Repository pattern
 
-### Authentication & Security
+#### Authentication & Authorization
 
-- User registration & login
+- User registration and login
 - JWT authentication
 - Refresh token rotation
-- API Key authentication
-- Swagger Authorize support
-- Password hashing (Argon2)
+- API key authentication
+- OpenAPI/Swagger authorization
+- Argon2 password hashing
 - Role-Based Access Control (RBAC)
 
-### Project Management
+#### Project Management
 
 - Project workspaces
-- Project membership management
+- Membership management
 - Ownership transfer
 - Permission enforcement
 
-### Knowledge Base
+#### Knowledge Base
 
-- Project Memory
-- Knowledge Base Upload API
+- Project memory
+- Knowledge base uploads
 - MinIO object storage
-- File upload management
-- Docker MinIO bootstrap
+- Upload management
 
-### Engineering
+#### Engineering Quality
 
 - Unit testing with Pytest
-- Static typing with MyPy
+- Static type checking with MyPy
 - Ruff linting
 - Import Linter architecture validation
 
 ---
 
-##  In Progress
+### In Progress
 
 - Document parsing
 - Text chunking
@@ -82,52 +79,51 @@ The project is being built incrementally through engineering sprints, with each 
 
 ---
 
-##  Planned
+### Planned
 
 - Semantic search
-- RAG pipeline
+- Retrieval-Augmented Generation (RAG)
+- Knowledge graph
 - LLM integration
-- Knowledge Graph
 - Dataset management
 - Experiment tracking
 - Model registry
 - Training pipelines
-- Inference service
 - Deployment management
-- Monitoring & observability
+- Monitoring and observability
 - Background jobs
 - CI/CD
 
 ---
 
-# Tech Stack
+## Technology Stack
 
-## Backend
+### Backend
 
-- FastAPI
 - Python 3.12
+- FastAPI
 - SQLAlchemy
 - PostgreSQL
 - Alembic
-- Pydantic
 - Redis
 - Neo4j
 - MinIO
+- Pydantic
 - PyJWT
 - pwdlib (Argon2)
 
-## Frontend
+### Frontend
 
 - Next.js
 - TypeScript
 - Tailwind CSS
 
-## Infrastructure
+### Infrastructure
 
 - Docker
 - Docker Compose
 
-## Quality
+### Quality Assurance
 
 - Pytest
 - Ruff
@@ -136,9 +132,9 @@ The project is being built incrementally through engineering sprints, with each 
 
 ---
 
-# Architecture
+## Architecture
 
-The backend follows **Clean Architecture**.
+The backend follows Clean Architecture principles.
 
 ```text
 Presentation (FastAPI)
@@ -150,10 +146,11 @@ Application (Features / Services)
 Domain (Business Rules)
           │
           ▼
-Infrastructure (Database, Storage, Security)
+Infrastructure
+(Database • Storage • Security • External Services)
 ```
 
-Core principles:
+### Design Principles
 
 - Clean Architecture
 - Domain-Driven Design
@@ -166,17 +163,13 @@ Core principles:
 
 ---
 
-# Project Structure
+## Project Structure
 
 ```text
 MLCopilot-Platform
 │
 ├── apps
 │   ├── api
-│   │   ├── src
-│   │   ├── tests
-│   │   └── alembic
-│   │
 │   └── web
 │
 ├── docs
@@ -189,29 +182,29 @@ MLCopilot-Platform
 
 ---
 
-# Current Backend Progress
+## Development Progress
 
 | Module | Status |
 |---------|--------|
-| Infrastructure | ✅ Complete |
-| Database Foundation | ✅ Complete |
-| Repository Layer | ✅ Complete |
-| Authentication | ✅ Complete |
-| JWT & API Keys | ✅ Complete |
-| RBAC | ✅ Complete |
-| Project Management | ✅ Complete |
-| Project Memory | ✅ Complete |
-| Knowledge Base Uploads | ✅ Complete |
-| Document Parsing | 🚧 In Progress |
-| Embeddings | ⏳ Planned |
-| Semantic Search | ⏳ Planned |
-| RAG Chat | ⏳ Planned |
+| Infrastructure | Complete |
+| Database Foundation | Complete |
+| Repository Layer | Complete |
+| Authentication | Complete |
+| JWT & API Keys | Complete |
+| RBAC | Complete |
+| Project Management | Complete |
+| Project Memory | Complete |
+| Knowledge Base Uploads | Complete |
+| Document Parsing | In Progress |
+| Embeddings | Planned |
+| Semantic Search | Planned |
+| RAG Chat | Planned |
 
 ---
 
-# Getting Started
+## Getting Started
 
-## Clone the repository
+### Clone the repository
 
 ```bash
 git clone https://github.com/Urvity03/MLCopilot-Platform.git
@@ -219,17 +212,13 @@ git clone https://github.com/Urvity03/MLCopilot-Platform.git
 cd MLCopilot-Platform
 ```
 
----
-
-## Start the development environment
+### Start the development environment
 
 ```bash
 docker compose up -d
 ```
 
----
-
-## Run the backend
+### Run the backend
 
 ```bash
 cd apps/api
@@ -237,15 +226,13 @@ cd apps/api
 uvicorn mlcopilot.main:app --reload
 ```
 
-Swagger UI:
+API Documentation:
 
 ```
 http://localhost:8000/api/v1/docs
 ```
 
----
-
-## Run the frontend
+### Run the frontend
 
 ```bash
 cd apps/web
@@ -257,9 +244,9 @@ npm run dev
 
 ---
 
-# Development
+## Development
 
-Run all backend quality checks:
+Run the complete backend quality suite:
 
 ```bash
 ruff check src tests
@@ -273,63 +260,56 @@ lint-imports
 
 ---
 
-# Roadmap
+## Roadmap
 
 - [x] Monorepo setup
 - [x] Backend foundation
 - [x] Configuration system
 - [x] Database architecture
-- [x] Repository pattern
+- [x] Repository layer
 - [x] Authentication
-- [x] JWT & Refresh Tokens
-- [x] API Keys
+- [x] JWT authentication
+- [x] API key authentication
 - [x] Role-Based Access Control
-- [x] Project Management
-- [x] Project Memory
-- [x] Knowledge Base Uploads
-- [ ] Document Parsing
-- [ ] Text Chunking
-- [ ] Embedding Generation
-- [ ] Semantic Search
-- [ ] RAG Chat
-- [ ] Knowledge Graph
-- [ ] Model Registry
-- [ ] Experiment Tracking
-- [ ] Dataset Management
-- [ ] Training Pipelines
-- [ ] Deployment Platform
-- [ ] Monitoring
+- [x] Project management
+- [x] Project memory
+- [x] Knowledge base uploads
+- [ ] Document parsing
+- [ ] Text chunking
+- [ ] Embedding generation
+- [ ] Semantic search
+- [ ] Retrieval-Augmented Generation
+- [ ] Knowledge graph
+- [ ] Model registry
+- [ ] Experiment tracking
+- [ ] Dataset management
+- [ ] Training pipelines
+- [ ] Deployment platform
+- [ ] Monitoring and observability
 - [ ] CI/CD
 
 ---
 
-# Current Status
+## Current Development Focus
 
-**Current Sprint:** Sprint 9 – Document Parsing & Chunking
+The platform currently supports authentication, project workspaces, role-based access control, project memory, and knowledge base uploads backed by MinIO object storage.
 
-The platform now supports:
-
-- User authentication
-- Project workspaces
-- RBAC
-- Project Memory
-- Knowledge Base uploads
-- Object storage via MinIO
-
-The next milestone is transforming uploaded documents into searchable knowledge through parsing, chunking, and embeddings.
+The next milestone focuses on document parsing, text chunking, and embedding generation to enable semantic search and Retrieval-Augmented Generation workflows.
 
 ---
 
-# Author
+## Author
 
 **Urvi Tyagi**
 
-- GitHub: https://github.com/Urvity03
-- LinkedIn: https://www.linkedin.com/in/urvi-tyagi-17b302286/
-- Repository: https://github.com/Urvity03/MLCopilot-Platform
+GitHub: https://github.com/Urvity03
+
+LinkedIn: https://www.linkedin.com/in/urvi-tyagi-17b302286/
+
+Repository: https://github.com/Urvity03/MLCopilot-Platform
 
 ---
 
-# License
+## License
 
 This project is licensed under the MIT License.
