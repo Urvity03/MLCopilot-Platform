@@ -10,6 +10,7 @@ from mlcopilot.domain.memory import ArtifactRef, MemoryKind, MemoryPage, MemoryR
 from mlcopilot.domain.project import Project, ProjectContext, ProjectMember
 from mlcopilot.domain.refresh_token import RefreshToken
 from mlcopilot.domain.role import Role
+from mlcopilot.domain.upload import ParsedChunk, Upload, UploadKind, UploadParseStatus
 from mlcopilot.domain.user import User
 
 __all__ = [
@@ -19,10 +20,14 @@ __all__ = [
     "MemoryKind",
     "MemoryPage",
     "MemoryRecord",
+    "ParsedChunk",
     "Project",
     "ProjectContext",
     "ProjectMember",
     "RefreshToken",
     "Role",
+    "Upload",
+    "UploadKind",
+    "UploadParseStatus",
     "User",
 ]

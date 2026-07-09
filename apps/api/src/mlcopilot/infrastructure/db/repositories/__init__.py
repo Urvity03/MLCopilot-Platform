@@ -9,6 +9,7 @@ from mlcopilot.infrastructure.db.repositories.project import (
 from mlcopilot.infrastructure.db.repositories.refresh_token import (
     SqlAlchemyRefreshTokenRepository,
 )
+from mlcopilot.infrastructure.db.repositories.upload import SqlAlchemyUploadRepository
 from mlcopilot.infrastructure.db.repositories.user import SqlAlchemyUserRepository
 
 __all__ = [
@@ -17,5 +18,6 @@ __all__ = [
     "SqlAlchemyMemoryRepository",
     "SqlAlchemyProjectRepository",
     "SqlAlchemyRefreshTokenRepository",
+    "SqlAlchemyUploadRepository",
     "SqlAlchemyUserRepository",
 ]

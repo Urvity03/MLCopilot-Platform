@@ -25,6 +25,7 @@ from mlcopilot.features.auth.router import router as auth_router
 from mlcopilot.features.health.router import router as health_router
 from mlcopilot.features.memory import memory_router
 from mlcopilot.features.projects import projects_router
+from mlcopilot.features.uploads import uploads_router
 from mlcopilot.infrastructure.cache import create_redis_client
 from mlcopilot.infrastructure.db import create_engine, create_session_factory
 
@@ -92,6 +93,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.include_router(auth_router, prefix=settings.api_v1_prefix)
     app.include_router(api_keys_router, prefix=settings.api_v1_prefix)
     app.include_router(projects_router, prefix=settings.api_v1_prefix)
+    app.include_router(uploads_router, prefix=settings.api_v1_prefix)
     app.include_router(memory_router, prefix=settings.api_v1_prefix)
 
     return app

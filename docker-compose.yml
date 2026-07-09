@@ -51,6 +51,8 @@ services:
         condition: service_healthy
       minio:
         condition: service_healthy
+      minio-bootstrap:
+        condition: service_completed_successfully
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/v1/health/live')"]
       interval: 10s
@@ -139,6 +141,18 @@ services:
       interval: 10s
       timeout: 5s
       retries: 12
+
+  minio-bootstrap:
+    image: minio/mc:latest
+    depends_on:
+      minio:
+        condition: service_healthy
+    entrypoint: >
+      /bin/sh -c "
+      mc alias set local http://minio:9000 mlcopilot mlcopilot-dev-secret;
+      mc mb --ignore-existing local/mlcopilot;
+      exit 0;
+      "
 
 volumes:
   postgres-data:

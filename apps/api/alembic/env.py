@@ -14,9 +14,9 @@ from typing import TYPE_CHECKING
 from alembic import context
 from sqlalchemy.ext.asyncio import create_async_engine
 
+import mlcopilot.infrastructure.db.models  # noqa: F401 — register models on Base.metadata
 from mlcopilot.core.config import get_settings
 from mlcopilot.infrastructure.db.base import Base
-import mlcopilot.infrastructure.db.models  # noqa: F401 — register models on Base.metadata
 
 if TYPE_CHECKING:
     from sqlalchemy import Connection
