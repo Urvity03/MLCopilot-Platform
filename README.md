@@ -18,6 +18,24 @@ The platform is being developed incrementally, with each milestone introducing p
 
 ---
 
+# System Architecture
+
+                    Client
+                       │
+          Next.js Frontend (Planned)
+                       │
+                       ▼
+                 FastAPI Backend
+                       │
+        ┌──────────────┼──────────────┐
+        ▼              ▼              ▼
+   PostgreSQL       Redis         Neo4j
+        │
+        ▼
+      MinIO
+      
+---
+
 ## Features
 
 ### Completed
