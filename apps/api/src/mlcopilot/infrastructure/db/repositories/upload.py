@@ -7,8 +7,9 @@ from uuid import UUID
 
 from sqlalchemy import select
 
+from mlcopilot.domain.upload import ParsedChunk, UploadKind, UploadParseStatus
 from mlcopilot.domain.upload import Upload as DomainUpload
-from mlcopilot.domain.upload import UploadKind, UploadParseStatus
+from mlcopilot.infrastructure.db.models.upload import ParsedChunkModel as DbParsedChunk
 from mlcopilot.infrastructure.db.models.upload import UploadModel as DbUpload
 
 if TYPE_CHECKING:
@@ -68,3 +69,44 @@ class SqlAlchemyUploadRepository:
         )
         self._session.add(db_upload)
         await self._session.flush()
+
+    async def update(self, upload: DomainUpload) -> None:
+        """Update an existing upload."""
+        db_upload = await self._session.get(DbUpload, upload.id)
+        if db_upload:
+            db_upload.parse_status = upload.parse_status.value
+            db_upload.metadata_ = upload.metadata
+            await self._session.flush()
+
+    async def add_chunks(self, upload_id: UUID, chunks: list[ParsedChunk]) -> None:
+        """Bulk insert parsed chunks for an upload."""
+        db_chunks = [
+            DbParsedChunk(
+                id=c.id,
+                upload_id=upload_id,
+                position=c.position,
+                content=c.content,
+                metadata_=c.metadata,
+            )
+            for c in chunks
+        ]
+        self._session.add_all(db_chunks)
+        await self._session.flush()
+
+    async def get_chunks(self, upload_id: UUID) -> list[ParsedChunk]:
+        """Retrieve chunks from database and map to domain objects."""
+        result = await self._session.execute(
+            select(DbParsedChunk)
+            .where(DbParsedChunk.upload_id == upload_id)
+            .order_by(DbParsedChunk.position.asc())
+        )
+        return [
+            ParsedChunk(
+                id=c.id,
+                upload_id=c.upload_id,
+                position=c.position,
+                content=c.content,
+                metadata=c.metadata_,
+            )
+            for c in result.scalars().all()
+        ]
