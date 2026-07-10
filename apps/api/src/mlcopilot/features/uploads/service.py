@@ -3,12 +3,14 @@
 from __future__ import annotations
 
 import json
+import os
 import uuid
 from datetime import UTC, datetime
 from typing import TYPE_CHECKING, BinaryIO
 
 from mlcopilot.domain.errors import UnprocessableError
-from mlcopilot.domain.upload import Upload, UploadKind, UploadParseStatus
+from mlcopilot.domain.upload import ParsedChunk, Upload, UploadKind, UploadParseStatus
+from mlcopilot.infrastructure.parsers.registry import get_parser_for_extension
 
 if TYPE_CHECKING:
     from mlcopilot.features.uploads.repository import UploadRepository
@@ -37,6 +39,14 @@ class UploadService:
                 msg = "Invalid PDF format: incorrect magic bytes"
                 raise UnprocessableError(msg)
             kind = UploadKind.PAPER
+        elif filename_lower.endswith(".docx"):
+            magic = data.read(4)
+            if magic != b"PK\x03\x04":
+                msg = "Invalid DOCX format: incorrect magic bytes"
+                raise UnprocessableError(msg)
+            kind = UploadKind.PAPER
+        elif filename_lower.endswith(".md") or filename_lower.endswith(".txt"):
+            kind = UploadKind.PAPER
         elif filename_lower.endswith(".ipynb"):
             try:
                 content = data.read().decode("utf-8")
@@ -51,7 +61,10 @@ class UploadService:
                 raise UnprocessableError(msg) from e
             kind = UploadKind.NOTEBOOK
         else:
-            msg = "Unsupported file extension. Only .pdf and .ipynb are allowed."
+            msg = (
+                "Unsupported file extension. "
+                "Allowed extensions are: .pdf, .docx, .md, .txt, and .ipynb."
+            )
             raise UnprocessableError(msg)
 
         return kind
@@ -101,9 +114,51 @@ class UploadService:
 
         await self._uploads.add(upload)
 
-        # Note: Event firing (e.g. NotebookUploaded, PaperUploaded) would occur here,
-        # but is omitted as there is no central EventBus in the current architecture.
-        # Future asynchronous parsers will likely poll the 'pending' status or consume events.
+        # Synchronous document parsing and chunking workflow for PAPER kinds
+        # (PDF, DOCX, Markdown, Text)
+        # Notebooks (.ipynb) are skipped for this sprint's parsing pipeline
+        if kind == UploadKind.PAPER:
+            upload.parse_status = UploadParseStatus.PARSING
+            await self._uploads.update(upload)
+
+            try:
+                _, ext = os.path.splitext(filename.lower())
+                parser = get_parser_for_extension(ext)
+
+                # Fetch raw file bytes from storage
+                file_bytes = await self._storage.get(project_id, upload_id, filename)
+
+                # Parse and chunk
+                extracted_chunks = parser.parse(file_bytes)
+
+                # Map extracted chunks to domain ParsedChunk entities
+                parsed_chunks = [
+                    ParsedChunk(
+                        id=uuid.uuid4(),
+                        upload_id=upload_id,
+                        position=idx + 1,
+                        content=chunk.content,
+                        metadata=chunk.metadata,
+                    )
+                    for idx, chunk in enumerate(extracted_chunks)
+                ]
+
+                # Bulk insert chunks
+                if parsed_chunks:
+                    await self._uploads.add_chunks(upload_id, parsed_chunks)
+
+                upload.parse_status = UploadParseStatus.PARSED
+                upload.metadata = {**upload.metadata, "chunk_count": len(parsed_chunks)}
+                await self._uploads.update(upload)
+
+            except Exception as e:
+                from mlcopilot.core.logging import get_logger
+                logger = get_logger("mlcopilot.features.uploads.service")
+                logger.error("upload.parsing.failed", upload_id=upload_id, error=str(e))
+
+                upload.parse_status = UploadParseStatus.FAILED
+                upload.metadata = {**upload.metadata, "error": str(e)}
+                await self._uploads.update(upload)
 
         return upload
 

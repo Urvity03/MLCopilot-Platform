@@ -5,7 +5,7 @@ from __future__ import annotations
 from typing import Protocol
 from uuid import UUID
 
-from mlcopilot.domain.upload import Upload
+from mlcopilot.domain.upload import ParsedChunk, Upload
 
 
 class UploadRepository(Protocol):
@@ -23,4 +23,16 @@ class UploadRepository(Protocol):
 
     async def add(self, upload: Upload) -> None:
         """Persist a new upload aggregate."""
+        ...
+
+    async def update(self, upload: Upload) -> None:
+        """Update an existing upload's status and metadata."""
+        ...
+
+    async def add_chunks(self, upload_id: UUID, chunks: list[ParsedChunk]) -> None:
+        """Bulk insert parsed chunks for an upload."""
+        ...
+
+    async def get_chunks(self, upload_id: UUID) -> list[ParsedChunk]:
+        """Retrieve parsed chunks for an upload."""
         ...

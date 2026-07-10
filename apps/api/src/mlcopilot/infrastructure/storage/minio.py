@@ -39,3 +39,22 @@ class MinioBlobStorage:
 
         return f"s3://{self._bucket_name}/{object_name}"
 
+    async def get(
+        self,
+        project_id: UUID,
+        upload_id: UUID,
+        filename: str,
+    ) -> bytes:
+        """Download a file from MinIO and return its raw bytes."""
+        object_name = f"projects/{project_id}/uploads/{upload_id}/{filename}"
+
+        def _get_bytes() -> bytes:
+            response = self._client.get_object(self._bucket_name, object_name)
+            try:
+                return response.read()
+            finally:
+                response.close()
+                response.release_conn()
+
+        return await run_sync(_get_bytes)
+

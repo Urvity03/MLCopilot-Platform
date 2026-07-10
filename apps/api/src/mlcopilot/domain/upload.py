@@ -6,7 +6,7 @@ import uuid
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import StrEnum
-from typing import Any
+from typing import Any, Protocol
 
 
 class UploadKind(StrEnum):
@@ -34,6 +34,22 @@ class ParsedChunk:
     position: int
     content: str
     metadata: dict[str, Any] = field(default_factory=dict)
+
+
+@dataclass(frozen=True)
+class ExtractedChunk:
+    """A raw chunk extracted from a document by a parser."""
+
+    content: str
+    metadata: dict[str, Any] = field(default_factory=dict)
+
+
+class DocumentParser(Protocol):
+    """Protocol for extracting text and chunking files in various formats."""
+
+    def parse(self, data: bytes) -> list[ExtractedChunk]:
+        """Parse raw document bytes and return a list of extracted chunks."""
+        ...
 
 
 @dataclass
