@@ -9,7 +9,13 @@ from datetime import UTC, datetime
 from typing import TYPE_CHECKING, BinaryIO
 
 from mlcopilot.domain.errors import UnprocessableError
-from mlcopilot.domain.upload import ParsedChunk, Upload, UploadKind, UploadParseStatus
+from mlcopilot.domain.upload import (
+    ParsedChunk,
+    Upload,
+    UploadEmbeddingStatus,
+    UploadKind,
+    UploadParseStatus,
+)
 from mlcopilot.infrastructure.parsers.registry import get_parser_for_extension
 
 if TYPE_CHECKING:
@@ -28,35 +34,50 @@ class UploadService:
         self._uploads = upload_repo
         self._storage = blob_storage
 
-    def _validate_and_determine_kind(self, filename: str, data: BinaryIO) -> UploadKind:
-        """Validate magic bytes and determine upload kind."""
+    def _determine_length(self, data: BinaryIO) -> int:
+        """Seek data to determine its length in bytes, resetting cursor position."""
+        data.seek(0, os.SEEK_END)
+        length = data.tell()
         data.seek(0)
+        return length
 
-        filename_lower = filename.lower()
-        if filename_lower.endswith(".pdf"):
+    def _validate_and_determine_kind(
+        self, filename: str, length: int, data: BinaryIO
+    ) -> UploadKind:
+        """Inspect file extension and size to return target upload kind."""
+        max_size = 50 * 1024 * 1024  # 50MB
+        if length > max_size:
+            msg = "File exceeds the maximum allowable size of 50MB."
+            raise UnprocessableError(msg)
+
+        _, ext = os.path.splitext(filename.lower())
+        if ext == ".pdf":
             magic = data.read(4)
+            data.seek(0)
             if magic != b"%PDF":
                 msg = "Invalid PDF format: incorrect magic bytes"
                 raise UnprocessableError(msg)
             kind = UploadKind.PAPER
-        elif filename_lower.endswith(".docx"):
+        elif ext == ".docx":
             magic = data.read(4)
+            data.seek(0)
             if magic != b"PK\x03\x04":
                 msg = "Invalid DOCX format: incorrect magic bytes"
                 raise UnprocessableError(msg)
             kind = UploadKind.PAPER
-        elif filename_lower.endswith(".md") or filename_lower.endswith(".txt"):
+        elif ext in {".md", ".txt"}:
             kind = UploadKind.PAPER
-        elif filename_lower.endswith(".ipynb"):
+        elif ext == ".ipynb":
             try:
                 content = data.read().decode("utf-8")
                 nb = json.loads(content)
+                data.seek(0)
                 if not isinstance(nb, dict) or "nbformat" not in nb:
                     msg = "Invalid Jupyter Notebook: missing nbformat attribute"
                     raise UnprocessableError(msg)
-            except UnprocessableError:
-                raise
             except Exception as e:
+                if isinstance(e, UnprocessableError):
+                    raise
                 msg = "Invalid Jupyter Notebook: file is not valid JSON"
                 raise UnprocessableError(msg) from e
             kind = UploadKind.NOTEBOOK
@@ -78,15 +99,9 @@ class UploadService:
         content_type: str,
         uploaded_by: uuid.UUID,
     ) -> Upload:
-        """Validate, upload to blob storage, and create the aggregate."""
-        kind = self._validate_and_determine_kind(filename, data)
-
-        # Calculate file length
-        data.seek(0, 2)
-        length = data.tell()
-
-        # Reset pointer for storage upload
-        data.seek(0)
+        """Ingest new document, parse, chunk, and update state."""
+        length = self._determine_length(data)
+        kind = self._validate_and_determine_kind(filename, length, data)
 
         upload_id = uuid.uuid4()
         now = datetime.now(UTC)
@@ -107,6 +122,7 @@ class UploadService:
             filename=filename,
             storage_uri=storage_uri,
             parse_status=UploadParseStatus.PENDING,
+            embedding_status=UploadEmbeddingStatus.PENDING,
             metadata={},
             uploaded_by=uploaded_by,
             created_at=now,
@@ -160,6 +176,7 @@ class UploadService:
                 upload.metadata = {**upload.metadata, "error": str(e)}
                 await self._uploads.update(upload)
 
+        await self._uploads.commit()
         return upload
 
     async def list_project_uploads(self, *, project_id: uuid.UUID) -> list[Upload]:

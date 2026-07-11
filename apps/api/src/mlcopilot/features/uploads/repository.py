@@ -36,3 +36,7 @@ class UploadRepository(Protocol):
     async def get_chunks(self, upload_id: UUID) -> list[ParsedChunk]:
         """Retrieve parsed chunks for an upload."""
         ...
+
+    async def commit(self) -> None:
+        """Commit the current persistence transaction."""
+        ...

@@ -86,6 +86,9 @@ class FakeUploadRepository:
     async def get_chunks(self, upload_id: uuid.UUID) -> list[ParsedChunk]:
         return self.chunks.get(upload_id, [])
 
+    async def commit(self) -> None:
+        pass
+
 
 class FakeMembershipRepository:
     def __init__(self, role: Role | None) -> None:
@@ -232,8 +235,12 @@ def app_with_overrides() -> FastAPI:
     repo = FakeUploadRepository()
     storage = FakeBlobStorage()
 
+    from mlcopilot.domain.upload import UploadEmbeddingStatus
+    from mlcopilot.features.embeddings.deps import get_embedding_service
+
     app.dependency_overrides[get_upload_repository] = lambda: repo
     app.dependency_overrides[get_blob_storage] = lambda: storage
+    app.dependency_overrides[get_embedding_service] = lambda: MagicMock()
 
     # Pre-populate data for GET tests
     project_id = uuid.UUID("00000000-0000-0000-0000-000000000001")
@@ -245,6 +252,7 @@ def app_with_overrides() -> FastAPI:
         filename="existing.pdf",
         storage_uri="s3://bucket/existing.pdf",
         parse_status=UploadParseStatus.PENDING,
+        embedding_status=UploadEmbeddingStatus.PENDING,
         metadata={},
         uploaded_by=uuid.uuid4(),
         created_at=datetime.now(UTC),

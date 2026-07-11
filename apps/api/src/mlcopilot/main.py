@@ -22,6 +22,7 @@ from mlcopilot.core.middleware import (
 )
 from mlcopilot.features.auth import api_keys_router
 from mlcopilot.features.auth.router import router as auth_router
+from mlcopilot.features.embeddings import search_router
 from mlcopilot.features.health.router import router as health_router
 from mlcopilot.features.memory import memory_router
 from mlcopilot.features.projects import projects_router
@@ -95,6 +96,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.include_router(projects_router, prefix=settings.api_v1_prefix)
     app.include_router(uploads_router, prefix=settings.api_v1_prefix)
     app.include_router(memory_router, prefix=settings.api_v1_prefix)
+    app.include_router(search_router, prefix=settings.api_v1_prefix)
 
     return app
 

@@ -40,10 +40,14 @@ The project is being developed incrementally through well-defined engineering mi
 - ✅ Project & membership management
 - ✅ Clean Architecture implementation
 - ✅ Docker development environment
+- ✅ Document upload & processing (PDF, DOCX, Markdown, TXT)
+- ✅ Intelligent text parsing & chunking (Sprint 9)
+- ✅ Vector embedding generation (Sentence Transformers: `all-MiniLM-L6-v2`)
+- ✅ Semantic similarity search with pgvector (HNSW cosine distance index)
+- ✅ Project tenant isolation & RBAC-enforced retrieval
 
 ## Planned
 
-- Project Memory
 - Dataset management
 - Experiment tracking
 - Model registry
@@ -70,7 +74,8 @@ The project is being developed incrementally through well-defined engineering mi
 - FastAPI
 - Python
 - SQLAlchemy
-- PostgreSQL
+- PostgreSQL (with **pgvector** extension)
+- Sentence Transformers (HNSW Cosine Distance Index)
 - Alembic
 - Pydantic
 - PyJWT
@@ -103,13 +108,15 @@ Infrastructure
 
 Core principles:
 
-- Domain-driven design
-- Dependency inversion
-- Repository pattern
+- Domain-driven design (DDD)
+- Dependency inversion (Clean Architecture boundaries)
+- Repository pattern (decoupled DB models and repository queries)
 - Service layer orchestration
-- Database abstraction
-- Stateless JWT authentication
-- Role-Based Access Control
+- Pluggable embedding providers (`EmbeddingProvider` protocol)
+- Vector indexing (HNSW cosine distance index for pgvector)
+- Database abstraction (SQLAlchemy ORM + Alembic migrations)
+- Stateless JWT authentication & Refresh token rotation
+- Role-Based Access Control (RBAC) & Tenant isolation
 
 ---
 
@@ -218,8 +225,8 @@ lint-imports
 - [x] Authentication service
 - [x] Authentication API
 - [x] Role-Based Access Control
-- [ ] Project Memory
-- [ ] Knowledge Base
+- [x] Document Parsing & Intelligent Chunking (Sprint 9)
+- [x] Semantic Search & pgvector Embedding Generation (Sprint 10)
 - [ ] LLM Integration
 - [ ] Model Registry
 - [ ] Experiment Tracking

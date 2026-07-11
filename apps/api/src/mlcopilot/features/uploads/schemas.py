@@ -16,6 +16,7 @@ class UploadResponse(BaseModel):
     filename: str
     storage_uri: str
     parse_status: str
+    embedding_status: str
     metadata: dict[str, Any]
     uploaded_by: uuid.UUID
     created_at: datetime

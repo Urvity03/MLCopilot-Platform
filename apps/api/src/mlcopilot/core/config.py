@@ -75,6 +75,8 @@ class Settings(BaseSettings):
     google_api_key: SecretStr = SecretStr("")
     openrouter_api_key: SecretStr = SecretStr("")
     ollama_base_url: str = ""
+    embedding_model_name: str = "all-MiniLM-L6-v2"
+    embedding_dimension: int = 384
 
     # ── Integrations (wiring arrives with the integrations feature) ───
     github_token: SecretStr = SecretStr("")
