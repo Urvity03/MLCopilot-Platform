@@ -10,41 +10,44 @@
 
 ---
 
-## Overview
+# Overview
 
-MLCopilot Platform is a full-stack AI/ML platform designed to provide a scalable foundation for building intelligent applications. The project emphasizes maintainability, extensibility, and production-ready engineering practices through a Clean Architecture design.
+MLCopilot Platform is a full-stack AI/ML platform designed to provide a scalable foundation for building intelligent AI applications.
 
-The platform is being developed incrementally, with each milestone introducing production-quality functionality.
+The backend follows **Clean Architecture**, emphasizing maintainability, extensibility, and production-ready engineering practices.
+
+The platform is being developed incrementally through engineering sprints, with each milestone introducing production-ready capabilities.
 
 ---
 
-## System Architecture
+# System Architecture
 
 ```text
                            Client
                               │
                               ▼
-            +--------------------------------+
-            | Next.js Frontend (Planned)     |
-            +--------------------------------+
+               +-----------------------------+
+               | Next.js Frontend (Planned)  |
+               +-----------------------------+
                               │
                               ▼
-            +--------------------------------+
-            |        FastAPI Backend         |
-            +--------------------------------+
-                 │           │           │
-                 ▼           ▼           ▼
-        +-------------+ +---------+ +---------+
-        | PostgreSQL  | |  Redis  | | Neo4j   |
-        +-------------+ +---------+ +---------+
-               │
-               ▼
-        +-------------+
-        |    MinIO    |
-        +-------------+
+               +-----------------------------+
+               |      FastAPI Backend        |
+               +-----------------------------+
+                    │      │       │
+                    ▼      ▼       ▼
+             PostgreSQL  Redis   Neo4j
+                    │
+                    ▼
+                 pgvector
+                    │
+                    ▼
+                 MinIO (S3)
 ```
+
 ---
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 - ✅ Monorepo architecture
 - ✅ FastAPI backend foundation
@@ -75,6 +78,13 @@ The platform is being developed incrementally, with each milestone introducing p
 
 =======
 #### Platform Foundation
+=======
+# Features
+
+## Completed
+
+### Platform Foundation
+>>>>>>> origin/main
 
 - Monorepo architecture
 - FastAPI backend
@@ -83,94 +93,114 @@ The platform is being developed incrementally, with each milestone introducing p
 - Docker Compose orchestration
 - Clean Architecture
 
-#### Database
+### Database
 
 - PostgreSQL integration
 - SQLAlchemy ORM
 - Alembic migrations
 - Repository pattern
+- pgvector integration
 
-#### Authentication & Authorization
+### Authentication & Authorization
 
-- User registration and login
+- User registration
 - JWT authentication
 - Refresh token rotation
 - API key authentication
-- OpenAPI/Swagger authorization
+- Swagger/OpenAPI authorization
 - Argon2 password hashing
 - Role-Based Access Control (RBAC)
 
-#### Project Management
+### Project Management
 
 - Project workspaces
 - Membership management
 - Ownership transfer
 - Permission enforcement
 
-#### Knowledge Base
+### Knowledge Base
 
 - Project memory
 - Knowledge base uploads
 - MinIO object storage
-- Upload management
+- Upload lifecycle management
+- PDF parsing
+- DOCX parsing
+- Markdown parsing
+- Plain text parsing
+- Intelligent document chunking
 
-#### Engineering Quality
+### AI Features
 
-- Unit testing with Pytest
-- Static type checking with MyPy
+- Sentence Transformer embeddings
+- Background embedding generation
+- pgvector vector storage
+- HNSW vector indexing
+- Semantic similarity search
+- Tenant-isolated retrieval
+
+### Engineering Quality
+
+- Pytest unit testing
+- MyPy static type checking
 - Ruff linting
 - Import Linter architecture validation
 
 ---
 
-### In Progress
+## In Progress
 
-- Document parsing
-- Text chunking
-- Embedding generation
+- Retrieval-Augmented Generation (RAG)
+- Conversation memory
 
 ---
 
-### Planned
+## Planned
 
-- Semantic search
-- Retrieval-Augmented Generation (RAG)
+- Multi-model LLM support
 - Knowledge graph
+<<<<<<< HEAD
 - LLM integration
 >>>>>>> main
+=======
+>>>>>>> origin/main
 - Dataset management
 - Experiment tracking
 - Model registry
 - Training pipelines
 - Deployment management
-- Monitoring and observability
-- Background jobs
-- CI/CD
+- Monitoring & observability
+- Background workers (Celery)
+- CI/CD pipeline
+- Web dashboard
 
 ---
 
-## Technology Stack
+# Technology Stack
 
-### Backend
+## Backend
 
 - Python 3.12
 - FastAPI
 - SQLAlchemy
 - PostgreSQL
+- pgvector
 - Alembic
 - Redis
 - Neo4j
 - MinIO
+- Sentence Transformers
 - Pydantic
 - PyJWT
 - pwdlib (Argon2)
 
-### Frontend
+## Frontend
 
 - Next.js
 - TypeScript
 - Tailwind CSS
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 ## Backend
 
@@ -188,11 +218,14 @@ The platform is being developed incrementally, with each milestone introducing p
 =======
 ### Infrastructure
 >>>>>>> main
+=======
+## Infrastructure
+>>>>>>> origin/main
 
 - Docker
 - Docker Compose
 
-### Quality Assurance
+## Quality Assurance
 
 - Pytest
 - Ruff
@@ -201,9 +234,9 @@ The platform is being developed incrementally, with each milestone introducing p
 
 ---
 
-## Architecture
+# Architecture
 
-The backend follows Clean Architecture principles.
+The backend follows **Clean Architecture**.
 
 ```text
 Presentation (FastAPI)
@@ -216,10 +249,10 @@ Domain (Business Rules)
           │
           ▼
 Infrastructure
-(Database • Storage • Security • External Services)
+(Database • Storage • Embeddings • External Services)
 ```
 
-### Design Principles
+## Design Principles
 
 <<<<<<< HEAD
 - Domain-driven design (DDD)
@@ -244,7 +277,7 @@ Infrastructure
 
 ---
 
-## Project Structure
+# Project Structure
 
 ```text
 MLCopilot-Platform
@@ -263,7 +296,7 @@ MLCopilot-Platform
 
 ---
 
-## Development Progress
+# Development Progress
 
 | Module | Status |
 |---------|--------|
@@ -276,16 +309,54 @@ MLCopilot-Platform
 | Project Management | Complete |
 | Project Memory | Complete |
 | Knowledge Base Uploads | Complete |
-| Document Parsing | In Progress |
-| Embeddings | Planned |
-| Semantic Search | Planned |
-| RAG Chat | Planned |
+| Document Parsing | Complete |
+| Intelligent Chunking | Complete |
+| Vector Embeddings | Complete |
+| Semantic Search | Complete |
+| RAG Chat | In Progress |
 
 ---
 
-## Getting Started
+# Knowledge Base Pipeline
 
-### Clone the repository
+```text
+Upload
+   │
+   ▼
+Store in MinIO
+   │
+   ▼
+Parse Document
+   │
+   ▼
+Chunk Text
+   │
+   ▼
+Generate Embeddings
+   │
+   ▼
+Store in pgvector
+   │
+   ▼
+Semantic Search
+```
+
+---
+
+# Supported Document Types
+
+| Format | Status |
+|----------|--------|
+| PDF | Supported |
+| DOCX | Supported |
+| Markdown | Supported |
+| TXT | Supported |
+
+---
+
+# Getting Started
+
+## Clone the repository
 
 ```bash
 git clone https://github.com/Urvity03/MLCopilot-Platform.git
@@ -293,13 +364,13 @@ git clone https://github.com/Urvity03/MLCopilot-Platform.git
 cd MLCopilot-Platform
 ```
 
-### Start the development environment
+## Start the development environment
 
 ```bash
 docker compose up -d
 ```
 
-### Run the backend
+## Run the backend
 
 ```bash
 cd apps/api
@@ -307,13 +378,13 @@ cd apps/api
 uvicorn mlcopilot.main:app --reload
 ```
 
-API Documentation:
+API Documentation
 
 ```
 http://localhost:8000/api/v1/docs
 ```
 
-### Run the frontend
+## Run the frontend
 
 ```bash
 cd apps/web
@@ -325,9 +396,9 @@ npm run dev
 
 ---
 
-## Development
+# Development
 
-Run the complete backend quality suite:
+Run the backend quality suite:
 
 ```bash
 ruff check src tests
@@ -341,11 +412,10 @@ lint-imports
 
 ---
 
-## Roadmap
+# Roadmap
 
 - [x] Monorepo setup
 - [x] Backend foundation
-- [x] Configuration system
 - [x] Database architecture
 - [x] Repository layer
 - [x] Authentication
@@ -366,32 +436,39 @@ lint-imports
 - [x] Project management
 - [x] Project memory
 - [x] Knowledge base uploads
-- [ ] Document parsing
-- [ ] Text chunking
-- [ ] Embedding generation
-- [ ] Semantic search
+- [x] Document parsing
+- [x] Intelligent chunking
+- [x] Embedding generation
+- [x] Semantic search
 - [ ] Retrieval-Augmented Generation
+- [ ] Conversation memory
+- [ ] Multi-model LLM support
 - [ ] Knowledge graph
 - [ ] Model registry
 - [ ] Experiment tracking
 - [ ] Dataset management
 - [ ] Training pipelines
 - [ ] Deployment platform
+<<<<<<< HEAD
 - [ ] Monitoring and observability
 >>>>>>> main
+=======
+- [ ] Monitoring & observability
+- [ ] Background workers
+>>>>>>> origin/main
 - [ ] CI/CD
 
 ---
 
-## Current Development Focus
+# Current Development Focus
 
-The platform currently supports authentication, project workspaces, role-based access control, project memory, and knowledge base uploads backed by MinIO object storage.
+The platform currently supports authentication, project workspaces, role-based access control, document ingestion, intelligent parsing, vector embedding generation, and semantic search.
 
-The next milestone focuses on document parsing, text chunking, and embedding generation to enable semantic search and Retrieval-Augmented Generation workflows.
+The next milestone focuses on Retrieval-Augmented Generation (RAG), conversation memory, and LLM integration.
 
 ---
 
-## Author
+# Author
 
 **Urvi Tyagi**
 
@@ -403,6 +480,6 @@ Repository: https://github.com/Urvity03/MLCopilot-Platform
 
 ---
 
-## License
+# License
 
 This project is licensed under the MIT License.
