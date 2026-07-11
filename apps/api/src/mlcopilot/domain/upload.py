@@ -25,6 +25,15 @@ class UploadParseStatus(StrEnum):
     FAILED = "failed"
 
 
+class UploadEmbeddingStatus(StrEnum):
+    """The embedding state machine for an upload."""
+
+    PENDING = "pending"
+    EMBEDDING = "embedding"
+    EMBEDDED = "embedded"
+    FAILED = "failed"
+
+
 @dataclass(frozen=True)
 class ParsedChunk:
     """A parsed chunk from an uploaded document."""
@@ -62,6 +71,7 @@ class Upload:
     filename: str
     storage_uri: str
     parse_status: UploadParseStatus
+    embedding_status: UploadEmbeddingStatus
     metadata: dict[str, Any]
     uploaded_by: uuid.UUID
     created_at: datetime

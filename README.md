@@ -47,11 +47,44 @@ The platform is being developed incrementally through engineering sprints, with 
 
 ---
 
+<<<<<<< HEAD
+<<<<<<< HEAD
+- ✅ Monorepo architecture
+- ✅ FastAPI backend foundation
+- ✅ Configuration management
+- ✅ PostgreSQL integration
+- ✅ SQLAlchemy ORM
+- ✅ Alembic migrations
+- ✅ Repository layer
+- ✅ Authentication service
+- ✅ JWT authentication
+- ✅ Refresh token rotation
+- ✅ API key authentication
+- ✅ Authentication REST API
+- ✅ Role-Based Access Control (RBAC)
+- ✅ Project & membership management
+- ✅ Clean Architecture implementation
+- ✅ Docker development environment
+- ✅ Document upload & processing (PDF, DOCX, Markdown, TXT)
+- ✅ Intelligent text parsing & chunking (Sprint 9)
+- ✅ Vector embedding generation (Sentence Transformers: `all-MiniLM-L6-v2`)
+- ✅ Semantic similarity search with pgvector (HNSW cosine distance index)
+- ✅ Project tenant isolation & RBAC-enforced retrieval
+=======
+## Features
+
+
+### Completed
+
+=======
+#### Platform Foundation
+=======
 # Features
 
 ## Completed
 
 ### Platform Foundation
+>>>>>>> origin/main
 
 - Monorepo architecture
 - FastAPI backend
@@ -126,6 +159,11 @@ The platform is being developed incrementally through engineering sprints, with 
 
 - Multi-model LLM support
 - Knowledge graph
+<<<<<<< HEAD
+- LLM integration
+>>>>>>> main
+=======
+>>>>>>> origin/main
 - Dataset management
 - Experiment tracking
 - Model registry
@@ -162,7 +200,27 @@ The platform is being developed incrementally through engineering sprints, with 
 - TypeScript
 - Tailwind CSS
 
+<<<<<<< HEAD
+<<<<<<< HEAD
+## Backend
+
+- FastAPI
+- Python
+- SQLAlchemy
+- PostgreSQL (with **pgvector** extension)
+- Sentence Transformers (HNSW Cosine Distance Index)
+- Alembic
+- Pydantic
+- PyJWT
+- pwdlib (Argon2)
+
+## DevOps
+=======
+### Infrastructure
+>>>>>>> main
+=======
 ## Infrastructure
+>>>>>>> origin/main
 
 - Docker
 - Docker Compose
@@ -196,6 +254,17 @@ Infrastructure
 
 ## Design Principles
 
+<<<<<<< HEAD
+- Domain-driven design (DDD)
+- Dependency inversion (Clean Architecture boundaries)
+- Repository pattern (decoupled DB models and repository queries)
+- Service layer orchestration
+- Pluggable embedding providers (`EmbeddingProvider` protocol)
+- Vector indexing (HNSW cosine distance index for pgvector)
+- Database abstraction (SQLAlchemy ORM + Alembic migrations)
+- Stateless JWT authentication & Refresh token rotation
+- Role-Based Access Control (RBAC) & Tenant isolation
+=======
 - Clean Architecture
 - Domain-Driven Design
 - Dependency Inversion
@@ -204,6 +273,7 @@ Infrastructure
 - Stateless JWT Authentication
 - Role-Based Access Control
 - Infrastructure Isolation
+>>>>>>> main
 
 ---
 
@@ -352,6 +422,17 @@ lint-imports
 - [x] JWT authentication
 - [x] API key authentication
 - [x] Role-Based Access Control
+<<<<<<< HEAD
+- [x] Document Parsing & Intelligent Chunking (Sprint 9)
+- [x] Semantic Search & pgvector Embedding Generation (Sprint 10)
+- [ ] LLM Integration
+- [ ] Model Registry
+- [ ] Experiment Tracking
+- [ ] Dataset Management
+- [ ] Training Pipelines
+- [ ] Deployment Platform
+- [ ] Monitoring & Observability
+=======
 - [x] Project management
 - [x] Project memory
 - [x] Knowledge base uploads
@@ -368,8 +449,13 @@ lint-imports
 - [ ] Dataset management
 - [ ] Training pipelines
 - [ ] Deployment platform
+<<<<<<< HEAD
+- [ ] Monitoring and observability
+>>>>>>> main
+=======
 - [ ] Monitoring & observability
 - [ ] Background workers
+>>>>>>> origin/main
 - [ ] CI/CD
 
 ---

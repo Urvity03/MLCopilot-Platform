@@ -7,7 +7,12 @@ from uuid import UUID
 
 from sqlalchemy import select
 
-from mlcopilot.domain.upload import ParsedChunk, UploadKind, UploadParseStatus
+from mlcopilot.domain.upload import (
+    ParsedChunk,
+    UploadEmbeddingStatus,
+    UploadKind,
+    UploadParseStatus,
+)
 from mlcopilot.domain.upload import Upload as DomainUpload
 from mlcopilot.infrastructure.db.models.upload import ParsedChunkModel as DbParsedChunk
 from mlcopilot.infrastructure.db.models.upload import UploadModel as DbUpload
@@ -30,6 +35,7 @@ class SqlAlchemyUploadRepository:
             filename=db_upload.filename,
             storage_uri=db_upload.storage_uri,
             parse_status=UploadParseStatus(db_upload.parse_status),
+            embedding_status=UploadEmbeddingStatus(db_upload.embedding_status),
             metadata=db_upload.metadata_,
             uploaded_by=db_upload.uploaded_by,
             created_at=db_upload.created_at,
@@ -63,6 +69,7 @@ class SqlAlchemyUploadRepository:
             filename=upload.filename,
             storage_uri=upload.storage_uri,
             parse_status=upload.parse_status.value,
+            embedding_status=upload.embedding_status.value,
             metadata_=upload.metadata,
             uploaded_by=upload.uploaded_by,
             created_at=upload.created_at,
@@ -75,6 +82,7 @@ class SqlAlchemyUploadRepository:
         db_upload = await self._session.get(DbUpload, upload.id)
         if db_upload:
             db_upload.parse_status = upload.parse_status.value
+            db_upload.embedding_status = upload.embedding_status.value
             db_upload.metadata_ = upload.metadata
             await self._session.flush()
 
@@ -110,3 +118,7 @@ class SqlAlchemyUploadRepository:
             )
             for c in result.scalars().all()
         ]
+
+    async def commit(self) -> None:
+        """Commit the current database transaction."""
+        await self._session.commit()
