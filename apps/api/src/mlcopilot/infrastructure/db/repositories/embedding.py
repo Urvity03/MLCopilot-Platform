@@ -75,6 +75,7 @@ class PostgresEmbeddingRepository(EmbeddingRepository):
                 ParsedChunkModel.upload_id.label("upload_id"),
                 ParsedChunkModel.content.label("content"),
                 ParsedChunkModel.metadata_.label("metadata"),
+                UploadModel.filename.label("filename"),
                 (1.0 - distance_expr).label("similarity"),
             )
             .join(ParsedChunkModel, ParsedChunkModel.id == ChunkEmbeddingModel.chunk_id)
@@ -86,13 +87,15 @@ class PostgresEmbeddingRepository(EmbeddingRepository):
         res = await self._session.execute(stmt)
         results = []
         for row in res.all():
+            meta = dict(row.metadata or {})
+            meta["filename"] = row.filename
             results.append(
                 SearchResult(
                     upload_id=row.upload_id,
                     chunk_id=row.chunk_id,
                     score=float(row.similarity),
                     content=row.content,
-                    metadata=row.metadata or {},
+                    metadata=meta,
                 )
             )
         return results
