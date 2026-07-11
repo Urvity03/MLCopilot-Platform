@@ -1,109 +1,257 @@
-# MLCopilot Platform
+#  MLCopilot Platform
 
-> **Production-ready AI Knowledge Platform** built with **FastAPI**,
-> **PostgreSQL**, **pgvector**, **Retrieval-Augmented Generation
-> (RAG)**, and **Clean Architecture**.
-
+```{=html}
+<p align="center">
+```
+`<b>`{=html}A production-ready AI Knowledge Platform built with FastAPI,
+PostgreSQL, pgvector, Retrieval-Augmented Generation (RAG), and Clean
+Architecture.`</b>`{=html}
+```{=html}
+</p>
+```
+```{=html}
+<p align="center">
+```
 ![Python](https://img.shields.io/badge/Python-3.12-blue)
 ![FastAPI](https://img.shields.io/badge/FastAPI-Backend-009688)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Database-336791)
 ![Docker](https://img.shields.io/badge/Docker-Containerized-2496ED)
 ![License](https://img.shields.io/badge/License-MIT-green)
 
+```{=html}
+</p>
+```
+
 ------------------------------------------------------------------------
 
-## Overview
+#  Table of Contents
 
-MLCopilot Platform is an AI knowledge platform for building searchable
-knowledge bases and Retrieval-Augmented Generation (RAG) applications.
-It follows Clean Architecture and emphasizes maintainability,
-scalability, and production-ready engineering.
+-   Overview
+-   Features
+-   Architecture
+-   AI Pipelines
+-   Tech Stack
+-   Project Structure
+-   API Overview
+-   Getting Started
+-   Development
+-   Testing
+-   Screenshots
+-   Roadmap
+-   Release History
+-   Author
+-   License
 
-## Features
+------------------------------------------------------------------------
 
-### Platform
+#  Overview
+
+MLCopilot Platform is a modular AI platform for managing projects,
+ingesting documents, generating embeddings, performing semantic search,
+and powering Retrieval-Augmented Generation (RAG) conversations.
+
+The backend follows **Clean Architecture**, separating domain logic from
+infrastructure while keeping the system scalable, testable, and easy to
+extend.
+
+------------------------------------------------------------------------
+
+#  Features
+
+## Platform
 
 -   Clean Architecture
--   Docker Compose development
+-   Monorepo
+-   Docker Compose
 -   Configuration management
--   Monorepo structure
 
-### Authentication
+## Authentication
 
 -   JWT Authentication
 -   Refresh Token Rotation
 -   API Keys
 -   RBAC
+-   Swagger Authorization
 
-### Knowledge Base
+## Project Management
 
--   PDF, DOCX, Markdown & TXT parsing
+-   Project workspaces
+-   Membership management
+-   Ownership transfer
+-   Tenant isolation
+
+## Knowledge Base
+
+-   PDF parsing
+-   DOCX parsing
+-   Markdown parsing
+-   TXT parsing
 -   Intelligent chunking
 -   MinIO storage
 
-### AI
+## AI
 
 -   Sentence Transformer embeddings
--   pgvector
+-   pgvector vector storage
 -   HNSW indexing
 -   Semantic search
--   RAG
--   Streaming chat
--   Citations
+-   RAG backend
+-   Conversation persistence
+-   Streaming responses
+-   Citation support
 
-### Engineering
+## Engineering
 
+-   SQLAlchemy
+-   Alembic
 -   Pytest
 -   Ruff
 -   MyPy
 -   Import Linter
 
-## Architecture
+------------------------------------------------------------------------
+
+#  Clean Architecture
 
 ``` mermaid
 flowchart TD
-A[FastAPI]-->B[Application]
-B-->C[Domain]
-C-->D[Infrastructure]
+A[FastAPI Routers]
+B[Application Services]
+C[Domain Layer]
+D[Infrastructure]
+
+A-->B
+B-->C
+C-->D
 ```
 
-## Knowledge Base Pipeline
+------------------------------------------------------------------------
+
+#  Knowledge Base Pipeline
 
 ``` mermaid
 flowchart LR
-Upload-->MinIO-->Parser-->Chunking-->Embeddings-->pgvector
+User-->Upload
+Upload-->MinIO
+MinIO-->Parser
+Parser-->Chunking
+Chunking-->Embeddings
+Embeddings-->pgvector
 ```
 
-## RAG Pipeline
+------------------------------------------------------------------------
+
+#  Embedding Pipeline
 
 ``` mermaid
 flowchart LR
-Question-->Embedding-->Search-->Prompt-->LLM-->Streaming-->Answer
+Chunks-->SentenceTransformer
+SentenceTransformer-->Vector384D
+Vector384D-->pgvector
+pgvector-->HNSW
 ```
 
-## Tech Stack
+------------------------------------------------------------------------
+
+#  Retrieval-Augmented Generation
+
+``` mermaid
+flowchart LR
+Question-->QueryEmbedding
+QueryEmbedding-->SemanticSearch
+SemanticSearch-->TopKChunks
+TopKChunks-->PromptBuilder
+PromptBuilder-->LLM
+LLM-->StreamingAnswer
+StreamingAnswer-->Citations
+```
+
+------------------------------------------------------------------------
+
+#  High-Level Database
+
+``` mermaid
+erDiagram
+USERS ||--o{ PROJECTS : owns
+PROJECTS ||--o{ UPLOADS : contains
+UPLOADS ||--o{ PARSED_CHUNKS : creates
+PARSED_CHUNKS ||--o{ EMBEDDINGS : generates
+PROJECTS ||--o{ CONVERSATIONS : has
+CONVERSATIONS ||--o{ CHAT_MESSAGES : contains
+```
+
+------------------------------------------------------------------------
+
+#  Technology Stack
 
   Layer       Technologies
-  ----------- -------------------------------
+  ----------- -------------------------------------------------
   Backend     FastAPI, Python
   Database    PostgreSQL, SQLAlchemy
   Vector DB   pgvector
-  AI          Sentence Transformers, OpenAI
+  AI          Sentence Transformers, OpenAI Provider
   Storage     MinIO
   Cache       Redis
   Graph       Neo4j
-  Frontend    Next.js (planned)
+  Frontend    Next.js, TypeScript, Tailwind CSS *(Sprint 12)*
+  DevOps      Docker, Docker Compose
+  Testing     Pytest, Ruff, MyPy, Import Linter
 
-## API
+------------------------------------------------------------------------
 
--   POST /auth/register
--   POST /auth/login
--   POST /projects
--   POST /projects/{id}/uploads
--   POST /projects/{id}/search
--   POST /projects/{id}/chat
+#  Project Structure
 
-## Development
+``` text
+MLCopilot-Platform
+├── apps
+│   ├── api
+│   └── web
+├── docs
+│   ├── architecture
+│   ├── api
+│   ├── diagrams
+│   └── images
+├── docker-compose.yml
+└── README.md
+```
+
+------------------------------------------------------------------------
+
+#  API Overview
+
+  Endpoint                      Description
+  ----------------------------- ------------------
+  POST /auth/register           Register a user
+  POST /auth/login              Login
+  POST /projects                Create project
+  POST /projects/{id}/uploads   Upload documents
+  POST /projects/{id}/search    Semantic search
+  POST /projects/{id}/chat      RAG chat
+
+------------------------------------------------------------------------
+
+#  Getting Started
+
+``` bash
+git clone https://github.com/Urvity03/MLCopilot-Platform.git
+cd MLCopilot-Platform
+docker compose up -d
+```
+
+Backend:
+
+``` bash
+cd apps/api
+uvicorn mlcopilot.main:app --reload
+```
+
+Swagger:
+
+    http://localhost:8000/api/v1/docs
+
+------------------------------------------------------------------------
+
+#  Development
 
 ``` bash
 ruff check src tests
@@ -112,45 +260,128 @@ pytest
 lint-imports
 ```
 
-## Screenshots
+------------------------------------------------------------------------
 
-Screenshots will be added after Sprint 12.
+#  Development Progress
 
-## Roadmap
+  Module                   Status
+  ----------------------- --------
+  Backend Foundation         ✅
+  Authentication             ✅
+  RBAC                       ✅
+  Project Management         ✅
+  Knowledge Base             ✅
+  Parsing                    ✅
+  Chunking                   ✅
+  Embeddings                 ✅
+  Semantic Search            ✅
+  RAG Backend                ✅
+  Premium SaaS Frontend      🚧
 
-### Completed
+------------------------------------------------------------------------
+
+#  Screenshots
+
+> Screenshots will be added after Sprint 12.
+
+Suggested screenshots:
+
+-   Dashboard
+-   Project Workspace
+-   Upload Manager
+-   Knowledge Base
+-   AI Chat
+-   Mobile View
+
+Create this folder:
+
+``` text
+docs/images/
+```
+
+Store:
+
+``` text
+dashboard.png
+chat.png
+knowledge-base.png
+projects.png
+upload.png
+mobile-dashboard.png
+mobile-chat.png
+```
+
+Reference images like:
+
+``` md
+![Dashboard](docs/images/dashboard.png)
+```
+
+------------------------------------------------------------------------
+
+#  Roadmap
+
+## Completed
 
 -   Backend Foundation
 -   Authentication
 -   RBAC
+-   Project Management
 -   Knowledge Base
--   Embeddings
+-   Document Parsing
+-   Intelligent Chunking
+-   Embedding Generation
 -   Semantic Search
--   RAG Backend
+-   Retrieval-Augmented Generation
 
-### Planned
+## Upcoming
 
 -   Premium SaaS Frontend
--   Multi-model LLM
+-   Multi-model LLM Support
 -   Knowledge Graph
+-   Dataset Management
+-   Experiment Tracking
+-   Model Registry
+-   Background Workers
+-   Monitoring
 -   CI/CD
 
-## Release History
+------------------------------------------------------------------------
 
-  Version   Highlights
-  --------- ----------------------------------
-  v0.1.0    Backend foundation
-  v0.2.0    Knowledge Base & Semantic Search
-  v0.3.0    RAG Backend
+#  Release History
 
-## Author
+  -----------------------------------------------------------------------
+  Version                             Highlights
+  ----------------------------------- -----------------------------------
+  **v0.1.0**                          Backend Foundation, Authentication,
+                                      RBAC
+
+  **v0.2.0**                          Knowledge Base, Parsing, Chunking,
+                                      Embeddings, Semantic Search
+
+  **v0.3.0**                          RAG Backend, Conversations,
+                                      Streaming Chat, Citations
+  -----------------------------------------------------------------------
+
+------------------------------------------------------------------------
+
+#  Contributing
+
+Issues, ideas, and pull requests are welcome.
+
+Please open an issue before proposing major architectural changes.
+
+------------------------------------------------------------------------
+
+#  Author
 
 **Urvi Tyagi**
 
-GitHub: https://github.com/Urvity03
+-   GitHub: https://github.com/Urvity03
+-   LinkedIn: https://www.linkedin.com/in/urvi-tyagi-17b302286/
 
-LinkedIn: https://www.linkedin.com/in/urvi-tyagi-17b302286/
+------------------------------------------------------------------------
 
-## License
+#  License
 
-MIT
+This project is licensed under the MIT License.
