@@ -26,7 +26,7 @@ The system uses a clean separation between the database storage model (pgvector)
                   Upload Router
                         │
                         ▼
-             Background Task (Celery)
+       FastAPI BackgroundTasks (In-Process)
                         │
                         ▼
             EmbeddingService (Application)
@@ -53,7 +53,7 @@ The database embedding flow runs through two distinct sequences: Write (Ingestio
 [Ingested Document Parsed]
             │
             ▼
-1. Trigger Background task (generate_embeddings_for_upload)
+1. Trigger FastAPI BackgroundTask (generate_embeddings_for_upload)
             │
             ▼
 2. Load parsed_chunks where chunk_id not in chunk_embeddings
@@ -201,8 +201,8 @@ sequenceDiagram
 - **Polymorphic vs Concrete Embedding Tables**: The database implements concrete embedding mapping tables (`chunk_embeddings`, `memory_embeddings`) instead of a single massive polymorphic entity table.
   - *Tradeoff*: Cross-entity search requires querying multiple tables.
   - *Rationale*: Enforces database relational integrity, clean foreign key cascading, and faster table scans on scoped queries.
-- **Asynchronous Execution**: Ingestion pipeline schedules embedding generations on Celery background threads.
-  - *Rationale*: Embedding calculations are CPU/GPU-intensive, and running them synchronously inside FastAPI routers would exhaust thread pools.
+- **Asynchronous Execution**: Ingestion pipeline offloads embedding generations to FastAPI's in-process `BackgroundTasks` thread pool.
+  - *Rationale*: Embedding calculations are CPU/GPU-intensive, and running them synchronously inside FastAPI routers would block request-handling threads. Using FastAPI's native background utility avoids dependency bloat before a distributed queue is necessary.
 - **HNSW Indexing**: Chosen over IVFFlat index models.
   - *Rationale*: HNSW provides better recall and faster search execution times without needing a training step.
 
@@ -210,5 +210,6 @@ sequenceDiagram
 
 # Future Improvements
 
+- **Celery Worker Integration**: Move embedding tasks from in-process `BackgroundTasks` to dedicated Celery worker containers backed by a Redis message broker to achieve high-throughput scalability.
 - **Vector Model Versioning**: Adding support for side-by-side active embedding models (e.g. migrating from MiniLM to Cohere-v3 without downtime) by checking model tags inside the `EmbeddingService`.
 - **Hybrid Search Fusion**: Combine vector similarity lookups with full-text search (FTS) indices using Reciprocal Rank Fusion (RRF).

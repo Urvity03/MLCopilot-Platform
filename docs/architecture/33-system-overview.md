@@ -11,7 +11,7 @@ To define the end-to-end architecture, database schemas, background workers, and
 - **Core Orchestration**: Managing user authentication, project workspaces, and RBAC rules.
 - **Ingestion Pipeline**: Handling document uploads, text parsing, semantic chunking, and embedding generation.
 - **RAG & Search**: Executing semantic search and generating conversational responses with grounded citations.
-- **Worker Queues**: Offloading intensive tasks (like embedding inference) to background celery workers.
+- **Background Processing**: Offloading compute-heavy embedding generation to FastAPI's in-process `BackgroundTasks` thread pool to prevent blocking response handlers.
 
 ---
 
@@ -28,14 +28,13 @@ MLCopilot is built on a modular, containerized three-tier architecture:
                           ┌───────────────────────────┐
                           │   FastAPI Backend API     │ (Application Layer)
                           └──────┬──────────────┬─────┘
-                                 │              │
-                    ┌────────────┘              └─────────────┐
-                    ▼                                         ▼
-        ┌───────────────────────┐                 ┌───────────────────────┐
-        │    Celery Workers     │                 │   Databases & Storage │ (Infrastructure)
-        │  (Embedding / Parse)  │                 │ (PostgreSQL, MinIO,   │
-        └───────────────────────┘                 │  Redis, Neo4j)        │
-                                                  └───────────────────────┘
+                                               │
+                                               ▼
+                                 ┌───────────────────────────┐
+                                 │    Databases & Storage    │ (Infrastructure)
+                                 │ (PostgreSQL, MinIO,       │
+                                 │  Redis, Neo4j)            │
+                                 └───────────────────────────┘
 ```
 
 ### Components
@@ -47,9 +46,8 @@ MLCopilot is built on a modular, containerized three-tier architecture:
 3. **Infrastructure Layer**:
    - PostgreSQL (with pgvector): Stores relational data and handles semantic search.
    - MinIO Object Storage: Stores raw document uploads.
-   - Redis: Acts as the message broker for Celery queues and caches session tokens.
+   - Redis: Key-value data store used for health-check verification and ready probes.
    - Neo4j Graph Database: Maps connections between papers, experiments, and commits.
-   - Celery: Executes background tasks like embedding generation.
 
 ---
 
@@ -65,7 +63,7 @@ The platform coordinates two primary workflows: **Document Ingestion** and **RAG
                                                     Group into chunks (<1500 chars)
                                                              │
                                                              ▼
-                                                    Schedule Celery worker task
+                                                    Schedule FastAPI BackgroundTask
                                                              │
                                                              ▼
                                                     Batch generate embeddings
@@ -103,17 +101,16 @@ graph TD
         API -->|Orchestrates| RAG[RAGService]
     end
 
-    subgraph Background Workers
-        Embeds -->|Publish Tasks| Redis[Redis Broker]
-        Redis -->|Consume Tasks| Celery[Celery Workers]
-        Celery -->|Batch Embed| LLM[Embedding Provider API]
-        Celery -->|Write Vectors| DB
+    subgraph Background Processing
+        API -->|Schedule Task| BG[FastAPI BackgroundTasks]
+        BG -->|Invoke| Embeds
+        Embeds -->|Batch Embed| LLM[Embedding Provider API]
+        Embeds -->|Write Vectors| DB[(PostgreSQL + pgvector)]
     end
 
     subgraph Storage Layer
         Uploads -->|Save Raw Binary| MinIO[(MinIO Bucket)]
-        RAG -->|Read/Write History| DB[(PostgreSQL + pgvector)]
-        Embeds -->|Read Chunks / Write Vectors| DB
+        RAG -->|Read/Write History| DB
     end
 
     subgraph External APIs
@@ -175,12 +172,13 @@ The core tables in our database schema support document processing, vector index
 # Design Decisions
 
 - **Clean Architecture Boundaries**: Application services communicate with infrastructure systems through protocol interfaces. This allows swapping databases, vector indexes, or LLM providers with minimal impact on core business logic.
-- **Asynchronous Ingestion**: Ingestion workflows run in the background via Celery. This prevents long-running operations from blocking the web server.
+- **Asynchronous Ingestion**: Compute-heavy embedding generation is executed in the background via FastAPI's in-process `BackgroundTasks` thread pool. This prevents long-running vector model inference from blocking the HTTP response thread.
 - **SQL-FTS Hybrid Indexing**: Storing text content alongside vector embeddings in PostgreSQL simplifies hybrid retrieval workflows.
 
 ---
 
 # Future Improvements
 
+- **Celery Task Worker Migration**: Offloading CPU/GPU-intensive tasks from the main API process to a distributed Celery queue backed by a Redis message broker.
 - **Knowledge Graph Integration**: Extend semantic search by fetching context from the Neo4j knowledge graph (mapping connections between concepts, code commits, and documents).
 - **Caching**: Implement a Redis cache for semantic search queries to speed up response times for common questions.
