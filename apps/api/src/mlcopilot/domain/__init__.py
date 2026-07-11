@@ -6,6 +6,15 @@ Never imports from core/, infrastructure/, features/, or workers/
 
 from mlcopilot.domain.api_key import ApiKey
 from mlcopilot.domain.auth import AuthContext
+from mlcopilot.domain.chat import (
+    ChatMessage,
+    ChatResponse,
+    Citation,
+    Conversation,
+    ConversationRepository,
+    LLMProvider,
+    RetrievedChunk,
+)
 from mlcopilot.domain.embedding import (
     Embedding,
     EmbeddingProvider,
@@ -31,11 +40,17 @@ __all__ = [
     "ApiKey",
     "ArtifactRef",
     "AuthContext",
+    "ChatMessage",
+    "ChatResponse",
+    "Citation",
+    "Conversation",
+    "ConversationRepository",
     "DocumentParser",
     "Embedding",
     "EmbeddingProvider",
     "EmbeddingRepository",
     "ExtractedChunk",
+    "LLMProvider",
     "MemoryKind",
     "MemoryPage",
     "MemoryRecord",
@@ -44,6 +59,7 @@ __all__ = [
     "ProjectContext",
     "ProjectMember",
     "RefreshToken",
+    "RetrievedChunk",
     "Role",
     "SearchResult",
     "Upload",
