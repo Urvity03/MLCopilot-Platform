@@ -115,7 +115,7 @@ export function NewProjectModal({ isOpen, onClose }: NewProjectModalProps) {
               type="text"
               {...register('slug')}
               placeholder="sentence-transformers"
-              className="w-full rounded-lg bg-zinc-900/50 border border-zinc-800/80 px-3 py-2 text-xs text-zinc-150 placeholder-zinc-500 focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 transition"
+              className="w-full rounded-lg bg-zinc-900/50 border border-zinc-800/80 px-3 py-2 text-xs text-zinc-200 placeholder-zinc-500 focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 transition"
               disabled={isCreating}
             />
             {errors.slug && (

@@ -133,7 +133,7 @@ export default function ChatPage() {
                     "group flex items-center justify-between rounded-lg px-3 py-2 text-xs font-medium cursor-pointer transition border border-transparent",
                     isActive
                       ? "bg-emerald-950/20 text-emerald-400 border-emerald-950/50"
-                      : "text-zinc-400 hover:bg-zinc-900/40 hover:text-zinc-250"
+                      : "text-zinc-400 hover:bg-zinc-900/40 hover:text-zinc-200"
                   )}
                   onClick={() => setActiveConvId(conv.id)}
                 >
@@ -191,7 +191,7 @@ export default function ChatPage() {
                 <Bot className="h-5 w-5 text-emerald-400" />
               </div>
               <h3 className="text-xs font-semibold text-zinc-200">Start a RAG chat session</h3>
-              <p className="text-[10px] text-zinc-550 leading-relaxed font-medium mt-1">
+              <p className="text-[10px] text-zinc-500 leading-relaxed font-medium mt-1">
                 Ask questions about your ingested research documents, papers, or code structures. The copilot will cite sources from matching text nodes.
               </p>
             </div>
@@ -317,7 +317,7 @@ export default function ChatPage() {
               }}
               placeholder="Ask anything about your ingested paper set... (Press Enter to query)"
               rows={1}
-              className="w-full rounded-xl bg-zinc-900/50 border border-zinc-805/85 pl-4 pr-12 py-3.5 text-xs text-zinc-100 placeholder-zinc-500 focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 transition resize-none max-h-24 overflow-y-auto leading-relaxed subtle-glow"
+              className="w-full rounded-xl bg-zinc-900/50 border border-zinc-800/80 pl-4 pr-12 py-3.5 text-xs text-zinc-100 placeholder-zinc-500 focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 transition resize-none max-h-24 overflow-y-auto leading-relaxed subtle-glow"
               disabled={isSendingMessage}
             />
             
@@ -334,7 +334,7 @@ export default function ChatPage() {
               <Send className="h-3.5 w-3.5" />
             </button>
           </form>
-          <div className="max-w-3xl mx-auto flex items-center justify-between text-[9px] text-zinc-650 mt-2 font-mono font-medium select-none">
+          <div className="max-w-3xl mx-auto flex items-center justify-between text-[9px] text-zinc-600 mt-2 font-mono font-medium select-none">
             <span>SHIFT + ENTER for newline</span>
             <span>CITATIONS LOADED ON ANSWER</span>
           </div>

@@ -75,9 +75,9 @@ export default function UploadsPage() {
           </div>
         ) : !hasUploads ? (
           <div className="flex flex-col items-center justify-center p-8 rounded-xl border border-zinc-800/40 bg-zinc-900/10 text-center text-zinc-500 min-h-[200px]">
-            <FileText className="h-6 w-6 text-zinc-655 mb-2.5" />
+            <FileText className="h-6 w-6 text-zinc-600 mb-2.5" />
             <p className="text-xs font-bold text-zinc-400 mb-0.5">No Ingested Documents Found</p>
-            <p className="text-[10px] text-zinc-550 max-w-xs font-medium">Use the drag zone above to upload corpus materials for RAG indexing.</p>
+            <p className="text-[10px] text-zinc-500 max-w-xs font-medium">Use the drag zone above to upload corpus materials for RAG indexing.</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -109,7 +109,7 @@ export default function UploadsPage() {
             <div className="space-y-4">
               <div className="p-3 bg-zinc-900/50 border border-zinc-800 rounded-lg space-y-1">
                 <span className="text-[9px] font-bold text-zinc-500 uppercase tracking-wide">Filename</span>
-                <p className="text-xs font-semibold text-zinc-150 truncate">{activeUploadDetails.filename}</p>
+                <p className="text-xs font-semibold text-zinc-200 truncate">{activeUploadDetails.filename}</p>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
@@ -131,7 +131,7 @@ export default function UploadsPage() {
 
               <div className="p-3 bg-zinc-900/50 border border-zinc-800 rounded-lg space-y-1.5">
                 <span className="text-[9px] font-bold text-zinc-500 uppercase tracking-wide">Minio Storage Key URI</span>
-                <p className="text-[10px] font-mono text-zinc-450 leading-relaxed break-all select-all p-1 bg-zinc-950 border border-zinc-900 rounded">
+                <p className="text-[10px] font-mono text-zinc-400 leading-relaxed break-all select-all p-1 bg-zinc-950 border border-zinc-900 rounded">
                   {activeUploadDetails.storage_uri}
                 </p>
               </div>
@@ -139,7 +139,7 @@ export default function UploadsPage() {
               {activeUploadDetails.metadata && Object.keys(activeUploadDetails.metadata).length > 0 && (
                 <div className="p-3 bg-zinc-900/50 border border-zinc-800 rounded-lg space-y-1.5">
                   <span className="text-[9px] font-bold text-zinc-500 uppercase tracking-wide">System Metadata Attributes</span>
-                  <pre className="text-[10px] font-mono text-zinc-450 leading-normal p-2 bg-zinc-950 border border-zinc-900 rounded max-h-40 overflow-y-auto">
+                  <pre className="text-[10px] font-mono text-zinc-400 leading-normal p-2 bg-zinc-950 border border-zinc-900 rounded max-h-40 overflow-y-auto">
                     {JSON.stringify(activeUploadDetails.metadata, null, 2)}
                   </pre>
                 </div>

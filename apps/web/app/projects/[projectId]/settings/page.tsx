@@ -100,7 +100,7 @@ export default function SettingsPage() {
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="w-full rounded-lg bg-zinc-900/50 border border-zinc-800/80 px-3 py-2 text-xs text-zinc-150 focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 transition"
+                className="w-full rounded-lg bg-zinc-900/50 border border-zinc-800/80 px-3 py-2 text-xs text-zinc-200 focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 transition"
                 required
               />
             </div>
@@ -113,7 +113,7 @@ export default function SettingsPage() {
                 type="text"
                 value={slug}
                 onChange={(e) => setSlug(e.target.value)}
-                className="w-full rounded-lg bg-zinc-900/50 border border-zinc-805/85 px-3 py-2 text-xs text-zinc-150 focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 transition font-mono"
+                className="w-full rounded-lg bg-zinc-900/50 border border-zinc-800/80 px-3 py-2 text-xs text-zinc-200 focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 transition font-mono"
                 required
               />
             </div>
@@ -126,7 +126,7 @@ export default function SettingsPage() {
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 rows={3}
-                className="w-full rounded-lg bg-zinc-900/50 border border-zinc-805/85 px-3 py-2 text-xs text-zinc-100 placeholder-zinc-500 focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 transition resize-none leading-relaxed"
+                className="w-full rounded-lg bg-zinc-900/50 border border-zinc-800/80 px-3 py-2 text-xs text-zinc-100 placeholder-zinc-500 focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 transition resize-none leading-relaxed"
               />
             </div>
 

@@ -115,7 +115,7 @@ export default function MembersPage() {
               {members.map((member) => (
                 <div 
                   key={member.user_id}
-                  className="flex items-center justify-between p-4.5 hover:bg-zinc-900/10 transition-colors"
+                  className="flex items-center justify-between p-4 hover:bg-zinc-900/10 transition-colors"
                 >
                   <div className="flex items-center gap-3">
                     <div className="h-8 w-8 rounded-lg bg-zinc-900 border border-zinc-800/80 flex items-center justify-center font-mono text-xs font-bold text-zinc-400 shadow-sm shrink-0">
@@ -196,7 +196,7 @@ export default function MembersPage() {
               <select
                 value={inviteRole}
                 onChange={(e: any) => setInviteRole(e.target.value)}
-                className="w-full rounded-lg bg-zinc-900/50 border border-zinc-800/80 px-3 py-2 text-xs text-zinc-150 focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 transition"
+                className="w-full rounded-lg bg-zinc-900/50 border border-zinc-800/80 px-3 py-2 text-xs text-zinc-200 focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 transition"
               >
                 <option value="admin">Administrator (Write access, manage members)</option>
                 <option value="member">Workspace Member (Read/Write documents/chat)</option>

@@ -32,6 +32,28 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const [notificationsOpen, setNotificationsOpen] = React.useState(false);
   const [commandCenterOpen, setCommandCenterOpen] = React.useState(false);
 
+  const projectRef = React.useRef<HTMLDivElement>(null);
+  const profileRef = React.useRef<HTMLDivElement>(null);
+  const notificationsRef = React.useRef<HTMLDivElement>(null);
+
+  React.useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (projectRef.current && !projectRef.current.contains(event.target as Node)) {
+        setProjectDropdownOpen(false);
+      }
+      if (profileRef.current && !profileRef.current.contains(event.target as Node)) {
+        setProfileDropdownOpen(false);
+      }
+      if (notificationsRef.current && !notificationsRef.current.contains(event.target as Node)) {
+        setNotificationsOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
   // Extract active project from URL params
   const projectId = params?.projectId as string | undefined;
   const activeProject = React.useMemo(() => {
@@ -118,7 +140,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           </div>
 
           {/* Project Workspace Selector */}
-          <div className={cn("p-4 border-b border-zinc-900/60 relative", sidebarCollapsed && "p-2.5 flex justify-center")}>
+          <div ref={projectRef} className={cn("p-4 border-b border-zinc-900/60 relative", sidebarCollapsed && "p-2.5 flex justify-center")}>
             {sidebarCollapsed ? (
               <button
                 onClick={() => setSidebarCollapsed(false)}
@@ -282,7 +304,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
             {/* Right Section: Notification Hub, User dropdown */}
             <div className="flex items-center gap-3">
-              <div className="relative">
+              <div ref={notificationsRef} className="relative">
                 <button
                   onClick={() => setNotificationsOpen(!notificationsOpen)}
                   className="p-2 rounded-lg text-zinc-500 hover:text-zinc-200 hover:bg-zinc-900/60 transition relative"
@@ -309,7 +331,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               </div>
 
               {/* Profile dropdown */}
-              <div className="relative">
+              <div ref={profileRef} className="relative">
                 <button
                   onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
                   className="h-8 w-8 rounded-lg bg-zinc-900 border border-zinc-850 hover:border-zinc-700/60 flex items-center justify-center text-xs text-zinc-300 font-bold transition font-mono"

@@ -56,7 +56,7 @@ export function RecentProjects({ projects, onCreateClick }: RecentProjectsProps)
             >
               <div>
                 <div className="flex items-start justify-between mb-4">
-                  <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-zinc-900 border border-zinc-800 text-zinc-400 group-hover:text-emerald-450 group-hover:bg-emerald-950/20 group-hover:border-emerald-800/30 transition-all shadow-[0_0_15px_rgba(0,0,0,0.2)]">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-zinc-900 border border-zinc-800 text-zinc-400 group-hover:text-emerald-400 group-hover:bg-emerald-950/20 group-hover:border-emerald-800/30 transition-all shadow-[0_0_15px_rgba(0,0,0,0.2)]">
                     <Folder className="h-4.5 w-4.5" />
                   </div>
                   <span className="text-[9px] font-mono font-medium text-zinc-500 bg-zinc-950 px-2 py-0.5 rounded border border-zinc-900">
@@ -67,7 +67,7 @@ export function RecentProjects({ projects, onCreateClick }: RecentProjectsProps)
                 <h3 className="text-sm font-semibold text-zinc-200 group-hover:text-white transition-colors">
                   {proj.name}
                 </h3>
-                <p className="text-xs text-zinc-450 font-medium leading-normal line-clamp-2 mt-1 mb-6">
+                <p className="text-xs text-zinc-400 font-medium leading-normal line-clamp-2 mt-1 mb-6">
                   {proj.description || 'No description provided.'}
                 </p>
               </div>
@@ -75,11 +75,11 @@ export function RecentProjects({ projects, onCreateClick }: RecentProjectsProps)
               <div className="flex items-center justify-between pt-3.5 border-t border-zinc-900/60 mt-auto">
                 <div className="flex gap-4">
                   <div className="flex items-center gap-1.5 text-[10px] text-zinc-500 font-semibold font-mono">
-                    <Database className="h-3.5 w-3.5 text-zinc-650" />
+                    <Database className="h-3.5 w-3.5 text-zinc-600" />
                     <span>{proj.documentCount} DOCS</span>
                   </div>
                   <div className="flex items-center gap-1.5 text-[10px] text-zinc-500 font-semibold font-mono">
-                    <MessageSquare className="h-3.5 w-3.5 text-zinc-650" />
+                    <MessageSquare className="h-3.5 w-3.5 text-zinc-600" />
                     <span>{proj.conversationCount} CHATS</span>
                   </div>
                 </div>

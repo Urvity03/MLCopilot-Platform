@@ -94,7 +94,7 @@ export default function LoginPage() {
                 type="email"
                 {...register('email')}
                 placeholder="name@example.com"
-                className="w-full rounded-lg bg-zinc-900/50 border border-zinc-800/80 px-3 py-2.5 text-xs text-zinc-150 placeholder-zinc-500 focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 transition"
+                className="w-full rounded-lg bg-zinc-900/50 border border-zinc-800/80 px-3 py-2.5 text-xs text-zinc-200 placeholder-zinc-500 focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 transition"
                 disabled={isLoggingIn}
               />
               {errors.email && (
@@ -110,7 +110,7 @@ export default function LoginPage() {
                 type="password"
                 {...register('password')}
                 placeholder="••••••••"
-                className="w-full rounded-lg bg-zinc-900/50 border border-zinc-800/80 px-3 py-2.5 text-xs text-zinc-150 placeholder-zinc-500 focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 transition"
+                className="w-full rounded-lg bg-zinc-900/50 border border-zinc-800/80 px-3 py-2.5 text-xs text-zinc-200 placeholder-zinc-500 focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 transition"
                 disabled={isLoggingIn}
               />
               {errors.password && (
@@ -133,7 +133,7 @@ export default function LoginPage() {
             </Button>
           </form>
 
-          <p className="text-center text-xs text-zinc-450 mt-8 font-medium">
+          <p className="text-center text-xs text-zinc-400 mt-8 font-medium">
             Don't have an account?{' '}
             <Link href="/register" className="font-semibold text-emerald-400 hover:underline">
               Register for free

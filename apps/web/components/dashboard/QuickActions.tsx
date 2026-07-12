@@ -65,7 +65,7 @@ export function QuickActions({
               hoverLift={!act.disabled} 
               hoverGlow={!act.disabled}
               className={cn(
-                "p-4.5 flex gap-4 h-full items-start border-zinc-800/40 bg-zinc-900/10",
+                "p-5 flex gap-4 h-full items-start border-zinc-800/40 bg-zinc-900/10",
                 !act.disabled && "group-hover:border-emerald-500/20"
               )}
             >
