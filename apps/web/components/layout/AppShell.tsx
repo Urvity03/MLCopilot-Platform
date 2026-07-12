@@ -14,6 +14,7 @@ import { useAuthStore } from '../../store/auth';
 import { useProjects } from '../../hooks/useProjects';
 import { ProtectedRoute } from '../common/ProtectedRoute';
 import { SearchBar, CommandPalette } from '../ui/command-palette';
+import { NewProjectModal } from '../dashboard/NewProjectModal';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 
@@ -31,6 +32,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const [profileDropdownOpen, setProfileDropdownOpen] = React.useState(false);
   const [notificationsOpen, setNotificationsOpen] = React.useState(false);
   const [commandCenterOpen, setCommandCenterOpen] = React.useState(false);
+  const [newProjectOpen, setNewProjectOpen] = React.useState(false);
 
   const projectRef = React.useRef<HTMLDivElement>(null);
   const profileRef = React.useRef<HTMLDivElement>(null);
@@ -74,6 +76,30 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       router.push('/dashboard');
     }
   };
+
+  // Breadcrumbs calculation
+  const breadcrumbs = React.useMemo(() => {
+    const segments = pathname.split('/').filter(Boolean);
+    const crumbs = [];
+
+    if (segments[0] === 'dashboard') {
+      crumbs.push({ name: 'Dashboard', href: '/dashboard' });
+    } else if (segments[0] === 'projects') {
+      crumbs.push({ name: 'Projects', href: '/dashboard' });
+      if (activeProject) {
+        crumbs.push({ name: activeProject.name, href: `/projects/${activeProject.id}` });
+      }
+      if (segments[2]) {
+        const pageName = segments[2].charAt(0).toUpperCase() + segments[2].slice(1);
+        const mappedName = pageName === 'Uploads' ? 'Knowledge Base' : pageName === 'Chat' ? 'AI Chat' : pageName;
+        crumbs.push({ name: mappedName, href: pathname });
+      }
+    } else {
+      crumbs.push({ name: 'Workspace', href: '/dashboard' });
+    }
+
+    return crumbs;
+  }, [pathname, activeProject]);
 
   const menuItems = [
     { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
@@ -128,7 +154,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               )}
             </AnimatePresence>
             
-            {/* Collapse Trigger Button (Visible on Sidebar Hover) */}
+            {/* Collapse Trigger Button */}
             {!sidebarCollapsed && (
               <button 
                 onClick={() => setSidebarCollapsed(true)}
@@ -195,38 +221,43 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           </div>
 
           {/* Navigation Links */}
-          <nav className="flex-1 px-4 py-6 space-y-1.5 overflow-y-auto" aria-label="Main Navigation">
-            {menuItems.map((item) => {
-              const Icon = item.icon;
-              const isActive = pathname === item.href;
-              return (
-                <Link
-                  key={item.name}
-                  href={item.href}
-                  className={cn(
-                    "flex items-center gap-3 px-3 py-2 rounded-lg text-xs font-semibold transition border border-transparent",
-                    isActive
-                      ? "bg-emerald-950/20 text-emerald-400 border-emerald-950/50 shadow-[0_0_15px_rgba(16,185,129,0.02)]"
-                      : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900/40",
-                    sidebarCollapsed && "justify-center px-0.5"
-                  )}
-                  title={sidebarCollapsed ? item.name : undefined}
-                >
-                  <Icon className={cn("h-4 w-4 shrink-0", isActive ? "text-emerald-400" : "text-zinc-500")} />
-                  {!sidebarCollapsed && <span>{item.name}</span>}
-                </Link>
-              );
-            })}
+          <nav className="flex-1 px-4 py-6 space-y-6 overflow-y-auto" aria-label="Main Navigation">
+            {/* General Group */}
+            <div className="space-y-1.5">
+              {!sidebarCollapsed && (
+                <p className="px-3 text-[9px] font-bold text-zinc-600 uppercase tracking-widest mb-2 select-none">Platform</p>
+              )}
+              {menuItems.map((item) => {
+                const Icon = item.icon;
+                const isActive = pathname === item.href;
+                return (
+                  <Link
+                    key={item.name}
+                    href={item.href}
+                    className={cn(
+                      "flex items-center gap-3 px-3 py-2 rounded-lg text-xs font-semibold transition border border-transparent",
+                      isActive
+                        ? "bg-emerald-950/20 text-emerald-400 border-emerald-950/50 shadow-[0_0_15px_rgba(16,185,129,0.02)]"
+                        : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900/40",
+                      sidebarCollapsed && "justify-center px-0.5"
+                    )}
+                    title={sidebarCollapsed ? item.name : undefined}
+                  >
+                    <Icon className={cn("h-4 w-4 shrink-0", isActive ? "text-emerald-400" : "text-zinc-500")} />
+                    {!sidebarCollapsed && <span>{item.name}</span>}
+                  </Link>
+                );
+              })}
+            </div>
 
+            {/* Workspace Group */}
             {activeProject && (
-              <>
-                <div className={cn("pt-6 pb-2 px-3", sidebarCollapsed && "px-1 flex justify-center")}>
-                  {!sidebarCollapsed ? (
-                    <p className="text-[9px] font-bold text-zinc-600 uppercase tracking-widest">Workspace Routes</p>
-                  ) : (
-                    <div className="h-px bg-zinc-900 w-6" />
-                  )}
-                </div>
+              <div className="space-y-1.5 pt-2">
+                {!sidebarCollapsed ? (
+                  <p className="px-3 text-[9px] font-bold text-zinc-600 uppercase tracking-widest mb-2 select-none">Workspace</p>
+                ) : (
+                  <div className="h-px bg-zinc-900/60 mx-3 my-2" />
+                )}
                 {projectItems.map((item) => {
                   const Icon = item.icon;
                   const isActive = pathname === item.href;
@@ -248,7 +279,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                     </Link>
                   );
                 })}
-              </>
+              </div>
             )}
           </nav>
 
@@ -263,19 +294,19 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               </button>
             ) : (
               <div className="flex items-center gap-2.5 truncate max-w-[160px]">
-                <div className="h-7 w-7 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center text-[10px] text-zinc-300 font-bold font-mono">
+                <div className="h-7 w-7 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center text-[10px] text-zinc-300 font-bold font-mono shrink-0">
                   {user?.full_name?.slice(0, 2).toUpperCase() || 'U'}
                 </div>
-                <div className="truncate">
+                <div className="truncate select-none">
                   <p className="text-xs font-semibold text-zinc-200 truncate">{user?.full_name}</p>
-                  <p className="text-[10px] text-zinc-500 truncate">{user?.email}</p>
+                  <p className="text-[10px] text-zinc-550 truncate">{user?.email}</p>
                 </div>
               </div>
             )}
             
             <button
               onClick={() => logout()}
-              className="p-1.5 rounded-lg text-zinc-500 hover:text-red-400 hover:bg-zinc-900/60 transition"
+              className="p-1.5 rounded-lg text-zinc-550 hover:text-red-400 hover:bg-zinc-900/60 transition shrink-0"
               title="Logout Account"
             >
               <LogOut className="h-4 w-4" />
@@ -287,27 +318,58 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         <div className="flex-1 flex flex-col min-w-0 h-screen overflow-hidden">
           {/* Top Header Navigation */}
           <header className="h-16 border-b border-zinc-900/60 flex items-center justify-between px-6 bg-[#030303]/70 backdrop-blur-md sticky top-0 z-30 shrink-0">
-            {/* Left Section: Mobile Menu Trigger + SearchBar */}
+            {/* Left Section: Mobile Menu Trigger + Breadcrumbs */}
             <div className="flex items-center gap-4">
               <button
                 onClick={() => setMobileMenuOpen(true)}
-                className="lg:hidden p-2 -ml-2 rounded-lg text-zinc-400 hover:bg-zinc-900 hover:text-zinc-100 transition"
-                aria-label="Open navigation drawer"
+                className="p-1 rounded-md text-zinc-500 hover:text-zinc-300 lg:hidden"
+                aria-label="Open mobile menu"
               >
                 <Menu className="h-4.5 w-4.5" />
               </button>
 
-              <div className="hidden md:block">
-                <SearchBar onOpenPallet={() => setCommandCenterOpen(true)} />
+              {/* Breadcrumbs Path */}
+              <div className="hidden lg:flex items-center gap-2 text-xs text-zinc-400 font-medium select-none">
+                {breadcrumbs.map((crumb, idx) => (
+                  <React.Fragment key={crumb.href}>
+                    {idx > 0 && <span className="text-zinc-700">/</span>}
+                    <Link 
+                      href={crumb.href} 
+                      className={cn(
+                        "hover:text-zinc-200 transition-colors truncate max-w-[140px]",
+                        idx === breadcrumbs.length - 1 && "text-zinc-200 font-semibold cursor-default pointer-events-none"
+                      )}
+                    >
+                      {crumb.name}
+                    </Link>
+                  </React.Fragment>
+                ))}
               </div>
             </div>
 
-            {/* Right Section: Notification Hub, User dropdown */}
-            <div className="flex items-center gap-3">
+            {/* Right Section: Command Center Search, Quick Ingest, Notifications, Avatar */}
+            <div className="flex items-center gap-4">
+              {/* Global Command Center SearchBar button */}
+              <div className="hidden md:block">
+                <SearchBar onOpenPallet={() => setCommandCenterOpen(true)} />
+              </div>
+
+              {/* Quick Ingest Creation Action */}
+              <button
+                onClick={() => setNewProjectOpen(true)}
+                className="hidden sm:inline-flex items-center gap-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-xs font-semibold text-white px-3 py-1.5 transition border border-emerald-500/10 shadow-md shadow-emerald-950/10 cursor-pointer active:scale-95"
+              >
+                <FolderPlus className="h-3.5 w-3.5" />
+                <span>Quick Ingest</span>
+              </button>
+
+              <div className="h-4 w-px bg-zinc-900" />
+
+              {/* Notifications bell */}
               <div ref={notificationsRef} className="relative">
                 <button
                   onClick={() => setNotificationsOpen(!notificationsOpen)}
-                  className="p-2 rounded-lg text-zinc-500 hover:text-zinc-200 hover:bg-zinc-900/60 transition relative"
+                  className="p-2 rounded-lg text-zinc-550 hover:text-zinc-200 hover:bg-zinc-900/60 transition relative cursor-pointer"
                   aria-label="View notifications"
                 >
                   <Bell className="h-4 w-4" />
@@ -317,12 +379,12 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 {/* Notifications Dropdown */}
                 {notificationsOpen && (
                   <div className="absolute right-0 mt-2 w-80 bg-zinc-950 border border-zinc-900 rounded-xl shadow-2xl z-50 p-4 glass-card">
-                    <div className="flex items-center justify-between mb-3 border-b border-zinc-900 pb-2">
+                    <div className="flex items-center justify-between mb-3 border-b border-zinc-900 pb-2 select-none">
                       <span className="text-xs font-bold text-zinc-300">Notifications</span>
                       <span className="text-[10px] text-emerald-400 font-semibold cursor-pointer">Mark all read</span>
                     </div>
                     <div className="space-y-2 max-h-48 overflow-y-auto">
-                      <div className="p-2 rounded bg-zinc-900/40 border border-zinc-800/30 text-[11px] text-zinc-400 leading-normal">
+                      <div className="p-2 rounded bg-zinc-900/40 border border-zinc-800/30 text-[11px] text-zinc-400 leading-normal font-medium">
                         Welcome to MLCopilot Platform! Explore your personal workspace and upload document sets to start chatting.
                       </div>
                     </div>
@@ -334,23 +396,23 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               <div ref={profileRef} className="relative">
                 <button
                   onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
-                  className="h-8 w-8 rounded-lg bg-zinc-900 border border-zinc-850 hover:border-zinc-700/60 flex items-center justify-center text-xs text-zinc-300 font-bold transition font-mono"
+                  className="h-8 w-8 rounded-lg bg-zinc-900 border border-zinc-800 hover:border-zinc-700/60 flex items-center justify-center text-xs text-zinc-300 font-bold transition font-mono cursor-pointer"
                 >
                   {user?.full_name?.slice(0, 2).toUpperCase() || 'U'}
                 </button>
 
                 {profileDropdownOpen && (
                   <div className="absolute right-0 mt-2 w-56 bg-zinc-950 border border-zinc-900 rounded-xl shadow-2xl z-50 py-1.5 glass-card overflow-hidden">
-                    <div className="px-4 py-2 border-b border-zinc-900">
+                    <div className="px-4 py-2 border-b border-zinc-900 select-none">
                       <p className="text-xs font-bold text-zinc-200 truncate">{user?.full_name}</p>
-                      <p className="text-[10px] text-zinc-500 truncate mt-0.5">{user?.email}</p>
+                      <p className="text-[10px] text-zinc-550 truncate mt-0.5">{user?.email}</p>
                     </div>
                     <button
                       onClick={() => {
                         setProfileDropdownOpen(false);
                         setCommandCenterOpen(true);
                       }}
-                      className="w-full text-left px-4 py-2 text-xs text-zinc-400 hover:bg-zinc-900 hover:text-zinc-200 transition font-semibold flex items-center justify-between"
+                      className="w-full text-left px-4 py-2 text-xs text-zinc-400 hover:bg-zinc-900 hover:text-zinc-200 transition font-semibold flex items-center justify-between cursor-pointer"
                     >
                       <span>Command Center</span>
                       <span className="text-[9px] bg-zinc-900 border border-zinc-800 rounded px-1 text-zinc-500 font-mono">⌘K</span>
@@ -358,7 +420,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                     <div className="border-t border-zinc-900 my-1" />
                     <button
                       onClick={() => logout()}
-                      className="w-full text-left px-4 py-2 text-xs text-red-400 hover:bg-red-950/20 transition font-semibold flex items-center justify-between"
+                      className="w-full text-left px-4 py-2 text-xs text-red-400 hover:bg-red-950/20 transition font-semibold flex items-center justify-between cursor-pointer"
                     >
                       <span>Logout account</span>
                       <LogOut className="h-3.5 w-3.5" />
@@ -370,7 +432,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           </header>
 
           {/* Screen Content Render */}
-          <main className="flex-1 overflow-y-auto relative">
+          <main className="flex-1 overflow-y-auto relative z-10">
             {children}
           </main>
         </div>
@@ -391,7 +453,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               >
                 <button
                   onClick={() => setMobileMenuOpen(false)}
-                  className="absolute right-4 top-4 p-2 text-zinc-400 hover:text-zinc-100 hover:bg-zinc-900 rounded-lg"
+                  className="absolute right-4 top-4 p-2 text-zinc-400 hover:text-zinc-100 hover:bg-zinc-900 rounded-lg text-lg"
                   aria-label="Close navigation drawer"
                 >
                   &times;
@@ -472,6 +534,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
         {/* Global Command Center Portal Overlay */}
         <CommandPalette open={commandCenterOpen} onOpenChange={setCommandCenterOpen} />
+
+        {/* Global Ingestion Modal */}
+        <NewProjectModal isOpen={newProjectOpen} onClose={() => setNewProjectOpen(false)} />
       </div>
     </ProtectedRoute>
   );
