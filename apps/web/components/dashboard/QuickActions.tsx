@@ -1,7 +1,6 @@
 'use client';
 
-import * as React from 'react';
-import { FolderPlus, Upload, MessageSquare } from 'lucide-react';
+import { FolderPlus, Upload, MessageSquare, ArrowRight } from 'lucide-react';
 import { Card } from '../ui/card';
 import { cn } from '@/lib/utils';
 
@@ -20,28 +19,28 @@ export function QuickActions({
 }: QuickActionsProps) {
   const actions = [
     {
-      title: 'New Project',
-      description: 'Create a new project workspace to ingest papers.',
+      title: 'Initialize Workspace',
+      description: 'Create a new project workspace schema to begin ingesting files.',
       icon: FolderPlus,
       onClick: onCreateProjectClick,
       disabled: false,
-      color: 'text-emerald-400 group-hover:text-emerald-300 border-emerald-950/40 hover:border-emerald-500/20 bg-emerald-950/5',
+      color: 'text-emerald-400 group-hover:text-emerald-350 border-emerald-950/40 bg-emerald-950/5',
     },
     {
-      title: 'Upload Documents',
-      description: 'Ingest raw PDF/DOCX files into active workspace.',
+      title: 'Ingest Text Corpus',
+      description: 'Upload and parse PDFs, markdown, or text files into embeddings.',
       icon: Upload,
       onClick: onNavigateToUploads,
       disabled: !hasProjects,
-      color: 'text-cyan-400 group-hover:text-cyan-300 border-cyan-950/40 hover:border-cyan-500/20 bg-cyan-950/5',
+      color: 'text-cyan-400 group-hover:text-cyan-350 border-cyan-950/40 bg-cyan-950/5',
     },
     {
-      title: 'Start Chat',
-      description: 'Query ingested corpus via semantic vector pipelines.',
+      title: 'AI Copilot Chat',
+      description: 'Interact with your workspace vectors using RAG streaming queries.',
       icon: MessageSquare,
       onClick: onNavigateToChat,
       disabled: !hasProjects,
-      color: 'text-teal-400 group-hover:text-teal-300 border-teal-950/40 hover:border-teal-500/20 bg-teal-950/5',
+      color: 'text-teal-400 group-hover:text-teal-355 border-teal-950/40 bg-teal-950/5',
     },
   ];
 
@@ -65,28 +64,33 @@ export function QuickActions({
               hoverLift={!act.disabled} 
               hoverGlow={!act.disabled}
               className={cn(
-                "p-5 flex gap-4 h-full items-start border-zinc-800/40 bg-zinc-900/10",
-                !act.disabled && "group-hover:border-emerald-500/20"
+                "p-5 flex gap-4 h-full items-start border-zinc-800/40 bg-zinc-900/10 relative overflow-hidden transition-all duration-350",
+                !act.disabled && "group-hover:border-emerald-500/25 group-hover:bg-zinc-900/20 group-hover:shadow-[0_4px_20px_rgba(0,0,0,0.4)]"
               )}
             >
               <div 
                 className={cn(
-                  "p-2 rounded-lg border flex-shrink-0 transition-colors",
+                  "p-2.5 rounded-lg border flex-shrink-0 transition-colors",
                   act.disabled 
-                    ? "border-zinc-800 text-zinc-600 bg-zinc-900/30" 
+                    ? "border-zinc-800 text-zinc-650 bg-zinc-900/30" 
                     : act.color
                 )}
               >
                 <Icon className="h-4.5 w-4.5" />
               </div>
-              <div className="space-y-0.5">
-                <p className={cn(
-                  "text-xs font-semibold transition-colors", 
-                  act.disabled ? "text-zinc-500" : "text-zinc-200 group-hover:text-zinc-100"
-                )}>
-                  {act.title}
-                </p>
-                <p className="text-[11px] text-zinc-500 leading-normal font-medium">{act.description}</p>
+              <div className="space-y-1.5 flex-1 min-w-0 pr-4">
+                <div className="flex items-center gap-1.5">
+                  <p className={cn(
+                    "text-xs font-bold transition-colors", 
+                    act.disabled ? "text-zinc-500" : "text-zinc-200 group-hover:text-white"
+                  )}>
+                    {act.title}
+                  </p>
+                  {!act.disabled && (
+                    <ArrowRight className="h-3 w-3 text-emerald-400 opacity-0 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all shrink-0" />
+                  )}
+                </div>
+                <p className="text-[10px] text-zinc-500 leading-normal font-medium">{act.description}</p>
               </div>
             </Card>
           </button>

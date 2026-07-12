@@ -10,6 +10,7 @@ import { RecentEvents } from '../../components/dashboard/RecentEvents';
 import { QuickActions } from '../../components/dashboard/QuickActions';
 import { StorageOverview } from '../../components/dashboard/StorageOverview';
 import { NewProjectModal } from '../../components/dashboard/NewProjectModal';
+import { AIRecommendations } from '../../components/dashboard/AIRecommendations';
 import { Section } from '../../components/ui/section';
 import { Skeleton } from '../../components/ui/skeletons';
 
@@ -96,6 +97,19 @@ export default function DashboardPage() {
 
         {/* Right Side: Storage & Timeline Activity Feed (takes 1 col) */}
         <div className="space-y-6">
+          {/* AI Platform Insights */}
+          <Section title="AI Platform Insights">
+            {isLoading ? (
+              <Skeleton className="h-44 rounded-xl bg-zinc-900/30 border border-zinc-800/20" />
+            ) : isError || !metrics ? (
+              <div className="h-44 rounded-xl border border-zinc-900 bg-zinc-950/20 flex items-center justify-center">
+                <p className="text-xs text-zinc-500 font-semibold">Insights unavailable.</p>
+              </div>
+            ) : (
+              <AIRecommendations metrics={metrics} />
+            )}
+          </Section>
+
           {/* Storage Analysis */}
           <Section title="Storage Analysis">
             {isLoading ? (

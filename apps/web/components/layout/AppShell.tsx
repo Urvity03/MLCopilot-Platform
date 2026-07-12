@@ -250,6 +250,31 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               })}
             </div>
 
+            {/* Pinned Workspaces Group */}
+            {projects.length > 0 && !sidebarCollapsed && (
+              <div className="space-y-1.5 pt-2">
+                <p className="px-3 text-[9px] font-bold text-zinc-650 uppercase tracking-widest mb-2 select-none">Pinned Workspaces</p>
+                {projects.slice(0, 3).map((p) => {
+                  const isActive = activeProject?.id === p.id;
+                  return (
+                    <Link
+                      key={p.id}
+                      href={`/projects/${p.id}`}
+                      className={cn(
+                        "flex items-center gap-2.5 px-3 py-1.5 rounded-lg text-[11px] font-semibold transition border border-transparent truncate",
+                        isActive
+                          ? "bg-zinc-900/40 text-emerald-400 pl-3 border-l-2 border-emerald-500"
+                          : "text-zinc-500 hover:text-zinc-350 hover:bg-zinc-900/20"
+                      )}
+                    >
+                      <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 shrink-0 animate-pulse" />
+                      <span className="truncate">{p.name}</span>
+                    </Link>
+                  );
+                })}
+              </div>
+            )}
+
             {/* Workspace Group */}
             {activeProject && (
               <div className="space-y-1.5 pt-2">
