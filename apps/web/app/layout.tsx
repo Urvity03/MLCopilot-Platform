@@ -3,26 +3,9 @@ import type { Metadata, Viewport } from 'next'
 import './globals.css'
 
 export const metadata: Metadata = {
-  title: 'v0 App',
-  description: 'Created with v0',
-  generator: 'v0.app',
-  icons: {
-    icon: [
-      {
-        url: '/icon-light-32x32.png',
-        media: '(prefers-color-scheme: light)',
-      },
-      {
-        url: '/icon-dark-32x32.png',
-        media: '(prefers-color-scheme: dark)',
-      },
-      {
-        url: '/icon.svg',
-        type: 'image/svg+xml',
-      },
-    ],
-    apple: '/apple-icon.png',
-  },
+  title: 'MLCopilot Platform',
+  description: 'Production-grade AI & Machine Learning Platform',
+  applicationName: 'MLCopilot',
 }
 
 export const viewport: Viewport = {
@@ -33,15 +16,24 @@ export const viewport: Viewport = {
   ],
 }
 
+import { ThemeProvider } from '../components/common/ThemeProvider'
+import { QueryProvider } from '../components/common/QueryProvider'
+import { Toaster } from '../components/ui/toast'
+
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en">
-      <body className="antialiased">
-        {children}
+    <html lang="en" className="dark" style={{ colorScheme: 'dark' }}>
+      <body className="antialiased bg-[#030303] text-zinc-100 min-h-screen">
+        <QueryProvider>
+          <ThemeProvider>
+            {children}
+            <Toaster />
+          </ThemeProvider>
+        </QueryProvider>
         {process.env.NODE_ENV === 'production' && <Analytics />}
       </body>
     </html>
