@@ -186,14 +186,36 @@ export default function ChatPage() {
               <div className="h-20 bg-zinc-900/20 border border-zinc-800/40 rounded-xl animate-pulse" />
             </div>
           ) : !activeConversation || activeConversation.messages.length === 0 ? (
-            <div className="h-full flex flex-col items-center justify-center text-center max-w-md mx-auto">
-              <div className="h-11 w-11 rounded-xl bg-zinc-900 border border-zinc-800/80 flex items-center justify-center text-zinc-500 mb-4 shadow-lg shadow-black/20">
-                <Bot className="h-5 w-5 text-emerald-400" />
+            <div className="h-full flex flex-col items-center justify-center text-center max-w-sm mx-auto space-y-6">
+              <div className="flex flex-col items-center">
+                <div className="h-11 w-11 rounded-xl bg-zinc-900 border border-zinc-800/80 flex items-center justify-center text-zinc-500 mb-4 shadow-lg shadow-black/20">
+                  <Bot className="h-5 w-5 text-emerald-400" />
+                </div>
+                <h3 className="text-xs font-semibold text-zinc-200">Start a RAG chat session</h3>
+                <p className="text-[10px] text-zinc-500 leading-relaxed font-medium mt-1">
+                  Ask questions about your ingested research documents, papers, or code structures. The copilot will cite sources from matching text nodes.
+                </p>
               </div>
-              <h3 className="text-xs font-semibold text-zinc-200">Start a RAG chat session</h3>
-              <p className="text-[10px] text-zinc-500 leading-relaxed font-medium mt-1">
-                Ask questions about your ingested research documents, papers, or code structures. The copilot will cite sources from matching text nodes.
-              </p>
+
+              {/* Suggestion Chips */}
+              <div className="w-full space-y-2 pt-2">
+                <p className="text-[9px] font-bold text-zinc-600 uppercase tracking-widest text-center">Suggested Queries</p>
+                <div className="flex flex-col gap-2">
+                  {[
+                    "Summarize the key findings of the documents",
+                    "What are the major constraints or limitations mentioned?",
+                    "Give me an overview of the methodologies used"
+                  ].map((sug, idx) => (
+                    <button
+                      key={idx}
+                      onClick={() => setInput(sug)}
+                      className="text-left w-full rounded-lg bg-zinc-900/40 hover:bg-zinc-900/80 border border-zinc-800/50 hover:border-emerald-500/20 px-3 py-2 text-[10px] font-semibold text-zinc-400 hover:text-emerald-400 transition cursor-pointer"
+                    >
+                      {sug}
+                    </button>
+                  ))}
+                </div>
+              </div>
             </div>
           ) : (
             <div className="max-w-3xl mx-auto space-y-6">
