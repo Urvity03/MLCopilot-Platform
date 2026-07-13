@@ -74,8 +74,16 @@ export default function MembersPage() {
     }
   };
 
+  const activeMembers = React.useMemo(() => {
+    return members.filter(m => m.user?.full_name);
+  }, [members]);
+
+  const pendingMembers = React.useMemo(() => {
+    return members.filter(m => !m.user?.full_name);
+  }, [members]);
+
   return (
-    <div className="p-6 md:p-8 max-w-5xl mx-auto space-y-8">
+    <div className="p-6 md:p-8 max-w-5xl mx-auto space-y-8 font-sans">
       {/* 1. Page Header */}
       <PageHeader
         title="Workspace Members"
@@ -93,8 +101,8 @@ export default function MembersPage() {
         }
       />
 
-      {/* 2. Members Directory list */}
-      <Section title="Workspace Access Directory">
+      {/* 2. Active Members Directory */}
+      <Section title="Active Membership Directory">
         <Card className="bg-zinc-900/10 border-zinc-800/40 p-0 overflow-hidden">
           {isLoading ? (
             <div className="p-6 space-y-3">
@@ -106,53 +114,117 @@ export default function MembersPage() {
             <div className="p-6 text-xs font-semibold text-red-400">
               Failed to load workspace members list.
             </div>
-          ) : members.length === 0 ? (
+          ) : activeMembers.length === 0 ? (
             <div className="p-8 text-center text-xs text-zinc-500 font-medium">
-              No members found for this workspace.
+              No active membership accounts found.
             </div>
           ) : (
-            <div className="divide-y divide-zinc-900/60">
-              {members.map((member) => (
-                <div 
-                  key={member.user_id}
-                  className="flex items-center justify-between p-4 hover:bg-zinc-900/10 transition-colors"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="h-8 w-8 rounded-lg bg-zinc-900 border border-zinc-800/80 flex items-center justify-center font-mono text-xs font-bold text-zinc-400 shadow-sm shrink-0">
-                      {member.user?.full_name?.slice(0, 2).toUpperCase() || 'U'}
-                    </div>
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs font-semibold text-zinc-200">
-                          {member.user?.full_name || 'Pending User'}
-                        </span>
-                        <span className="inline-flex items-center gap-1 text-[9px] font-bold text-zinc-500 font-mono">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse text-xs select-none">
+                <thead>
+                  <tr className="border-b border-zinc-900 bg-zinc-950/40 text-[10px] font-bold text-zinc-500 uppercase tracking-wider font-mono">
+                    <th className="p-4">User</th>
+                    <th className="p-4">Role Authority</th>
+                    <th className="p-4">Email Address</th>
+                    <th className="p-4 text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-zinc-900/40">
+                  {activeMembers.map((member) => (
+                    <tr key={member.user_id} className="hover:bg-zinc-900/5 transition-colors">
+                      <td className="p-4 flex items-center gap-3">
+                        <div className="h-7 w-7 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center font-mono text-[10px] font-bold text-zinc-400 shrink-0">
+                          {member.user?.full_name?.slice(0, 2).toUpperCase() || 'U'}
+                        </div>
+                        <span className="font-semibold text-zinc-200">{member.user?.full_name}</span>
+                      </td>
+                      <td className="p-4">
+                        <span className="inline-flex items-center gap-1 text-[9px] font-bold text-indigo-400 font-mono uppercase bg-indigo-950/30 border border-indigo-900/20 px-2 py-0.5 rounded">
                           {getRoleIcon(member.role)}
-                          <span className="uppercase">{member.role}</span>
+                          <span>{member.role}</span>
                         </span>
-                      </div>
-                      <span className="text-[10px] text-zinc-500 font-medium">
-                        {member.user?.email || `ID: ${member.user_id}`}
-                      </span>
-                    </div>
-                  </div>
+                      </td>
+                      <td className="p-4 text-zinc-400 font-medium">{member.user?.email || member.user_id}</td>
+                      <td className="p-4 text-right">
+                        {member.role !== 'owner' && (
+                          <button
+                            onClick={() => {
+                              if (confirm('Are you sure you want to remove this member?')) {
+                                removeMutation.mutate(member.user_id);
+                              }
+                            }}
+                            disabled={removeMutation.isPending}
+                            className="p-1.5 rounded bg-rose-955/20 hover:bg-rose-955/40 border border-rose-900/20 text-rose-400 transition cursor-pointer active:translate-y-[0.5px] disabled:opacity-50"
+                            title="Remove member"
+                          >
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </button>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </Card>
+      </Section>
 
-                  {member.role !== 'owner' && (
-                    <button
-                      onClick={() => {
-                        if (confirm('Are you sure you want to remove this member?')) {
-                          removeMutation.mutate(member.user_id);
-                        }
-                      }}
-                      disabled={removeMutation.isPending}
-                      className="p-1.5 rounded bg-rose-950/20 hover:bg-rose-950/40 border border-rose-900/20 text-rose-455 transition cursor-pointer active:translate-y-[0.5px]"
-                      title="Remove member"
-                    >
-                      <Trash2 className="h-3.5 w-3.5" />
-                    </button>
-                  )}
-                </div>
-              ))}
+      {/* 3. Pending Invites Queue */}
+      <Section title="Pending Workspace Invitations">
+        <Card className="bg-zinc-900/10 border-zinc-800/40 p-0 overflow-hidden">
+          {isLoading ? (
+            <div className="p-6 space-y-3">
+              <SkeletonRow />
+            </div>
+          ) : pendingMembers.length === 0 ? (
+            <div className="p-8 text-center text-xs text-zinc-550 font-medium select-none">
+              No pending workspace invites. All tokens are active.
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse text-xs select-none">
+                <thead>
+                  <tr className="border-b border-zinc-900 bg-zinc-950/40 text-[10px] font-bold text-zinc-500 uppercase tracking-wider font-mono">
+                    <th className="p-4">Invited Member ID</th>
+                    <th className="p-4">Invited Role</th>
+                    <th className="p-4">Status Token</th>
+                    <th className="p-4 text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-zinc-900/40">
+                  {pendingMembers.map((member) => (
+                    <tr key={member.user_id} className="hover:bg-zinc-900/5 transition-colors">
+                      <td className="p-4 font-mono text-zinc-300 font-semibold">{member.user_id}</td>
+                      <td className="p-4">
+                        <span className="inline-flex items-center gap-1 text-[9px] font-bold text-zinc-400 font-mono uppercase bg-zinc-900/50 border border-zinc-800/80 px-2 py-0.5 rounded">
+                          {getRoleIcon(member.role)}
+                          <span>{member.role}</span>
+                        </span>
+                      </td>
+                      <td className="p-4">
+                        <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[8px] font-bold tracking-wide uppercase border font-mono text-amber-400 bg-amber-955/20 border-amber-900/30 animate-pulse">
+                          Awaiting Bind
+                        </span>
+                      </td>
+                      <td className="p-4 text-right">
+                        <button
+                          onClick={() => {
+                            if (confirm('Are you sure you want to revoke this invitation?')) {
+                              removeMutation.mutate(member.user_id);
+                            }
+                          }}
+                          disabled={removeMutation.isPending}
+                          className="p-1.5 rounded bg-zinc-900/60 hover:bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-rose-400 transition cursor-pointer active:translate-y-[0.5px]"
+                          title="Revoke Invitation"
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           )}
         </Card>

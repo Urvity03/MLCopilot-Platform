@@ -10,7 +10,7 @@ import { useAuth } from '../../hooks/useAuth';
 import { useAuthStore } from '../../store/auth';
 import { ShieldAlert, UserPlus, Check } from 'lucide-react';
 import { Button } from '../../components/ui/button';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const registerSchema = z.object({
   full_name: z.string().min(1, { message: 'Display name is required.' }),
@@ -35,10 +35,13 @@ export default function RegisterPage() {
   const {
     register,
     handleSubmit,
+    watch,
     formState: { errors },
   } = useForm<RegisterFields>({
     resolver: zodResolver(registerSchema),
   });
+
+  const passwordVal = watch('password') || '';
 
   const onSubmit = (data: RegisterFields) => {
     registerUser(data);
@@ -180,6 +183,46 @@ export default function RegisterPage() {
                   {errors.password && (
                     <p className="text-[10px] text-rose-400 font-medium mt-1">{errors.password.message}</p>
                   )}
+
+                  {/* Password Strength Validation Checklist */}
+                  <AnimatePresence>
+                    {passwordVal && (
+                      <motion.div 
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: 'auto' }}
+                        exit={{ opacity: 0, height: 0 }}
+                        className="mt-2.5 space-y-2 p-3 rounded-lg bg-zinc-950/45 border border-zinc-900 overflow-hidden font-sans"
+                      >
+                        <div className="flex items-center justify-between text-[8px] font-bold text-zinc-550 uppercase tracking-wider font-mono">
+                          <span>Password Strength</span>
+                          <span className={((passwordVal.length >= 6 ? 1 : 0) + (/\d/.test(passwordVal) ? 1 : 0) + (/[A-Z]/.test(passwordVal) || /[^A-Za-z0-9]/.test(passwordVal) ? 1 : 0)) === 3 ? 'text-indigo-400' : 'text-zinc-600'}>
+                            {((passwordVal.length >= 6 ? 1 : 0) + (/\d/.test(passwordVal) ? 1 : 0) + (/[A-Z]/.test(passwordVal) || /[^A-Za-z0-9]/.test(passwordVal) ? 1 : 0)) === 3 ? 'STRONG' : 'WEAK'}
+                          </span>
+                        </div>
+                        
+                        <div className="flex gap-1 h-1 select-none">
+                          <div className={`h-full flex-1 rounded transition-colors duration-300 ${passwordVal.length >= 6 ? 'bg-indigo-500 shadow-[0_0_5px_rgba(99,102,241,0.2)]' : 'bg-zinc-850'}`} />
+                          <div className={`h-full flex-1 rounded transition-colors duration-300 ${/\d/.test(passwordVal) ? 'bg-indigo-500 shadow-[0_0_5px_rgba(99,102,241,0.2)]' : 'bg-zinc-850'}`} />
+                          <div className={`h-full flex-1 rounded transition-colors duration-300 ${/[A-Z]/.test(passwordVal) || /[^A-Za-z0-9]/.test(passwordVal) ? 'bg-indigo-500 shadow-[0_0_5px_rgba(99,102,241,0.2)]' : 'bg-zinc-850'}`} />
+                        </div>
+
+                        <div className="space-y-1 text-[9px] text-zinc-500 font-medium">
+                          <div className="flex items-center gap-1.5">
+                            <span className={`h-1.5 w-1.5 rounded-full transition-colors ${passwordVal.length >= 6 ? 'bg-indigo-500' : 'bg-zinc-850'}`} />
+                            <span>At least 6 characters</span>
+                          </div>
+                          <div className="flex items-center gap-1.5">
+                            <span className={`h-1.5 w-1.5 rounded-full transition-colors ${/\d/.test(passwordVal) ? 'bg-indigo-500' : 'bg-zinc-850'}`} />
+                            <span>Contains numeric character</span>
+                          </div>
+                          <div className="flex items-center gap-1.5">
+                            <span className={`h-1.5 w-1.5 rounded-full transition-colors ${/[A-Z]/.test(passwordVal) || /[^A-Za-z0-9]/.test(passwordVal) ? 'bg-indigo-500' : 'bg-zinc-850'}`} />
+                            <span>Contains uppercase or special character</span>
+                          </div>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 </div>
 
                 <Button
