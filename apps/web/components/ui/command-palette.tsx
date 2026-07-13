@@ -232,7 +232,7 @@ export function SearchBar({ onOpenPallet }: { onOpenPallet: () => void }) {
         <span className="text-xs font-medium">Search workspaces...</span>
       </div>
       <span className="text-[9px] bg-zinc-950 border border-zinc-800 rounded px-1.5 py-0.5 text-zinc-500 group-hover:text-zinc-400 font-mono select-none">
-        Ctrl K
+        ⌘K
       </span>
     </button>
   );

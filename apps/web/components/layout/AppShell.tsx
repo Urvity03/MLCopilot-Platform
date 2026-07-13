@@ -38,6 +38,22 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const profileRef = React.useRef<HTMLDivElement>(null);
   const notificationsRef = React.useRef<HTMLDivElement>(null);
 
+  // Extract active project from URL params
+  const projectId = params?.projectId as string | undefined;
+  const activeProject = React.useMemo(() => {
+    if (!projectId) return null;
+    return projects.find((p) => p.id === projectId) || null;
+  }, [projects, projectId]);
+
+  const selectProject = (id: string | null) => {
+    setProjectDropdownOpen(false);
+    if (id) {
+      router.push(`/projects/${id}`);
+    } else {
+      router.push('/dashboard');
+    }
+  };
+
   React.useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (projectRef.current && !projectRef.current.contains(event.target as Node)) {
@@ -56,26 +72,68 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     };
   }, []);
 
-  // Extract active project from URL params
-  const projectId = params?.projectId as string | undefined;
-  const activeProject = React.useMemo(() => {
-    if (!projectId) return null;
-    return projects.find((p) => p.id === projectId) || null;
-  }, [projects, projectId]);
+  // Keyboard navigation shortcuts (g d, g c, g k, etc.)
+  React.useEffect(() => {
+    let keysPressed = '';
+    const handleShortcuts = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement;
+      if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable) {
+        return;
+      }
+      if (e.key === 'g') {
+        keysPressed = 'g';
+        return;
+      }
+      if (keysPressed === 'g') {
+        if (e.key === 'd') {
+          e.preventDefault();
+          router.push('/dashboard');
+        } else if (e.key === 'c' && activeProject?.id) {
+          e.preventDefault();
+          router.push(`/projects/${activeProject.id}/chat`);
+        } else if (e.key === 'k' && activeProject?.id) {
+          e.preventDefault();
+          router.push(`/projects/${activeProject.id}/uploads`);
+        } else if (e.key === 's' && activeProject?.id) {
+          e.preventDefault();
+          router.push(`/projects/${activeProject.id}/settings`);
+        } else if (e.key === 'm' && activeProject?.id) {
+          e.preventDefault();
+          router.push(`/projects/${activeProject.id}/members`);
+        }
+        keysPressed = '';
+      } else {
+        keysPressed = '';
+      }
+    };
+    window.addEventListener('keydown', handleShortcuts);
+    return () => window.removeEventListener('keydown', handleShortcuts);
+  }, [activeProject, router]);
+
+  // Alt + Number quick project switcher
+  React.useEffect(() => {
+    const handleProjectSwitchShortcuts = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement;
+      if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') return;
+      if (e.altKey && e.key >= '1' && e.key <= '9') {
+        const index = parseInt(e.key) - 1;
+        if (index === 0) {
+          e.preventDefault();
+          selectProject(null);
+        } else if (projects[index - 1]) {
+          e.preventDefault();
+          selectProject(projects[index - 1].id);
+        }
+      }
+    };
+    window.addEventListener('keydown', handleProjectSwitchShortcuts);
+    return () => window.removeEventListener('keydown', handleProjectSwitchShortcuts);
+  }, [projects, router]);
 
   // Close mobile menu on navigate
   React.useEffect(() => {
     setMobileMenuOpen(false);
   }, [pathname]);
-
-  const selectProject = (id: string | null) => {
-    setProjectDropdownOpen(false);
-    if (id) {
-      router.push(`/projects/${id}`);
-    } else {
-      router.push('/dashboard');
-    }
-  };
 
   // Breadcrumbs calculation
   const breadcrumbs = React.useMemo(() => {
@@ -197,12 +255,13 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               <div className="absolute left-4 right-4 mt-2 bg-zinc-950 border border-zinc-900 rounded-xl shadow-2xl z-50 py-1.5 glass-card overflow-hidden max-h-60 overflow-y-auto">
                 <button
                   onClick={() => selectProject(null)}
-                  className="w-full text-left px-4 py-2 text-xs text-zinc-400 hover:bg-zinc-900 hover:text-zinc-200 transition font-semibold"
+                  className="w-full text-left px-4 py-2 text-xs text-zinc-400 hover:bg-zinc-900 hover:text-zinc-200 transition font-semibold flex items-center justify-between cursor-pointer"
                 >
-                  Personal Dashboard
+                  <span>Personal Dashboard</span>
+                  <span className="text-[9px] bg-zinc-900 border border-zinc-800 rounded px-1.5 text-zinc-500 font-mono">⌥1</span>
                 </button>
                 <div className="border-t border-zinc-900 my-1" />
-                {projects.map((p) => (
+                {projects.map((p, pIdx) => (
                   <button
                     key={p.id}
                     onClick={() => selectProject(p.id)}
@@ -214,6 +273,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                     )}
                   >
                     <span className="truncate">{p.name}</span>
+                    {pIdx < 8 && (
+                      <span className="text-[9px] bg-zinc-900 border border-zinc-800 rounded px-1.5 text-zinc-555 font-mono">⌥{pIdx + 2}</span>
+                    )}
                   </button>
                 ))}
               </div>
@@ -307,6 +369,17 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               </div>
             )}
           </nav>
+
+          {/* Active worker telemetry ticker */}
+          {!sidebarCollapsed && (
+            <div className="mx-4 my-2 px-3 py-2 bg-zinc-900/20 border border-zinc-805 rounded-lg select-none font-mono text-[9px] text-zinc-500 flex items-center justify-between gap-2 shrink-0">
+              <div className="flex items-center gap-1.5 truncate">
+                <span className="h-1.5 w-1.5 rounded-full bg-cyan-400 animate-pulse shrink-0" />
+                <span className="truncate">Inference queue: active</span>
+              </div>
+              <span>v1.1</span>
+            </div>
+          )}
 
           {/* Sidebar Footer */}
           <div className={cn("p-4 border-t border-zinc-900/60 bg-zinc-950/10 flex items-center justify-between", sidebarCollapsed && "p-3 flex-col gap-3 justify-center")}>
