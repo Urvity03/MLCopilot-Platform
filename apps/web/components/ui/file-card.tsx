@@ -34,8 +34,22 @@ export function FileCard({
 
   const chunkCount = upload.metadata?.chunk_count as number | undefined;
 
+  // Pipeline Status Mappings
+  const isUploaded = true;
+  const isParsed = upload.parse_status === 'parsed' || upload.embedding_status === 'embedded';
+  const isChunked = chunkCount !== undefined && chunkCount > 0;
+  const isEmbedded = upload.embedding_status === 'embedded';
+  const isFailed = upload.parse_status === 'failed' || upload.embedding_status === 'failed';
+
+  const readiness = React.useMemo(() => {
+    if (isFailed) return { text: 'Ingestion Failed', color: 'text-rose-400 bg-rose-950/20 border-rose-900/30' };
+    if (isEmbedded) return { text: 'Search Ready', color: 'text-emerald-400 bg-emerald-950/20 border-emerald-900/30 animate-none' };
+    if (upload.embedding_status === 'embedding') return { text: 'Embedding Vectors', color: 'text-cyan-400 bg-cyan-950/20 border-cyan-900/30 animate-pulse' };
+    return { text: 'Parsing Pipeline', color: 'text-amber-400 bg-amber-950/20 border-amber-900/30 animate-pulse' };
+  }, [isFailed, isEmbedded, upload.embedding_status]);
+
   return (
-    <Card className="p-4 bg-zinc-900/10 border-zinc-800/40 hover:border-indigo-500/20 group flex flex-col justify-between h-40">
+    <Card className="p-4.5 bg-zinc-900/10 border-zinc-800/40 hover:border-indigo-500/20 group flex flex-col justify-between h-44 relative overflow-hidden font-sans">
       <div>
         <div className="flex items-start justify-between gap-3">
           <div className="flex items-center gap-2.5 min-w-0">
@@ -50,15 +64,43 @@ export function FileCard({
                 {upload.filename}
               </h4>
               <p className="text-[9px] text-zinc-500 font-medium tracking-wide uppercase mt-0.5">
-                KIND: {upload.kind}
+                Size: {upload.metadata?.size_bytes ? `${(upload.metadata.size_bytes / 1024).toFixed(1)} KB` : 'Unknown size'}
               </p>
             </div>
           </div>
 
-          <StatusPill status={upload.embedding_status} />
+          <span className={`inline-flex items-center px-2 py-0.5 rounded text-[8px] font-bold tracking-wide uppercase border font-mono ${readiness.color}`}>
+            {readiness.text}
+          </span>
         </div>
 
-        {/* Aggregate chunks details if available */}
+        {/* Mini Ingestion Pipeline Dot Ticker */}
+        <div className="mt-4 flex items-center justify-between px-1 relative">
+          <div className="absolute left-1 right-1 top-1/2 -translate-y-1/2 h-px bg-zinc-900 z-0" />
+          {[
+            { label: 'Upload', active: isUploaded },
+            { label: 'Parse', active: isParsed },
+            { label: 'Chunk', active: isChunked },
+            { label: 'Embed', active: isEmbedded },
+            { label: 'Ready', active: isEmbedded }
+          ].map((step, idx) => (
+            <div key={idx} className="flex flex-col items-center gap-1 z-10 relative bg-[#09090b] px-1">
+              <span className={`h-2 w-2 rounded-full border transition-all ${
+                isFailed && !step.active ? 'bg-zinc-900 border-zinc-850' :
+                isFailed && step.active && idx === 3 ? 'bg-rose-500 border-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.3)]' :
+                step.active ? 'bg-indigo-500 border-indigo-500 shadow-[0_0_8px_rgba(99,102,241,0.3)]' :
+                'bg-zinc-900 border-zinc-850'
+              }`} />
+              <span className={`text-[8px] font-mono tracking-tighter uppercase font-semibold ${
+                step.active ? 'text-zinc-300 font-bold' : 'text-zinc-600'
+              }`}>
+                {step.label}
+              </span>
+            </div>
+          ))}
+        </div>
+
+        {/* Aggregated details */}
         <div className="mt-4 flex flex-wrap gap-2 items-center">
           {chunkCount !== undefined ? (
             <GradientBadge variant="indigo" className="gap-1 flex items-center">
