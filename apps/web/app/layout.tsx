@@ -31,8 +31,8 @@ export default function RootLayout({
         {/* Vercel/Linear-like background grid pattern */}
         <div className="fixed inset-0 bg-[#030303] bg-[linear-gradient(to_right,#09090b_1px,transparent_1px),linear-gradient(to_bottom,#09090b_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] pointer-events-none z-0 opacity-80" />
         {/* Tasteful ambient background glowing blobs */}
-        <div className="fixed -top-40 left-1/4 w-[600px] h-[600px] rounded-full bg-emerald-500/3 blur-[140px] pointer-events-none z-0" />
-        <div className="fixed top-1/4 right-1/4 w-[500px] h-[500px] rounded-full bg-cyan-500/3 blur-[120px] pointer-events-none z-0" />
+        <div className="fixed -top-40 left-1/4 w-[600px] h-[600px] rounded-full bg-indigo-500/2 blur-[140px] pointer-events-none z-0" />
+        <div className="fixed top-1/4 right-1/4 w-[500px] h-[500px] rounded-full bg-violet-500/2 blur-[120px] pointer-events-none z-0" />
         
         <div className="relative z-10 min-h-screen flex flex-col">
           <QueryProvider>

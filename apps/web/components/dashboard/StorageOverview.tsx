@@ -25,7 +25,7 @@ export function StorageOverview({ stats }: StorageOverviewProps) {
     <Card className="p-5 bg-zinc-900/10 border-zinc-800/40 relative overflow-hidden font-sans">
       <div className="flex items-center gap-3">
         <div className="h-8 w-8 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-400">
-          <HardDrive className="h-4 w-4 text-emerald-400" />
+          <HardDrive className="h-4 w-4 text-indigo-400" />
         </div>
         <div>
           <h4 className="text-xs font-semibold text-zinc-200">Storage Quota Status</h4>
@@ -35,13 +35,13 @@ export function StorageOverview({ stats }: StorageOverviewProps) {
 
       {/* Progress Bar meter */}
       <div className="mt-5 space-y-2">
-        <div className="flex justify-between text-[10px] font-semibold text-zinc-400 font-mono">
+        <div className="flex justify-between text-[10px] font-semibold text-zinc-500 font-mono">
           <span>{estimatedSizeMB} MB USED</span>
           <span>{quotaLimitMB} MB LIMIT</span>
         </div>
         <div className="h-2 w-full bg-zinc-900 rounded-full overflow-hidden border border-zinc-850">
           <div 
-            className="h-full bg-emerald-500 rounded-full transition-all duration-500" 
+            className="h-full bg-gradient-to-r from-indigo-500 to-indigo-600 rounded-full transition-all duration-500 shadow-[0_0_10px_rgba(99,102,241,0.2)]" 
             style={{ width: `${utilizationPercentage}%` }} 
           />
         </div>

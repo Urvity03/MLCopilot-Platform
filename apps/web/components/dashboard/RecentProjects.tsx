@@ -9,50 +9,84 @@ import { motion } from 'framer-motion';
 interface RecentProjectsProps {
   projects: Array<Project & { documentCount: number; conversationCount: number }>;
   onCreateClick: () => void;
+  onSelectTemplate: (template: { name: string; slug: string; description: string }) => void;
 }
 
-export function RecentProjects({ projects, onCreateClick }: RecentProjectsProps) {
+export function RecentProjects({ projects, onCreateClick, onSelectTemplate }: RecentProjectsProps) {
   if (projects.length === 0) {
+    const templates = [
+      {
+        name: 'BioMedical Corpus Search',
+        slug: 'biomedical-corpus',
+        description: 'Ingest PMC research articles and clinical guidelines to explore medical semantic vectors.',
+        icon: Database,
+        color: 'text-indigo-400 border-indigo-950/40 bg-indigo-950/5 hover:border-indigo-500/30'
+      },
+      {
+        name: 'SEC Filings Analyzer',
+        slug: 'sec-filings-analysis',
+        description: 'Aggregate public company balance sheets and financial logs to index RAG context.',
+        icon: Sparkles,
+        color: 'text-cyan-400 border-cyan-950/40 bg-cyan-950/5 hover:border-cyan-500/30'
+      },
+      {
+        name: 'Legal Document Auditor',
+        slug: 'legal-contract-audit',
+        description: 'Inspect service level agreements and corporate compliance contracts for semantic search.',
+        icon: Folder,
+        color: 'text-violet-400 border-violet-955/40 bg-violet-955/5 hover:border-violet-500/30'
+      }
+    ];
+
     return (
       <div className="rounded-xl border border-zinc-900/60 bg-zinc-950/20 p-6 space-y-6 relative overflow-hidden font-sans">
-        <div className="absolute top-0 right-0 p-6 opacity-5 select-none pointer-events-none">
-          <Sparkles className="h-24 w-24 text-emerald-500" />
-        </div>
         <div>
-          <h3 className="text-sm font-semibold text-zinc-100 flex items-center gap-2">
-            <span>🚀 Welcome to MLCopilot</span>
+          <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full border border-indigo-500/20 bg-indigo-950/15 text-[9px] font-bold text-indigo-400 font-mono tracking-wider uppercase">
+            Active Onboarding Setup
+          </span>
+          <h3 className="text-sm font-bold text-zinc-100 flex items-center gap-2 mt-2">
+            Initialize an AI Workspace Blueprint
           </h3>
           <p className="text-[11px] text-zinc-450 leading-relaxed font-medium mt-1">
-            Let's build your first AI semantic index and start querying your custom corpus.
+            To query document models, you must first create a search workspace context. Choose a pre-configured template partition below or start from scratch.
           </p>
         </div>
 
-        {/* Onboarding Checklist */}
-        <div className="space-y-3 pt-2">
-          <div className="flex items-center gap-3">
-            <div className="h-5 w-5 rounded-full bg-emerald-950 border border-emerald-500/20 flex items-center justify-center text-[10px] text-emerald-400 font-bold font-mono">✓</div>
-            <span className="text-xs text-zinc-400 font-semibold line-through">Step 1: Create MLCopilot Platform Account</span>
-          </div>
-          <div className="flex items-center gap-3">
-            <div className="h-5 w-5 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center text-[10px] text-zinc-200 font-bold font-mono">2</div>
-            <span className="text-xs text-zinc-200 font-semibold">Step 2: Initialize a Project Workspace</span>
-          </div>
-          <div className="flex items-center gap-3 opacity-40">
-            <div className="h-5 w-5 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center text-[10px] text-zinc-550 font-bold font-mono">3</div>
-            <span className="text-xs text-zinc-450 font-medium">Step 3: Upload research documents & papers</span>
-          </div>
-          <div className="flex items-center gap-3 opacity-40">
-            <div className="h-5 w-5 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center text-[10px] text-zinc-550 font-bold font-mono">4</div>
-            <span className="text-xs text-zinc-450 font-medium">Step 4: Start semantic RAG copilot chat</span>
-          </div>
+        {/* Templates Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+          {templates.map((tpl, idx) => {
+            const TplIcon = tpl.icon;
+            return (
+              <button
+                key={idx}
+                onClick={() => onSelectTemplate({ name: tpl.name, slug: tpl.slug, description: tpl.description })}
+                className="w-full text-left rounded-lg transition-all duration-300 relative select-none group border border-zinc-800/40 bg-zinc-900/10 p-4 hover:border-zinc-700/80 cursor-pointer active:translate-y-px flex flex-col justify-between min-h-[140px]"
+              >
+                <div>
+                  <div className={`p-2 w-fit rounded-lg border flex-shrink-0 mb-3 transition-colors ${tpl.color}`}>
+                    <TplIcon className="h-4 w-4" />
+                  </div>
+                  <h4 className="text-[11px] font-bold text-zinc-200 group-hover:text-white transition-colors">{tpl.name}</h4>
+                  <p className="text-[9px] text-zinc-500 leading-normal font-medium mt-1.5 line-clamp-3">
+                    {tpl.description}
+                  </p>
+                </div>
+                <div className="flex items-center gap-1 text-[9px] font-bold text-indigo-400 mt-4 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <span>DEPLOY BLUEPRINT</span>
+                  <ArrowRight className="h-2.5 w-2.5" />
+                </div>
+              </button>
+            );
+          })}
         </div>
 
-        <div className="flex gap-3 pt-4 border-t border-zinc-900/60">
+        <div className="flex items-center justify-between pt-4 border-t border-zinc-900/60 text-[10px] text-zinc-500 font-medium">
+          <span>Need custom properties? Setup custom databases.</span>
           <button
             onClick={onCreateClick}
-            className="rounded-lg bg-emerald-600 hover:bg-emerald-500 text-xs font-semibold text-white px-4 py-2 transition border border-emerald-500/10 shadow-md shadow-emerald-950/10 cursor-pointer active:scale-95"
+            className="rounded-lg bg-primary hover:bg-primary/95 text-[10px] font-semibold text-white px-3.5 py-1.5 transition border border-indigo-500/20 shadow-md shadow-indigo-950/20 cursor-pointer active:translate-y-[0.5px]"
           >
-            Create Project Workspace
+            Create Empty Workspace
           </button>
         </div>
       </div>
@@ -87,11 +121,11 @@ export function RecentProjects({ projects, onCreateClick }: RecentProjectsProps)
             className="group flex flex-col h-full"
           >
             <Card
-              className="p-5 flex flex-col justify-between h-full bg-zinc-900/10 border-zinc-800/40 group-hover:border-emerald-500/20"
+              className="p-5 flex flex-col justify-between h-full bg-zinc-900/10 border-zinc-800/40 group-hover:border-indigo-500/20"
             >
               <div>
                 <div className="flex items-start justify-between mb-4">
-                  <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-zinc-900 border border-zinc-800 text-zinc-400 group-hover:text-emerald-450 group-hover:bg-emerald-950/20 group-hover:border-emerald-800/30 transition-all shadow-[0_0_15px_rgba(0,0,0,0.2)]">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-zinc-900 border border-zinc-800 text-zinc-400 group-hover:text-indigo-400 group-hover:bg-indigo-950/20 group-hover:border-indigo-800/30 transition-all shadow-[0_0_15px_rgba(0,0,0,0.2)]">
                     <Folder className="h-4.5 w-4.5" />
                   </div>
                   <span className="text-[9px] font-mono font-medium text-zinc-500 bg-zinc-950 px-2 py-0.5 rounded border border-zinc-900">
@@ -118,7 +152,7 @@ export function RecentProjects({ projects, onCreateClick }: RecentProjectsProps)
                     <span>{proj.conversationCount} CHATS</span>
                   </div>
                 </div>
-                <div className="flex items-center gap-1 text-[10px] font-bold text-emerald-400 opacity-0 group-hover:opacity-100 transition-opacity">
+                <div className="flex items-center gap-1 text-[10px] font-bold text-indigo-400 opacity-0 group-hover:opacity-100 transition-opacity">
                   <span>ENTER</span>
                   <ArrowRight className="h-3 w-3" />
                 </div>

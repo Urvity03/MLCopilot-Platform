@@ -80,8 +80,8 @@ export function StatCard({
             <div
               className={cn(
                 "inline-flex items-center gap-0.5 rounded px-1.5 py-0.5 text-[10px] font-medium border",
-                trend.direction === 'up' && "bg-emerald-950/20 text-emerald-400 border-emerald-900/30",
-                trend.direction === 'down' && "bg-red-950/20 text-red-400 border-red-900/30",
+                trend.direction === 'up' && "bg-indigo-950/20 text-indigo-400 border-indigo-900/30",
+                trend.direction === 'down' && "bg-rose-950/20 text-rose-400 border-rose-900/30",
                 trend.direction === 'neutral' && "bg-zinc-900 text-zinc-400 border-zinc-800"
               )}
             >
@@ -95,7 +95,7 @@ export function StatCard({
       </div>
 
       <div className="flex items-center justify-between mt-auto">
-        <span className="text-[11px] text-zinc-400 font-medium">
+        <span className="text-[11px] text-zinc-450 font-medium">
           {description || 'No description'}
         </span>
         {chartData && chartData.length >= 2 && (
@@ -104,7 +104,7 @@ export function StatCard({
               <path
                 d={sparklinePath}
                 fill="none"
-                stroke={trend?.direction === 'down' ? '#ef4444' : '#10b981'}
+                stroke={trend?.direction === 'down' ? '#f43f5e' : '#6366f1'}
                 strokeWidth="1.5"
                 strokeLinecap="round"
                 strokeLinejoin="round"

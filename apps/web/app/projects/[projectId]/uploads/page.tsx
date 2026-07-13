@@ -97,7 +97,7 @@ export default function UploadsPage() {
         <DialogContent className="max-w-md font-sans">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-sm font-bold">
-              <Info className="h-4 w-4 text-emerald-400" />
+              <Info className="h-4 w-4 text-indigo-400" />
               <span>Document Metadata Analysis</span>
             </DialogTitle>
             <DialogDescription>
@@ -115,7 +115,7 @@ export default function UploadsPage() {
               <div className="grid grid-cols-2 gap-3">
                 <div className="p-3 bg-zinc-900/50 border border-zinc-800 rounded-lg space-y-1">
                   <span className="text-[9px] font-bold text-zinc-500 uppercase tracking-wide">Ingestion Status</span>
-                  <div className="flex items-center gap-1.5 mt-0.5 text-xs text-emerald-400 font-semibold uppercase">
+                  <div className="flex items-center gap-1.5 mt-0.5 text-xs text-indigo-400 font-semibold uppercase">
                     <Activity className="h-3.5 w-3.5" />
                     <span>{activeUploadDetails.embedding_status}</span>
                   </div>

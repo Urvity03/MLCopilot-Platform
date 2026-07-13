@@ -22,12 +22,17 @@ export function StatusPill({ status, className, ...props }: StatusPillProps) {
   const config = React.useMemo(() => {
     switch (status) {
       case 'embedded':
+        return {
+          bg: 'bg-indigo-950/20 text-indigo-400 border-indigo-900/30',
+          dot: 'bg-indigo-400',
+          label: 'Embedded',
+        };
       case 'success':
       case 'active':
         return {
           bg: 'bg-emerald-950/20 text-emerald-400 border-emerald-900/30',
           dot: 'bg-emerald-400',
-          label: status === 'embedded' ? 'Embedded' : status === 'success' ? 'Success' : 'Active',
+          label: status === 'success' ? 'Success' : 'Active',
         };
       case 'parsing':
       case 'embedding':
@@ -38,21 +43,21 @@ export function StatusPill({ status, className, ...props }: StatusPillProps) {
         };
       case 'pending':
         return {
-          bg: 'bg-zinc-900 text-zinc-400 border-zinc-800',
-          dot: 'bg-zinc-500',
+          bg: 'bg-amber-950/15 text-amber-400 border-amber-900/20',
+          dot: 'bg-amber-400',
           label: 'Pending',
         };
       case 'failed':
       case 'inactive':
         return {
-          bg: 'bg-red-950/20 text-red-400 border-red-900/30',
-          dot: 'bg-red-500',
+          bg: 'bg-rose-950/20 text-rose-400 border-rose-900/30',
+          dot: 'bg-rose-500',
           label: status === 'failed' ? 'Failed' : 'Inactive',
         };
       case 'parsed':
         return {
-          bg: 'bg-teal-950/20 text-teal-400 border-teal-900/30',
-          dot: 'bg-teal-400',
+          bg: 'bg-violet-950/20 text-violet-400 border-violet-900/30',
+          dot: 'bg-violet-400',
           label: 'Parsed',
         };
       default:

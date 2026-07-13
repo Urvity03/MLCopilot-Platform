@@ -27,9 +27,10 @@ type ProjectFields = z.infer<typeof projectSchema>;
 interface NewProjectModalProps {
   isOpen: boolean;
   onClose: () => void;
+  prefilledData?: { name: string; slug: string; description: string } | null;
 }
 
-export function NewProjectModal({ isOpen, onClose }: NewProjectModalProps) {
+export function NewProjectModal({ isOpen, onClose, prefilledData }: NewProjectModalProps) {
   const { createProject, isCreating } = useProjects();
 
   const {
@@ -50,16 +51,31 @@ export function NewProjectModal({ isOpen, onClose }: NewProjectModalProps) {
 
   const projectName = watch('name');
 
+  // Load prefilled template data when workspace blueprint is selected
+  React.useEffect(() => {
+    if (isOpen) {
+      if (prefilledData) {
+        reset({
+          name: prefilledData.name,
+          slug: prefilledData.slug,
+          description: prefilledData.description,
+        });
+      } else {
+        reset({ name: '', slug: '', description: '' });
+      }
+    }
+  }, [isOpen, prefilledData, reset]);
+
   // Auto-generate slug from project name
   React.useEffect(() => {
-    if (projectName) {
+    if (projectName && !prefilledData) {
       const generatedSlug = projectName
         .toLowerCase()
         .replace(/[^a-z0-9]+/g, '-')
         .replace(/(^-|-$)+/g, '');
       setValue('slug', generatedSlug, { shouldValidate: true });
     }
-  }, [projectName, setValue]);
+  }, [projectName, setValue, prefilledData]);
 
   const onSubmit = (data: ProjectFields) => {
     createProject(
@@ -82,7 +98,7 @@ export function NewProjectModal({ isOpen, onClose }: NewProjectModalProps) {
       <DialogContent className="max-w-sm">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <Sparkles className="h-4.5 w-4.5 text-emerald-400" />
+            <Sparkles className="h-4.5 w-4.5 text-indigo-400" />
             <span>Create Workspace</span>
           </DialogTitle>
           <DialogDescription>
@@ -99,7 +115,7 @@ export function NewProjectModal({ isOpen, onClose }: NewProjectModalProps) {
               type="text"
               {...register('name')}
               placeholder="e.g. Sentence Transformers"
-              className="w-full rounded-lg bg-zinc-900/50 border border-zinc-800/80 px-3 py-2 text-xs text-zinc-100 placeholder-zinc-500 focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 transition"
+              className="w-full rounded-lg bg-zinc-900/50 border border-zinc-800/80 px-3 py-2 text-xs text-zinc-100 placeholder-zinc-500 focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/20 transition outline-none"
               disabled={isCreating}
             />
             {errors.name && (
@@ -115,7 +131,7 @@ export function NewProjectModal({ isOpen, onClose }: NewProjectModalProps) {
               type="text"
               {...register('slug')}
               placeholder="sentence-transformers"
-              className="w-full rounded-lg bg-zinc-900/50 border border-zinc-800/80 px-3 py-2 text-xs text-zinc-200 placeholder-zinc-500 focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 transition"
+              className="w-full rounded-lg bg-zinc-900/50 border border-zinc-800/80 px-3 py-2 text-xs text-zinc-200 placeholder-zinc-500 focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/20 transition outline-none"
               disabled={isCreating}
             />
             {errors.slug && (
@@ -131,7 +147,7 @@ export function NewProjectModal({ isOpen, onClose }: NewProjectModalProps) {
               {...register('description')}
               placeholder="Provide a brief summary of the workspace corpus..."
               rows={3}
-              className="w-full rounded-lg bg-zinc-900/50 border border-zinc-800/80 px-3 py-2 text-xs text-zinc-100 placeholder-zinc-500 focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 transition resize-none"
+              className="w-full rounded-lg bg-zinc-900/50 border border-zinc-800/80 px-3 py-2 text-xs text-zinc-100 placeholder-zinc-500 focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/20 transition resize-none outline-none"
               disabled={isCreating}
             />
             {errors.description && (
@@ -154,7 +170,7 @@ export function NewProjectModal({ isOpen, onClose }: NewProjectModalProps) {
               type="submit"
               variant="default"
               size="sm"
-              className="bg-emerald-600 hover:bg-emerald-500 border border-emerald-500/10"
+              className="bg-primary hover:bg-primary/95 border border-indigo-500/20 shadow-md shadow-indigo-950/20 cursor-pointer active:translate-y-[0.5px]"
               disabled={isCreating}
             >
               {isCreating ? (

@@ -24,7 +24,7 @@ export function QuickActions({
       icon: FolderPlus,
       onClick: onCreateProjectClick,
       disabled: false,
-      color: 'text-emerald-400 group-hover:text-emerald-350 border-emerald-950/40 bg-emerald-950/5',
+      color: 'text-indigo-400 group-hover:text-indigo-350 border-indigo-950/40 bg-indigo-950/5',
     },
     {
       title: 'Ingest Text Corpus',
@@ -40,7 +40,7 @@ export function QuickActions({
       icon: MessageSquare,
       onClick: onNavigateToChat,
       disabled: !hasProjects,
-      color: 'text-teal-400 group-hover:text-teal-355 border-teal-950/40 bg-teal-950/5',
+      color: 'text-violet-400 group-hover:text-violet-350 border-violet-950/40 bg-violet-950/5',
     },
   ];
 
@@ -65,7 +65,7 @@ export function QuickActions({
               hoverGlow={!act.disabled}
               className={cn(
                 "p-5 flex gap-4 h-full items-start border-zinc-800/40 bg-zinc-900/10 relative overflow-hidden transition-all duration-350",
-                !act.disabled && "group-hover:border-emerald-500/25 group-hover:bg-zinc-900/20 group-hover:shadow-[0_4px_20px_rgba(0,0,0,0.4)]"
+                !act.disabled && "group-hover:border-indigo-500/25 group-hover:bg-zinc-900/20 group-hover:shadow-[0_4px_20px_rgba(0,0,0,0.4)]"
               )}
             >
               <div 
@@ -87,7 +87,7 @@ export function QuickActions({
                     {act.title}
                   </p>
                   {!act.disabled && (
-                    <ArrowRight className="h-3 w-3 text-emerald-400 opacity-0 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all shrink-0" />
+                    <ArrowRight className="h-3 w-3 text-indigo-400 opacity-0 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all shrink-0" />
                   )}
                 </div>
                 <p className="text-[10px] text-zinc-500 leading-normal font-medium">{act.description}</p>

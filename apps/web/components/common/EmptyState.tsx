@@ -37,7 +37,7 @@ export function EmptyState({
           onClick={onAction}
           variant="default"
           size="sm"
-          className="bg-emerald-600 hover:bg-emerald-500 hover:shadow-lg hover:shadow-emerald-950/20 active:translate-y-px border border-emerald-500/10 font-semibold px-4 transition"
+          className="bg-primary hover:bg-primary/95 hover:shadow-lg hover:shadow-indigo-950/20 active:translate-y-px border border-indigo-500/10 font-semibold px-4 transition cursor-pointer"
         >
           {actionText}
         </Button>

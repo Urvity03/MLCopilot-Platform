@@ -66,7 +66,7 @@ export default function MembersPage() {
   const getRoleIcon = (role: string) => {
     switch (role) {
       case 'owner':
-        return <ShieldCheck className="h-4 w-4 text-emerald-400" />;
+        return <ShieldCheck className="h-4 w-4 text-indigo-400" />;
       case 'admin':
         return <Shield className="h-4 w-4 text-cyan-400" />;
       default:
@@ -85,7 +85,7 @@ export default function MembersPage() {
             onClick={() => setInviteOpen(true)}
             variant="default"
             size="sm"
-            className="bg-emerald-600 hover:bg-emerald-500 border border-emerald-500/10 gap-1.5"
+            className="bg-primary hover:bg-primary/95 border border-indigo-500/20 shadow-md shadow-indigo-950/20 cursor-pointer active:translate-y-[0.5px] gap-1.5"
           >
             <UserPlus className="h-3.5 w-3.5" />
             <span>Invite Member</span>
@@ -145,7 +145,7 @@ export default function MembersPage() {
                         }
                       }}
                       disabled={removeMutation.isPending}
-                      className="p-1.5 rounded bg-red-950/10 hover:bg-red-950/30 border border-red-900/10 text-red-400 transition"
+                      className="p-1.5 rounded bg-rose-950/20 hover:bg-rose-950/40 border border-rose-900/20 text-rose-455 transition cursor-pointer active:translate-y-[0.5px]"
                       title="Remove member"
                     >
                       <Trash2 className="h-3.5 w-3.5" />
@@ -163,7 +163,7 @@ export default function MembersPage() {
         <DialogContent className="max-w-sm">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <UserPlus className="h-4.5 w-4.5 text-emerald-400" />
+              <UserPlus className="h-4.5 w-4.5 text-indigo-400" />
               <span>Invite Member</span>
             </DialogTitle>
             <DialogDescription>
@@ -182,7 +182,7 @@ export default function MembersPage() {
                   value={inviteEmail}
                   onChange={(e) => setInviteEmail(e.target.value)}
                   placeholder="Enter User ID to associate"
-                  className="w-full rounded-lg bg-zinc-900/50 border border-zinc-800/80 px-3 py-2 pl-9 text-xs text-zinc-100 placeholder-zinc-500 focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 transition"
+                  className="w-full rounded-lg bg-zinc-900/50 border border-zinc-800/80 px-3 py-2 pl-9 text-xs text-zinc-100 placeholder-zinc-500 focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/20 transition outline-none"
                   required
                 />
                 <Mail className="absolute left-3 h-3.5 w-3.5 text-zinc-500" />
@@ -196,7 +196,7 @@ export default function MembersPage() {
               <select
                 value={inviteRole}
                 onChange={(e: any) => setInviteRole(e.target.value)}
-                className="w-full rounded-lg bg-zinc-900/50 border border-zinc-800/80 px-3 py-2 text-xs text-zinc-200 focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 transition"
+                className="w-full rounded-lg bg-zinc-900/50 border border-zinc-800/80 px-3 py-2 text-xs text-zinc-200 focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/20 transition outline-none"
               >
                 <option value="admin">Administrator (Write access, manage members)</option>
                 <option value="member">Workspace Member (Read/Write documents/chat)</option>
@@ -219,7 +219,7 @@ export default function MembersPage() {
                 type="submit"
                 variant="default"
                 size="sm"
-                className="bg-emerald-600 hover:bg-emerald-500 border border-emerald-500/10"
+                className="bg-primary hover:bg-primary/95 border border-indigo-500/20 shadow-md shadow-indigo-950/20 cursor-pointer active:translate-y-[0.5px]"
                 disabled={inviteMutation.isPending}
               >
                 {inviteMutation.isPending ? 'Inviting...' : 'Send Invitation'}

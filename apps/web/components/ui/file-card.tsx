@@ -35,11 +35,11 @@ export function FileCard({
   const chunkCount = upload.metadata?.chunk_count as number | undefined;
 
   return (
-    <Card className="p-4 bg-zinc-900/10 border-zinc-800/40 hover:border-emerald-500/20 group flex flex-col justify-between h-40">
+    <Card className="p-4 bg-zinc-900/10 border-zinc-800/40 hover:border-indigo-500/20 group flex flex-col justify-between h-40">
       <div>
         <div className="flex items-start justify-between gap-3">
           <div className="flex items-center gap-2.5 min-w-0">
-            <div className="h-8 w-8 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-400 group-hover:text-emerald-400 group-hover:bg-emerald-950/20 group-hover:border-emerald-800/30 transition-all font-mono text-[9px] font-bold shrink-0">
+            <div className="h-8 w-8 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-400 group-hover:text-indigo-400 group-hover:bg-indigo-950/20 group-hover:border-indigo-800/30 transition-all font-mono text-[9px] font-bold shrink-0">
               {extension}
             </div>
             <div className="min-w-0">
@@ -61,8 +61,8 @@ export function FileCard({
         {/* Aggregate chunks details if available */}
         <div className="mt-4 flex flex-wrap gap-2 items-center">
           {chunkCount !== undefined ? (
-            <GradientBadge variant="emerald" className="gap-1 flex items-center">
-              <Database className="h-3 w-3 text-emerald-400" />
+            <GradientBadge variant="indigo" className="gap-1 flex items-center">
+              <Database className="h-3 w-3 text-indigo-400" />
               <span>{chunkCount} CHUNKS</span>
             </GradientBadge>
           ) : (

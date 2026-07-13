@@ -47,7 +47,7 @@ export default function ProjectOverviewPage() {
     return (
       <div className="p-8 text-center text-zinc-500 font-sans">
         Workspace details could not be found. Return to{' '}
-        <button onClick={() => router.push('/dashboard')} className="text-emerald-400 font-semibold underline cursor-pointer">
+        <button onClick={() => router.push('/dashboard')} className="text-indigo-400 font-semibold underline cursor-pointer">
           dashboard
         </button>
       </div>
@@ -106,9 +106,9 @@ export default function ProjectOverviewPage() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Knowledge Base Card */}
         <button onClick={() => navigateTo('uploads')} className="text-left select-none group cursor-pointer">
-          <Card className="p-6 bg-zinc-900/10 border-zinc-800/40 hover:border-emerald-500/20 flex flex-col justify-between h-48">
+          <Card className="p-6 bg-zinc-900/10 border-zinc-800/40 hover:border-indigo-500/20 flex flex-col justify-between h-48">
             <div>
-              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-zinc-900 border border-zinc-800 text-zinc-400 group-hover:text-emerald-450 group-hover:bg-emerald-950/20 group-hover:border-emerald-800/30 transition-all mb-4">
+              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-zinc-900 border border-zinc-800 text-zinc-400 group-hover:text-indigo-400 group-hover:bg-indigo-950/20 group-hover:border-indigo-800/30 transition-all mb-4">
                 <Database className="h-4.5 w-4.5" />
               </div>
               <h3 className="text-sm font-semibold text-zinc-200 group-hover:text-white transition-colors">
@@ -123,7 +123,7 @@ export default function ProjectOverviewPage() {
               <span className="text-[10px] text-zinc-500 font-semibold font-mono">
                 {uploadsLoading ? 'LOADING...' : `${uploads.length} DOCUMENTS`}
               </span>
-              <div className="flex items-center gap-1 text-[10px] font-bold text-emerald-400 opacity-0 group-hover:opacity-100 transition-opacity">
+              <div className="flex items-center gap-1 text-[10px] font-bold text-indigo-400 opacity-0 group-hover:opacity-100 transition-opacity">
                 <span>OPEN</span>
                 <ArrowRight className="h-3 w-3" />
               </div>
@@ -133,9 +133,9 @@ export default function ProjectOverviewPage() {
 
         {/* AI Chat Card */}
         <button onClick={() => navigateTo('chat')} className="text-left select-none group cursor-pointer">
-          <Card className="p-6 bg-zinc-900/10 border-zinc-800/40 hover:border-emerald-500/20 flex flex-col justify-between h-48">
+          <Card className="p-6 bg-zinc-900/10 border-zinc-800/40 hover:border-indigo-500/20 flex flex-col justify-between h-48">
             <div>
-              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-zinc-900 border border-zinc-800 text-zinc-400 group-hover:text-emerald-450 group-hover:bg-emerald-950/20 group-hover:border-emerald-800/30 transition-all mb-4">
+              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-zinc-900 border border-zinc-800 text-zinc-400 group-hover:text-indigo-400 group-hover:bg-indigo-950/20 group-hover:border-indigo-800/30 transition-all mb-4">
                 <MessageSquare className="h-4.5 w-4.5" />
               </div>
               <h3 className="text-sm font-semibold text-zinc-200 group-hover:text-white transition-colors">
@@ -150,7 +150,7 @@ export default function ProjectOverviewPage() {
               <span className="text-[10px] text-zinc-500 font-semibold font-mono">
                 RAG STREAMING ENABLED
               </span>
-              <div className="flex items-center gap-1 text-[10px] font-bold text-emerald-400 opacity-0 group-hover:opacity-100 transition-opacity">
+              <div className="flex items-center gap-1 text-[10px] font-bold text-indigo-400 opacity-0 group-hover:opacity-100 transition-opacity">
                 <span>OPEN</span>
                 <ArrowRight className="h-3 w-3" />
               </div>

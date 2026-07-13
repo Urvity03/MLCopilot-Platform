@@ -16,8 +16,8 @@ const Card = React.forwardRef<HTMLDivElement, CardProps>(
         ref={ref}
         className={cn(
           "rounded-xl glass-card border border-zinc-800/40 text-card-foreground p-6 overflow-hidden relative",
-          hoverLift && "transition-all duration-300 hover:-translate-y-0.5 hover:shadow-2xl hover:shadow-emerald-950/10 hover:border-emerald-500/20",
-          hoverGlow && "glow-hover-emerald",
+          hoverLift && "transition-all duration-300 hover:-translate-y-0.5 hover:shadow-2xl hover:shadow-indigo-950/20 hover:border-indigo-500/20",
+          hoverGlow && "glow-hover-indigo",
           className
         )}
         {...props}

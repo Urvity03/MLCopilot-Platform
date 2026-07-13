@@ -44,11 +44,11 @@ export function AIRecommendations({ metrics }: AIRecommendationsProps) {
     <Card className="p-5 bg-zinc-900/10 border-zinc-800/40 relative overflow-hidden font-sans">
       {/* Glow highlight */}
       <div className="absolute top-0 right-0 p-4 opacity-[0.03] select-none pointer-events-none">
-        <Sparkles className="h-16 w-16 text-emerald-500" />
+        <Sparkles className="h-16 w-16 text-indigo-500" />
       </div>
 
       <div className="flex items-center gap-3">
-        <div className="h-8 w-8 rounded-lg bg-emerald-950/20 border border-emerald-900/25 flex items-center justify-center text-emerald-400 shrink-0">
+        <div className="h-8 w-8 rounded-lg bg-indigo-950/20 border border-indigo-900/25 flex items-center justify-center text-indigo-400 shrink-0">
           <Sparkles className="h-4 w-4" />
         </div>
         <div>
@@ -60,15 +60,15 @@ export function AIRecommendations({ metrics }: AIRecommendationsProps) {
       <div className="mt-4 space-y-3.5">
         {/* Recommendation tip box */}
         <div className="p-3 bg-zinc-950 border border-zinc-900 rounded-lg text-xs leading-relaxed text-zinc-350">
-          <p className="font-semibold text-zinc-400 mb-1 select-none text-[9px] uppercase tracking-wider text-emerald-400">RECOMMENDED ACTION</p>
+          <p className="font-semibold text-zinc-400 mb-1 select-none text-[9px] uppercase tracking-wider text-indigo-400">RECOMMENDED ACTION</p>
           <span className="font-medium">{recommendation.tip}</span>
         </div>
 
         {/* Pipeline Status indicators */}
         <div className="flex justify-between items-center text-[10px] pt-1">
           <span className="text-zinc-500 font-semibold uppercase tracking-wider">Pipeline Health</span>
-          <div className="flex items-center gap-1.5 text-emerald-400 font-bold uppercase font-mono">
-            <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
+          <div className="flex items-center gap-1.5 text-cyan-400 font-bold uppercase font-mono">
+            <span className="h-1.5 w-1.5 rounded-full bg-cyan-400 animate-pulse" />
             <span>OPERATIONAL</span>
           </div>
         </div>

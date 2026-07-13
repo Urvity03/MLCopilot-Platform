@@ -100,7 +100,7 @@ export default function SettingsPage() {
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="w-full rounded-lg bg-zinc-900/50 border border-zinc-800/80 px-3 py-2 text-xs text-zinc-200 focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 transition"
+                className="w-full rounded-lg bg-zinc-900/50 border border-zinc-800/80 px-3 py-2 text-xs text-zinc-200 focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/20 transition outline-none"
                 required
               />
             </div>
@@ -113,7 +113,7 @@ export default function SettingsPage() {
                 type="text"
                 value={slug}
                 onChange={(e) => setSlug(e.target.value)}
-                className="w-full rounded-lg bg-zinc-900/50 border border-zinc-800/80 px-3 py-2 text-xs text-zinc-200 focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 transition font-mono"
+                className="w-full rounded-lg bg-zinc-900/50 border border-zinc-800/80 px-3 py-2 text-xs text-zinc-200 focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/20 transition font-mono outline-none"
                 required
               />
             </div>
@@ -126,7 +126,7 @@ export default function SettingsPage() {
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 rows={3}
-                className="w-full rounded-lg bg-zinc-900/50 border border-zinc-800/80 px-3 py-2 text-xs text-zinc-100 placeholder-zinc-500 focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 transition resize-none leading-relaxed"
+                className="w-full rounded-lg bg-zinc-900/50 border border-zinc-800/80 px-3 py-2 text-xs text-zinc-100 placeholder-zinc-500 focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/20 transition resize-none leading-relaxed outline-none"
               />
             </div>
 
@@ -135,7 +135,7 @@ export default function SettingsPage() {
                 type="submit"
                 variant="default"
                 size="sm"
-                className="bg-emerald-600 hover:bg-emerald-500 border border-emerald-500/10 gap-1.5"
+                className="bg-primary hover:bg-primary/95 border border-indigo-500/20 shadow-md shadow-indigo-950/20 cursor-pointer active:translate-y-[0.5px] gap-1.5"
               >
                 <Save className="h-3.5 w-3.5" />
                 <span>Save Changes (Coming Soon)</span>
@@ -163,7 +163,7 @@ export default function SettingsPage() {
               disabled={deleteMutation.isPending}
               variant="destructive"
               size="sm"
-              className="bg-red-650/10 text-red-400 hover:bg-red-950/20 border border-red-900/20 gap-1.5 self-start md:self-center shrink-0"
+              className="bg-rose-950/20 text-rose-455 hover:bg-rose-950/40 border border-rose-900/20 gap-1.5 self-start md:self-center shrink-0 cursor-pointer active:translate-y-[0.5px]"
             >
               <Trash2 className="h-3.5 w-3.5" />
               <span>{deleteMutation.isPending ? 'Deleting...' : 'Delete Workspace'}</span>

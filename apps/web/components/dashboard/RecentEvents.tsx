@@ -32,9 +32,9 @@ export function RecentEvents({ events }: RecentEventsProps) {
   };
 
   const colorMap = {
-    upload: 'text-emerald-400 bg-emerald-950/20 border-emerald-500/10 shadow-[0_0_10px_rgba(16,185,129,0.02)]',
+    upload: 'text-indigo-400 bg-indigo-950/20 border-indigo-500/10 shadow-[0_0_10px_rgba(99,102,241,0.02)]',
     project: 'text-cyan-400 bg-cyan-950/20 border-cyan-500/10 shadow-[0_0_10px_rgba(6,182,212,0.02)]',
-    chat: 'text-teal-400 bg-teal-950/20 border-teal-500/10 shadow-[0_0_10px_rgba(20,184,166,0.02)]',
+    chat: 'text-violet-400 bg-violet-950/20 border-violet-500/10 shadow-[0_0_10px_rgba(139,92,246,0.02)]',
   };
 
   return (
@@ -64,7 +64,7 @@ export function RecentEvents({ events }: RecentEventsProps) {
                     <div className="text-xs space-y-0.5">
                       <Link 
                         href={item.link} 
-                        className="font-semibold text-zinc-200 hover:text-emerald-400 hover:underline transition-colors"
+                        className="font-semibold text-zinc-200 hover:text-indigo-400 hover:underline transition-colors"
                       >
                         {item.title}
                       </Link>

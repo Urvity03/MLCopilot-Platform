@@ -173,14 +173,14 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
                         onOpenChange(false);
                       }}
                       className={cn(
-                        "w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-left transition text-xs font-medium",
+                        "w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-left transition text-xs font-medium cursor-pointer",
                         isSelected
-                          ? "bg-emerald-950/30 text-emerald-400 border border-emerald-900/20"
+                          ? "bg-indigo-950/20 text-indigo-400 border border-indigo-900/30"
                           : "text-zinc-400 hover:bg-zinc-900/40 hover:text-zinc-200 border border-transparent"
                       )}
                     >
                       <div className="flex items-center gap-3">
-                        <Icon className={cn("h-4 w-4", isSelected ? "text-emerald-400" : "text-zinc-500")} />
+                        <Icon className={cn("h-4 w-4", isSelected ? "text-indigo-400" : "text-zinc-500")} />
                         <div>
                           <p className={cn("font-medium", isSelected ? "text-zinc-200" : "text-zinc-300")}>
                             {item.title}
@@ -192,7 +192,7 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
                       </div>
                       
                       {isSelected && (
-                        <span className="flex items-center gap-1 text-[10px] text-emerald-500 font-mono">
+                        <span className="flex items-center gap-1 text-[10px] text-indigo-400 font-mono">
                           <span>Enter</span>
                           <ArrowRight className="h-3 w-3" />
                         </span>

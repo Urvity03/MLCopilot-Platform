@@ -93,13 +93,13 @@ export function UploadZone({
         onDrop={handleDrop}
         onClick={onButtonClick}
         animate={{
-          borderColor: isDragActive ? '#10b981' : 'rgba(63, 63, 70, 0.4)',
-          backgroundColor: isDragActive ? 'rgba(16, 185, 129, 0.03)' : 'rgba(9, 9, 11, 0.2)',
+          borderColor: isDragActive ? '#6366f1' : 'rgba(63, 63, 70, 0.4)',
+          backgroundColor: isDragActive ? 'rgba(99, 102, 241, 0.03)' : 'rgba(9, 9, 11, 0.2)',
         }}
         transition={{ duration: 0.2 }}
         className={cn(
           "relative flex flex-col items-center justify-center border border-dashed rounded-xl p-10 text-center cursor-pointer transition-shadow select-none overflow-hidden min-h-[220px]",
-          isDragActive ? "shadow-[0_0_20px_rgba(16,185,129,0.06)] scale-[1.01]" : "hover:border-zinc-700/80 hover:shadow-[0_0_15px_rgba(255,255,255,0.01)]",
+          isDragActive ? "shadow-[0_0_20px_rgba(99,102,241,0.06)] scale-[1.01]" : "hover:border-zinc-700/80 hover:shadow-[0_0_15px_rgba(255,255,255,0.01)]",
           isUploading && "pointer-events-none opacity-50"
         )}
       >
@@ -117,12 +117,12 @@ export function UploadZone({
         {isDragActive && (
           <motion.div 
             layoutId="drag-glow"
-            className="absolute inset-0 bg-gradient-to-r from-emerald-500/5 to-cyan-500/5 pointer-events-none"
+            className="absolute inset-0 bg-gradient-to-r from-indigo-500/5 to-cyan-500/5 pointer-events-none"
           />
         )}
 
         <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-zinc-900 border border-zinc-800/80 text-zinc-500 group-hover:text-zinc-300 mb-4 shadow-[0_4px_10px_rgba(0,0,0,0.3)]">
-          <UploadCloud className={cn("h-5 w-5 transition-transform", isDragActive && "scale-110 text-emerald-400")} />
+          <UploadCloud className={cn("h-5 w-5 transition-transform", isDragActive && "scale-110 text-indigo-400")} />
         </div>
 
         <h3 className="text-xs font-semibold text-zinc-200">
@@ -134,8 +134,8 @@ export function UploadZone({
 
         {isUploading && (
           <div className="absolute inset-0 bg-zinc-950/60 backdrop-blur-[1px] flex flex-col items-center justify-center gap-3">
-            <div className="h-5 w-5 animate-spin rounded-full border-2 border-emerald-500 border-t-transparent" />
-            <span className="text-[10px] font-semibold text-emerald-400 tracking-wider uppercase">Uploading...</span>
+            <div className="h-5 w-5 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+            <span className="text-[10px] font-semibold text-indigo-400 tracking-wider uppercase">Uploading...</span>
           </div>
         )}
       </motion.div>
