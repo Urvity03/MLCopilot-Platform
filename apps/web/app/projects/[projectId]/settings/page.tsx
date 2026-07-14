@@ -12,6 +12,7 @@ import { toast } from '../../../../components/ui/toast';
 import { Settings, Trash2, ShieldAlert, Save } from 'lucide-react';
 import { Skeleton } from '../../../../components/ui/skeletons';
 import { cn } from '@/lib/utils';
+import { useApiKeys } from '../../../../hooks/useApiKeys';
 
 export default function SettingsPage() {
   const params = useParams();
@@ -70,10 +71,20 @@ export default function SettingsPage() {
     }
   };
 
-  const handleGenerateToken = () => {
-    const randomHex = Array.from({ length: 32 }, () => Math.floor(Math.random() * 16).toString(16)).join('');
-    setGeneratedToken(`mlc_live_${randomHex}`);
-    toast.success('Generated new API workspace access token.');
+  const {
+    apiKeys,
+    createApiKey,
+    deleteApiKey,
+  } = useApiKeys();
+
+  const handleGenerateToken = async () => {
+    try {
+      const resp = await createApiKey(`Workspace Key ${new Date().toLocaleDateString()}`);
+      setGeneratedToken(resp.plain_key);
+      toast.success('Generated new API workspace access token.');
+    } catch (e) {
+      toast.error('Failed to generate API workspace token.');
+    }
   };
 
   const handleCopyToken = () => {
@@ -300,6 +311,45 @@ export default function SettingsPage() {
                 </div>
               )}
             </div>
+
+            {/* List of active keys */}
+            {apiKeys.length > 0 && (
+              <div className="space-y-2 mt-4 select-none">
+                <span className="text-[9px] font-bold text-zinc-500 uppercase tracking-wider font-mono block">Active Access Credentials</span>
+                <div className="border border-zinc-900 bg-zinc-950/40 rounded-lg overflow-hidden">
+                  <table className="w-full text-left text-xs border-collapse">
+                    <thead>
+                      <tr className="border-b border-zinc-900 text-[8px] font-bold text-zinc-500 uppercase tracking-wider font-mono">
+                        <th className="p-3">Key Name</th>
+                        <th className="p-3 font-mono">Prefix</th>
+                        <th className="p-3 text-right">Action</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-zinc-900/40 text-zinc-300">
+                      {apiKeys.map((key) => (
+                        <tr key={key.id} className="hover:bg-zinc-900/5 transition-colors">
+                          <td className="p-3 font-semibold">{key.name}</td>
+                          <td className="p-3 font-mono">{key.prefix}••••••••</td>
+                          <td className="p-3 text-right">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                if (confirm('Revoke this API Key immediately?')) {
+                                  deleteApiKey(key.id);
+                                }
+                              }}
+                              className="text-[10px] font-bold text-rose-400 hover:text-rose-350 cursor-pointer"
+                            >
+                              Revoke
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
           </Card>
         </Section>
       )}
