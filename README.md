@@ -363,15 +363,6 @@ Reference images like:
                                       Streaming Chat, Citations
   -----------------------------------------------------------------------
 
-------------------------------------------------------------------------
-
-#  Contributing
-
-Issues, ideas, and pull requests are welcome.
-
-Please open an issue before proposing major architectural changes.
-
-------------------------------------------------------------------------
 
 #  Author
 
