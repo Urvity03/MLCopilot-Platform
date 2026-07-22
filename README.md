@@ -52,9 +52,9 @@ The platform follows **Clean Architecture**, ensuring scalability, maintainabili
 
 ---
 
-# ✨ Key Features
+# Key Features
 
-## 🔐 Authentication & Security
+## Authentication & Security
 
 - JWT Authentication
 - Refresh Token Rotation
@@ -65,7 +65,7 @@ The platform follows **Clean Architecture**, ensuring scalability, maintainabili
 
 ---
 
-## 📂 Project Management
+## Project Management
 
 - Multi-project workspaces
 - Team collaboration
@@ -75,7 +75,7 @@ The platform follows **Clean Architecture**, ensuring scalability, maintainabili
 
 ---
 
-## 📚 Knowledge Base
+## Knowledge Base
 
 - PDF Parsing
 - DOCX Parsing
@@ -86,7 +86,7 @@ The platform follows **Clean Architecture**, ensuring scalability, maintainabili
 
 ---
 
-## 🤖 AI & Retrieval
+## AI & Retrieval
 
 - Sentence Transformer Embeddings
 - pgvector Vector Database
@@ -99,7 +99,7 @@ The platform follows **Clean Architecture**, ensuring scalability, maintainabili
 
 ---
 
-## ⚙️ Engineering
+## Engineering
 
 - Clean Architecture
 - Monorepo Structure
@@ -113,7 +113,7 @@ The platform follows **Clean Architecture**, ensuring scalability, maintainabili
 
 ---
 
-# 🏗️ System Architecture
+# System Architecture
 
 ```mermaid
 flowchart TD
@@ -155,7 +155,7 @@ StreamingChat --> User
 
 ---
 
-# 🧠 Clean Architecture
+# Clean Architecture
 
 ```mermaid
 flowchart TD
@@ -177,7 +177,7 @@ C --> D
 
 ---
 
-# 📄 Knowledge Base Pipeline
+# Knowledge Base Pipeline
 
 ```mermaid
 flowchart LR
@@ -197,7 +197,7 @@ Embeddings --> pgvector
 
 ---
 
-# 🧩 Embedding Pipeline
+# Embedding Pipeline
 
 ```mermaid
 flowchart LR
@@ -213,7 +213,7 @@ pgvector --> HNSW
 
 ---
 
-# 💬 Retrieval-Augmented Generation Pipeline
+# Retrieval-Augmented Generation Pipeline
 
 ```mermaid
 flowchart LR
@@ -235,7 +235,7 @@ StreamingAnswer --> Citations
 
 ---
 
-# 🗄️ High-Level Database
+# High-Level Database
 
 ```mermaid
 erDiagram
@@ -255,7 +255,7 @@ CONVERSATIONS ||--o{ CHAT_MESSAGES : contains
 
 ---
 
-# 🛠️ Technology Stack
+# Technology Stack
 
 | Layer | Technologies |
 |--------|--------------|
@@ -272,7 +272,7 @@ CONVERSATIONS ||--o{ CHAT_MESSAGES : contains
 
 ---
 
-# 📂 Project Structure
+# Project Structure
 
 ```text
 MLCopilot-Platform
@@ -296,7 +296,7 @@ MLCopilot-Platform
 
 ---
 
-# 🌐 API Overview
+# API Overview
 
 | Endpoint | Description |
 |-----------|-------------|
@@ -313,7 +313,7 @@ MLCopilot-Platform
 
 ---
 
-# 🚀 Getting Started
+# Getting Started
 
 ## Clone Repository
 
@@ -371,7 +371,7 @@ http://localhost:3000
 
 ---
 
-# 💻 Development
+# Development
 
 Run code quality tools:
 
@@ -387,7 +387,7 @@ lint-imports
 
 ---
 
-# 📈 Development Progress
+# Development Progress
 
 | Module | Status |
 |----------|--------|
@@ -408,7 +408,7 @@ lint-imports
 
 ---
 
-# 📊 Project Highlights
+# Project Highlights
 
 - Clean Architecture
 - Modular Monorepo
@@ -426,7 +426,7 @@ lint-imports
 
 ---
 
-# 📸 Screenshots
+# Screenshots
 
 > Screenshots will be added after the frontend reaches feature-complete status.
 
@@ -456,9 +456,9 @@ Example:
 
 ---
 
-# 🗺️ Roadmap
+# Roadmap
 
-## ✅ Completed
+## Completed
 
 - Backend Foundation
 - Authentication
@@ -475,7 +475,7 @@ Example:
 
 ---
 
-## 🚀 Upcoming
+## Upcoming
 
 - Premium SaaS UI
 - Multi-LLM Support
@@ -490,7 +490,7 @@ Example:
 
 ---
 
-# 📦 Release History
+# Release History
 
 | Version | Highlights |
 |----------|------------|
@@ -501,7 +501,7 @@ Example:
 
 ---
 
-# 👩‍💻 Author
+# Author
 
 **Urvi Tyagi**
 
@@ -511,7 +511,7 @@ Example:
 
 ---
 
-# 📄 License
+# License
 
 This project is licensed under the **MIT License**.
 
