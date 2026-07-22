@@ -442,20 +442,6 @@ Suggested screenshots:
 - Mobile Dashboard
 - Mobile Chat
 
-Store screenshots inside:
-
-```text
-docs/images/
-```
-
-Example:
-
-```markdown
-![Dashboard](docs/images/dashboard.png)
-```
-
----
-
 # Roadmap
 
 ## Completed
