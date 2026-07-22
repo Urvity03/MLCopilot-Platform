@@ -1,378 +1,524 @@
-#  MLCopilot Platform
+# 🚀 MLCopilot Platform
 
-```{=html}
 <p align="center">
-```
-`<b>`{=html}A production-ready AI Knowledge Platform built with FastAPI,
-PostgreSQL, pgvector, Retrieval-Augmented Generation (RAG), and Clean
-Architecture.`</b>`{=html}
-```{=html}
+  <b>An Enterprise-Ready AI Knowledge Platform for Document Intelligence, Semantic Search, and Retrieval-Augmented Generation (RAG).</b>
 </p>
-```
-```{=html}
+
 <p align="center">
-```
-![Python](https://img.shields.io/badge/Python-3.12-blue)
-![FastAPI](https://img.shields.io/badge/FastAPI-Backend-009688)
-![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Database-336791)
-![Docker](https://img.shields.io/badge/Docker-Containerized-2496ED)
-![License](https://img.shields.io/badge/License-MIT-green)
-
-```{=html}
+Built with <b>FastAPI • Next.js • PostgreSQL • pgvector • Redis • MinIO • Neo4j • Docker</b>
 </p>
-```
 
-------------------------------------------------------------------------
+<p align="center">
 
-#  Table of Contents
+![Python](https://img.shields.io/badge/Python-3.12-blue?style=for-the-badge&logo=python)
+![FastAPI](https://img.shields.io/badge/FastAPI-Backend-009688?style=for-the-badge&logo=fastapi)
+![Next.js](https://img.shields.io/badge/Next.js-Frontend-black?style=for-the-badge&logo=next.js)
+![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=typescript)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Database-336791?style=for-the-badge&logo=postgresql)
+![Docker](https://img.shields.io/badge/Docker-Containerized-2496ED?style=for-the-badge&logo=docker)
+![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)
 
--   Overview
--   Features
--   Architecture
--   AI Pipelines
--   Tech Stack
--   Project Structure
--   API Overview
--   Getting Started
--   Development
--   Testing
--   Screenshots
--   Roadmap
--   Release History
--   Author
--   License
+</p>
 
-------------------------------------------------------------------------
+---
 
-#  Overview
+# 📖 Table of Contents
 
-MLCopilot Platform is a modular AI platform for managing projects,
-ingesting documents, generating embeddings, performing semantic search,
-and powering Retrieval-Augmented Generation (RAG) conversations.
+- Overview
+- Key Features
+- Architecture
+- AI Pipelines
+- Technology Stack
+- Project Structure
+- API Overview
+- Getting Started
+- Development
+- Development Progress
+- Screenshots
+- Roadmap
+- Release History
+- Author
+- License
 
-The backend follows **Clean Architecture**, separating domain logic from
-infrastructure while keeping the system scalable, testable, and easy to
-extend.
+---
 
-------------------------------------------------------------------------
+# 📌 Overview
 
-#  Features
+MLCopilot Platform is a full-stack AI knowledge management platform that enables organizations to create intelligent workspaces powered by Retrieval-Augmented Generation (RAG).
 
-## Platform
+Users can upload documents, automatically generate embeddings, perform semantic search, and chat with their private knowledge base through a modern web interface.
 
--   Clean Architecture
--   Monorepo
--   Docker Compose
--   Configuration management
+The platform follows **Clean Architecture**, ensuring scalability, maintainability, and clear separation of concerns across the entire system.
 
-## Authentication
+---
 
--   JWT Authentication
--   Refresh Token Rotation
--   API Keys
--   RBAC
--   Swagger Authorization
+# ✨ Key Features
 
-## Project Management
+## 🔐 Authentication & Security
 
--   Project workspaces
--   Membership management
--   Ownership transfer
--   Tenant isolation
+- JWT Authentication
+- Refresh Token Rotation
+- API Key Management
+- Role-Based Access Control (RBAC)
+- Protected Routes
+- Swagger Authorization
 
-## Knowledge Base
+---
 
--   PDF parsing
--   DOCX parsing
--   Markdown parsing
--   TXT parsing
--   Intelligent chunking
--   MinIO storage
+## 📂 Project Management
 
-## AI
+- Multi-project workspaces
+- Team collaboration
+- Membership management
+- Tenant isolation
+- Ownership transfer
 
--   Sentence Transformer embeddings
--   pgvector vector storage
--   HNSW indexing
--   Semantic search
--   RAG backend
--   Conversation persistence
--   Streaming responses
--   Citation support
+---
 
-## Engineering
+## 📚 Knowledge Base
 
--   SQLAlchemy
--   Alembic
--   Pytest
--   Ruff
--   MyPy
--   Import Linter
+- PDF Parsing
+- DOCX Parsing
+- Markdown Parsing
+- TXT Parsing
+- Intelligent Text Chunking
+- MinIO Object Storage
 
-------------------------------------------------------------------------
+---
 
-#  Clean Architecture
+## 🤖 AI & Retrieval
 
-``` mermaid
+- Sentence Transformer Embeddings
+- pgvector Vector Database
+- HNSW Vector Indexing
+- Semantic Search
+- Retrieval-Augmented Generation (RAG)
+- Streaming AI Responses (SSE)
+- Citation Support
+- Conversation Persistence
+
+---
+
+## ⚙️ Engineering
+
+- Clean Architecture
+- Monorepo Structure
+- Docker Compose
+- SQLAlchemy
+- Alembic
+- Pytest
+- Ruff
+- MyPy
+- Import Linter
+
+---
+
+# 🏗️ System Architecture
+
+```mermaid
 flowchart TD
+
+User --> Frontend
+
+Frontend[Next.js Frontend]
+
+Frontend --> API
+
+API[FastAPI Backend]
+
+API --> PostgreSQL
+
+API --> Redis
+
+API --> MinIO
+
+API --> Neo4j
+
+PostgreSQL --> pgvector
+
+MinIO --> DocumentParser
+
+DocumentParser --> Chunking
+
+Chunking --> Embeddings
+
+Embeddings --> pgvector
+
+pgvector --> SemanticSearch
+
+SemanticSearch --> LLM
+
+LLM --> StreamingChat
+
+StreamingChat --> User
+```
+
+---
+
+# 🧠 Clean Architecture
+
+```mermaid
+flowchart TD
+
 A[FastAPI Routers]
+
 B[Application Services]
+
 C[Domain Layer]
+
 D[Infrastructure]
 
-A-->B
-B-->C
-C-->D
+A --> B
+
+B --> C
+
+C --> D
 ```
 
-------------------------------------------------------------------------
+---
 
-#  Knowledge Base Pipeline
+# 📄 Knowledge Base Pipeline
 
-``` mermaid
+```mermaid
 flowchart LR
-User-->Upload
-Upload-->MinIO
-MinIO-->Parser
-Parser-->Chunking
-Chunking-->Embeddings
-Embeddings-->pgvector
+
+User --> Upload
+
+Upload --> MinIO
+
+MinIO --> Parser
+
+Parser --> Chunking
+
+Chunking --> Embeddings
+
+Embeddings --> pgvector
 ```
 
-------------------------------------------------------------------------
+---
 
-#  Embedding Pipeline
+# 🧩 Embedding Pipeline
 
-``` mermaid
+```mermaid
 flowchart LR
-Chunks-->SentenceTransformer
-SentenceTransformer-->Vector384D
-Vector384D-->pgvector
-pgvector-->HNSW
+
+Chunks --> SentenceTransformer
+
+SentenceTransformer --> VectorEmbeddings
+
+VectorEmbeddings --> pgvector
+
+pgvector --> HNSW
 ```
 
-------------------------------------------------------------------------
+---
 
-#  Retrieval-Augmented Generation
+# 💬 Retrieval-Augmented Generation Pipeline
 
-``` mermaid
+```mermaid
 flowchart LR
-Question-->QueryEmbedding
-QueryEmbedding-->SemanticSearch
-SemanticSearch-->TopKChunks
-TopKChunks-->PromptBuilder
-PromptBuilder-->LLM
-LLM-->StreamingAnswer
-StreamingAnswer-->Citations
+
+Question --> QueryEmbedding
+
+QueryEmbedding --> SemanticSearch
+
+SemanticSearch --> TopKChunks
+
+TopKChunks --> PromptBuilder
+
+PromptBuilder --> LLM
+
+LLM --> StreamingAnswer
+
+StreamingAnswer --> Citations
 ```
 
-------------------------------------------------------------------------
+---
 
-#  High-Level Database
+# 🗄️ High-Level Database
 
-``` mermaid
+```mermaid
 erDiagram
+
 USERS ||--o{ PROJECTS : owns
+
 PROJECTS ||--o{ UPLOADS : contains
+
 UPLOADS ||--o{ PARSED_CHUNKS : creates
+
 PARSED_CHUNKS ||--o{ EMBEDDINGS : generates
+
 PROJECTS ||--o{ CONVERSATIONS : has
+
 CONVERSATIONS ||--o{ CHAT_MESSAGES : contains
 ```
 
-------------------------------------------------------------------------
+---
 
-#  Technology Stack
+# 🛠️ Technology Stack
 
-  Layer       Technologies
-  ----------- -------------------------------------------------
-  Backend     FastAPI, Python
-  Database    PostgreSQL, SQLAlchemy
-  Vector DB   pgvector
-  AI          Sentence Transformers, OpenAI Provider
-  Storage     MinIO
-  Cache       Redis
-  Graph       Neo4j
-  Frontend    Next.js, TypeScript, Tailwind CSS *(Sprint 12)*
-  DevOps      Docker, Docker Compose
-  Testing     Pytest, Ruff, MyPy, Import Linter
+| Layer | Technologies |
+|--------|--------------|
+| Frontend | Next.js, React, TypeScript, Tailwind CSS |
+| Backend | FastAPI, Python |
+| Database | PostgreSQL, SQLAlchemy |
+| Vector Database | pgvector |
+| AI | Sentence Transformers, OpenAI Provider |
+| Storage | MinIO |
+| Cache | Redis |
+| Graph Database | Neo4j |
+| DevOps | Docker, Docker Compose |
+| Testing | Pytest, Ruff, MyPy, Import Linter |
 
-------------------------------------------------------------------------
+---
 
-#  Project Structure
+# 📂 Project Structure
 
-``` text
+```text
 MLCopilot-Platform
+│
 ├── apps
 │   ├── api
 │   └── web
+│
 ├── docs
 │   ├── architecture
 │   ├── api
 │   ├── diagrams
 │   └── images
+│
+├── packages
+│
 ├── docker-compose.yml
+│
 └── README.md
 ```
 
-------------------------------------------------------------------------
+---
 
-#  API Overview
+# 🌐 API Overview
 
-  Endpoint                      Description
-  ----------------------------- ------------------
-  POST /auth/register           Register a user
-  POST /auth/login              Login
-  POST /projects                Create project
-  POST /projects/{id}/uploads   Upload documents
-  POST /projects/{id}/search    Semantic search
-  POST /projects/{id}/chat      RAG chat
+| Endpoint | Description |
+|-----------|-------------|
+| POST /auth/register | Register User |
+| POST /auth/login | Login |
+| POST /auth/logout | Logout |
+| POST /projects | Create Project |
+| GET /projects | List Projects |
+| POST /projects/{id}/uploads | Upload Documents |
+| POST /projects/{id}/search | Semantic Search |
+| POST /projects/{id}/chat | RAG Chat |
+| GET /api-keys | List API Keys |
+| POST /api-keys | Generate API Key |
 
-------------------------------------------------------------------------
+---
 
-#  Getting Started
+# 🚀 Getting Started
 
-``` bash
+## Clone Repository
+
+```bash
 git clone https://github.com/Urvity03/MLCopilot-Platform.git
+
 cd MLCopilot-Platform
-docker compose up -d
 ```
 
-Backend:
+---
 
-``` bash
+## Start Entire Platform
+
+```bash
+docker compose up --build
+```
+
+---
+
+## Backend Development
+
+```bash
 cd apps/api
+
 uvicorn mlcopilot.main:app --reload
 ```
 
-Swagger:
+---
 
-    http://localhost:8000/api/v1/docs
+## Frontend Development
 
-------------------------------------------------------------------------
+```bash
+cd apps/web
 
-#  Development
+pnpm install
 
-``` bash
+pnpm dev
+```
+
+---
+
+## API Documentation
+
+Swagger UI
+
+```
+http://localhost:8000/api/v1/docs
+```
+
+Frontend
+
+```
+http://localhost:3000
+```
+
+---
+
+# 💻 Development
+
+Run code quality tools:
+
+```bash
 ruff check src tests
+
 mypy src
+
 pytest
+
 lint-imports
 ```
 
-------------------------------------------------------------------------
+---
 
-#  Development Progress
+# 📈 Development Progress
 
-  Module                   Status
-  ----------------------- --------
-  Backend Foundation         ✅
-  Authentication             ✅
-  RBAC                       ✅
-  Project Management         ✅
-  Knowledge Base             ✅
-  Parsing                    ✅
-  Chunking                   ✅
-  Embeddings                 ✅
-  Semantic Search            ✅
-  RAG Backend                ✅
-  Premium SaaS Frontend      🚧
+| Module | Status |
+|----------|--------|
+| Backend Foundation | ✅ |
+| Authentication | ✅ |
+| RBAC | ✅ |
+| Project Management | ✅ |
+| Knowledge Base | ✅ |
+| Parsing | ✅ |
+| Intelligent Chunking | ✅ |
+| Embeddings | ✅ |
+| Semantic Search | ✅ |
+| RAG Backend | ✅ |
+| Streaming Chat | ✅ |
+| API Keys | ✅ |
+| Next.js Frontend | 🚧 Active Development |
+| Production UI | 🚧 |
 
-------------------------------------------------------------------------
+---
 
-#  Screenshots
+# 📊 Project Highlights
 
-> Screenshots will be added after Sprint 12.
+- Clean Architecture
+- Modular Monorepo
+- JWT Authentication
+- Multi-Project Workspaces
+- Secure Document Uploads
+- Vector Database using pgvector
+- Semantic Search
+- Streaming AI Chat
+- Citation Support
+- Dockerized Deployment
+- Redis Caching
+- Neo4j Integration
+- MinIO Object Storage
+
+---
+
+# 📸 Screenshots
+
+> Screenshots will be added after the frontend reaches feature-complete status.
 
 Suggested screenshots:
 
--   Dashboard
--   Project Workspace
--   Upload Manager
--   Knowledge Base
--   AI Chat
--   Mobile View
+- Dashboard
+- AI Chat
+- Upload Manager
+- Project Workspace
+- Knowledge Base
+- Members
+- Settings
+- Mobile Dashboard
+- Mobile Chat
 
-Create this folder:
+Store screenshots inside:
 
-``` text
+```text
 docs/images/
 ```
 
-Store:
+Example:
 
-``` text
-dashboard.png
-chat.png
-knowledge-base.png
-projects.png
-upload.png
-mobile-dashboard.png
-mobile-chat.png
-```
-
-Reference images like:
-
-``` md
+```markdown
 ![Dashboard](docs/images/dashboard.png)
 ```
 
-------------------------------------------------------------------------
+---
 
-#  Roadmap
+# 🗺️ Roadmap
 
-## Completed
+## ✅ Completed
 
--   Backend Foundation
--   Authentication
--   RBAC
--   Project Management
--   Knowledge Base
--   Document Parsing
--   Intelligent Chunking
--   Embedding Generation
--   Semantic Search
--   Retrieval-Augmented Generation
+- Backend Foundation
+- Authentication
+- RBAC
+- Project Management
+- Knowledge Base
+- Document Parsing
+- Intelligent Chunking
+- Embedding Generation
+- Semantic Search
+- Retrieval-Augmented Generation
+- Streaming Chat
+- Citation Support
 
-## Upcoming
+---
 
--   Premium SaaS Frontend
--   Multi-model LLM Support
--   Knowledge Graph
--   Dataset Management
--   Experiment Tracking
--   Model Registry
--   Background Workers
--   Monitoring
--   CI/CD
+## 🚀 Upcoming
 
-------------------------------------------------------------------------
+- Premium SaaS UI
+- Multi-LLM Support
+- Hybrid Search
+- Knowledge Graph Expansion
+- OCR Pipeline
+- Experiment Tracking
+- Model Registry
+- Monitoring Dashboard
+- CI/CD
+- Kubernetes Deployment
 
-#  Release History
+---
 
-  -----------------------------------------------------------------------
-  Version                             Highlights
-  ----------------------------------- -----------------------------------
-  **v0.1.0**                          Backend Foundation, Authentication,
-                                      RBAC
+# 📦 Release History
 
-  **v0.2.0**                          Knowledge Base, Parsing, Chunking,
-                                      Embeddings, Semantic Search
+| Version | Highlights |
+|----------|------------|
+| **v0.1.0** | Backend Foundation, Authentication, RBAC |
+| **v0.2.0** | Knowledge Base, Parsing, Chunking, Embeddings, Semantic Search |
+| **v0.3.0** | RAG Backend, Streaming Chat, Citations, Conversations |
+| **v0.4.0** *(In Progress)* | Next.js Frontend, Dashboard, Project Workspace, Upload Center |
 
-  **v0.3.0**                          RAG Backend, Conversations,
-                                      Streaming Chat, Citations
-  -----------------------------------------------------------------------
+---
 
-
-#  Author
+# 👩‍💻 Author
 
 **Urvi Tyagi**
 
--   GitHub: https://github.com/Urvity03
--   LinkedIn: https://www.linkedin.com/in/urvi-tyagi-17b302286/
+**GitHub:** https://github.com/Urvity03
 
-------------------------------------------------------------------------
+**LinkedIn:** https://www.linkedin.com/in/urvi-tyagi-17b302286/
 
-#  License
+---
 
-This project is licensed under the MIT License.
+# 📄 License
+
+This project is licensed under the **MIT License**.
+
+---
+
+<p align="center">
+
+⭐ If you found this project interesting, consider giving it a star!
+
+</p>
