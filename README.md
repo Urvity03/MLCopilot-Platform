@@ -1,4 +1,4 @@
-# 🚀 MLCopilot Platform
+# MLCopilot Platform
 
 <p align="center">
   <b>An Enterprise-Ready AI Knowledge Platform for Document Intelligence, Semantic Search, and Retrieval-Augmented Generation (RAG).</b>
@@ -22,7 +22,7 @@ Built with <b>FastAPI • Next.js • PostgreSQL • pgvector • Redis • MinI
 
 ---
 
-# 📖 Table of Contents
+# Table of Contents
 
 - Overview
 - Key Features
@@ -42,7 +42,7 @@ Built with <b>FastAPI • Next.js • PostgreSQL • pgvector • Redis • MinI
 
 ---
 
-# 📌 Overview
+# Overview
 
 MLCopilot Platform is a full-stack AI knowledge management platform that enables organizations to create intelligent workspaces powered by Retrieval-Augmented Generation (RAG).
 
