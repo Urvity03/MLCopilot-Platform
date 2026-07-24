@@ -101,7 +101,7 @@ export function DialogContent({
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
             onClick={() => setOpen(false)}
-            className="fixed inset-0 bg-black/70 backdrop-blur-[4px]"
+            className="fixed inset-0 bg-[#09090B]/80 backdrop-blur-[6px]"
           />
 
           {/* Modal Container */}
@@ -113,7 +113,7 @@ export function DialogContent({
             exit={{ opacity: 0, scale: 0.95, y: 8 }}
             transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
             className={cn(
-              "relative w-full max-w-md rounded-xl border border-zinc-800/80 bg-zinc-950 p-6 shadow-2xl glass-card overflow-hidden z-50",
+              "relative w-full max-w-md rounded-2xl border border-[rgba(255,255,255,0.08)] bg-[#181A20] p-6 shadow-2xl overflow-hidden z-50",
               className
             )}
             {...props}
@@ -121,7 +121,7 @@ export function DialogContent({
             {/* Close Button */}
             <button
               onClick={() => setOpen(false)}
-              className="absolute right-4 top-4 rounded-lg p-1.5 text-zinc-500 hover:text-zinc-200 hover:bg-zinc-900 transition"
+              className="absolute right-4 top-4 rounded-lg p-1.5 text-[#56585E] hover:text-[#F0F0F3] hover:bg-[#1E2028] transition"
               aria-label="Close dialog"
             >
               <X className="h-4 w-4" />
@@ -154,7 +154,7 @@ export function DialogTitle({
   return (
     <h2
       className={cn(
-        "text-lg font-semibold leading-none tracking-tight text-white",
+        "text-lg font-semibold leading-none tracking-tight text-[#F0F0F3]",
         className
       )}
       {...props}
@@ -168,7 +168,7 @@ export function DialogDescription({
 }: React.HTMLAttributes<HTMLParagraphElement>) {
   return (
     <p
-      className={cn("text-xs text-zinc-400 font-medium leading-normal mt-1.5", className)}
+      className={cn("text-xs text-[#8B8D98] font-medium leading-normal mt-1.5", className)}
       {...props}
     />
   );
@@ -181,7 +181,7 @@ export function DialogFooter({
   return (
     <div
       className={cn(
-        "flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2 mt-6 pt-4 border-t border-zinc-900/60",
+        "flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2 mt-6 pt-4 border-t border-[rgba(255,255,255,0.06)]",
         className
       )}
       {...props}

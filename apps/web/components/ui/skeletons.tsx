@@ -8,7 +8,7 @@ interface SkeletonProps extends React.HTMLAttributes<HTMLDivElement> {}
 export function Skeleton({ className, ...props }: SkeletonProps) {
   return (
     <div
-      className={cn("animate-shimmer rounded bg-zinc-800/40 relative overflow-hidden", className)}
+      className={cn("animate-shimmer rounded-lg bg-[#181A20] relative overflow-hidden", className)}
       {...props}
     />
   );
@@ -16,7 +16,7 @@ export function Skeleton({ className, ...props }: SkeletonProps) {
 
 export function SkeletonCard() {
   return (
-    <div className="rounded-xl border border-zinc-800/40 bg-zinc-900/10 p-6 space-y-4">
+    <div className="rounded-2xl border border-[rgba(255,255,255,0.06)] bg-[#111217] p-5 space-y-4">
       <div className="flex items-center justify-between">
         <Skeleton className="h-4 w-1/3" />
         <Skeleton className="h-8 w-8 rounded-lg" />
@@ -32,7 +32,7 @@ export function SkeletonCard() {
 
 export function SkeletonRow() {
   return (
-    <div className="flex items-center justify-between py-4 border-b border-zinc-900/60 last:border-0">
+    <div className="flex items-center justify-between py-4 border-b border-[rgba(255,255,255,0.04)] last:border-0">
       <div className="flex items-center gap-3 w-2/3">
         <Skeleton className="h-8 w-8 rounded-lg shrink-0" />
         <div className="space-y-2 w-full">
@@ -40,7 +40,7 @@ export function SkeletonRow() {
           <Skeleton className="h-3 w-1/2" />
         </div>
       </div>
-      <Skeleton className="h-6 w-16 rounded" />
+      <Skeleton className="h-6 w-16 rounded-lg" />
     </div>
   );
 }

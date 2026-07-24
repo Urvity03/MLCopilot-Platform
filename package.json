@@ -18,5 +18,8 @@
     "overrides": {
       "hono": "4.12.25"
     }
+  },
+  "devDependencies": {
+    "playwright": "^1.61.1"
   }
 }

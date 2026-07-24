@@ -4,11 +4,11 @@ import * as React from 'react';
 import { cn } from '@/lib/utils';
 
 interface GradientBadgeProps extends React.HTMLAttributes<HTMLSpanElement> {
-  variant?: 'indigo' | 'violet' | 'cyan' | 'zinc';
+  variant?: 'purple' | 'blue' | 'green' | 'zinc';
 }
 
 export function GradientBadge({
-  variant = 'indigo',
+  variant = 'purple',
   className,
   children,
   ...props
@@ -16,11 +16,11 @@ export function GradientBadge({
   return (
     <span
       className={cn(
-        "inline-flex items-center rounded-md px-2 py-0.5 text-[10px] font-medium border relative overflow-hidden font-mono",
-        variant === 'indigo' && "bg-indigo-950/15 text-indigo-400 border-indigo-500/20 shadow-[0_0_10px_rgba(99,102,241,0.02)]",
-        variant === 'violet' && "bg-violet-950/15 text-violet-400 border-violet-500/20 shadow-[0_0_10px_rgba(139,92,246,0.02)]",
-        variant === 'cyan' && "bg-cyan-950/15 text-cyan-400 border-cyan-500/20 shadow-[0_0_10px_rgba(6,182,212,0.02)]",
-        variant === 'zinc' && "bg-zinc-900/60 text-zinc-400 border-zinc-800/80",
+        "inline-flex items-center rounded-lg px-2 py-0.5 text-[9px] font-semibold border relative overflow-hidden font-mono tracking-wide uppercase select-none",
+        variant === 'purple' && "bg-[#7C5CFC]/10 text-[#7C5CFC] border-[#7C5CFC]/15",
+        variant === 'blue' && "bg-[#4F8CFF]/10 text-[#4F8CFF] border-[#4F8CFF]/15",
+        variant === 'green' && "bg-[#3DD68C]/10 text-[#3DD68C] border-[#3DD68C]/15",
+        variant === 'zinc' && "bg-[#181A20] text-[#8B8D98] border-[rgba(255,255,255,0.06)]",
         className
       )}
       {...props}

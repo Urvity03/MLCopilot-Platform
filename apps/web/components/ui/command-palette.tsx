@@ -115,6 +115,14 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
     };
   }, [open]);
 
+  // Reset search on close
+  React.useEffect(() => {
+    if (!open) {
+      setSearch('');
+      setSelectedIndex(0);
+    }
+  }, [open]);
+
   if (!mounted) return null;
 
   return createPortal(
@@ -128,7 +136,7 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
             onClick={() => onOpenChange(false)}
-            className="fixed inset-0 bg-black/80 backdrop-blur-[6px]"
+            className="fixed inset-0 bg-black/70 backdrop-blur-md"
           />
 
           {/* Dialog Palette */}
@@ -137,29 +145,29 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.96, y: -10 }}
             transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
-            className="relative w-full max-w-lg rounded-xl border border-zinc-800 bg-zinc-950/80 shadow-2xl glass-card overflow-hidden z-50 flex flex-col max-h-[450px]"
+            className="relative w-full max-w-lg rounded-2xl border border-[rgba(255,255,255,0.06)] bg-[#141418]/95 backdrop-blur-xl shadow-2xl shadow-black/60 overflow-hidden z-50 flex flex-col max-h-[460px]"
           >
             {/* Input Header */}
-            <div className="flex items-center gap-3 px-4 border-b border-zinc-900/60 h-12 shrink-0">
-              <Search className="h-4 w-4 text-zinc-400" />
+            <div className="flex items-center gap-3 px-4 border-b border-[rgba(255,255,255,0.04)] h-12 shrink-0">
+              <Search className="h-4 w-4 text-[#56585E]" />
               <input
                 type="text"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                placeholder="Search workspaces, chat channels, document uploads..."
-                className="w-full bg-transparent text-sm text-zinc-200 placeholder-zinc-500 border-none outline-none focus:ring-0 focus:border-none focus:outline-none"
+                placeholder="Search workspaces, chat channels, documents..."
+                className="w-full bg-transparent text-sm text-[#F0F0F3] placeholder-[#56585E] border-none outline-none focus:ring-0 focus:border-none focus:outline-none"
                 autoFocus
               />
-              <span className="text-[10px] bg-zinc-900 border border-zinc-800 rounded px-1.5 py-0.5 text-zinc-500 font-mono select-none">
+              <span className="text-[10px] bg-[#0D0D10] border border-[rgba(255,255,255,0.06)] rounded-md px-1.5 py-0.5 text-[#56585E] font-mono select-none">
                 ESC
               </span>
             </div>
 
             {/* Results Body */}
-            <div className="flex-1 overflow-y-auto p-2 space-y-1">
+            <div className="flex-1 overflow-y-auto p-2 space-y-0.5">
               {filteredItems.length === 0 ? (
-                <div className="p-8 text-center text-xs text-zinc-500 font-medium">
-                  No matching workspace actions found.
+                <div className="p-8 text-center text-xs text-[#56585E] font-medium">
+                  No matching actions found.
                 </div>
               ) : (
                 filteredItems.map((item, index) => {
@@ -172,27 +180,28 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
                         router.push(item.href);
                         onOpenChange(false);
                       }}
+                      onMouseEnter={() => setSelectedIndex(index)}
                       className={cn(
-                        "w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-left transition text-xs font-medium cursor-pointer",
+                        'w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-left transition-all duration-150 text-xs font-medium cursor-pointer',
                         isSelected
-                          ? "bg-indigo-950/20 text-indigo-400 border border-indigo-900/30"
-                          : "text-zinc-400 hover:bg-zinc-900/40 hover:text-zinc-200 border border-transparent"
+                          ? 'bg-[#7C5CFC]/10 text-[#B4A0FF]'
+                          : 'text-[#8B8D98] hover:bg-[#1C1D24] hover:text-[#F0F0F3]'
                       )}
                     >
                       <div className="flex items-center gap-3">
-                        <Icon className={cn("h-4 w-4", isSelected ? "text-indigo-400" : "text-zinc-500")} />
+                        <Icon className={cn('h-4 w-4', isSelected ? 'text-[#7C5CFC]' : 'text-[#56585E]')} />
                         <div>
-                          <p className={cn("font-medium", isSelected ? "text-zinc-200" : "text-zinc-300")}>
+                          <p className={cn('font-medium', isSelected ? 'text-[#F0F0F3]' : 'text-[#8B8D98]')}>
                             {item.title}
                           </p>
-                          <p className="text-[9px] text-zinc-500 font-mono tracking-wider uppercase mt-0.5">
+                          <p className="text-[9px] text-[#56585E] font-mono tracking-wider uppercase mt-0.5">
                             {item.category}
                           </p>
                         </div>
                       </div>
                       
                       {isSelected && (
-                        <span className="flex items-center gap-1 text-[10px] text-indigo-400 font-mono">
+                        <span className="flex items-center gap-1 text-[10px] text-[#7C5CFC] font-mono">
                           <span>Enter</span>
                           <ArrowRight className="h-3 w-3" />
                         </span>
@@ -204,10 +213,10 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
             </div>
 
             {/* Shortcut hints footer */}
-            <div className="h-8 border-t border-zinc-900/60 bg-zinc-950/40 px-4 flex items-center justify-between text-[9px] text-zinc-500 font-medium font-mono shrink-0 select-none">
+            <div className="h-9 border-t border-[rgba(255,255,255,0.04)] bg-[#0D0D10]/60 px-4 flex items-center justify-between text-[10px] text-[#56585E] font-medium font-mono shrink-0 select-none">
               <div className="flex gap-4">
                 <span>↑↓ Navigate</span>
-                <span>↵ Open selection</span>
+                <span>↵ Open</span>
               </div>
               <div>
                 <span>MLCopilot Command Center</span>
@@ -225,14 +234,14 @@ export function SearchBar({ onOpenPallet }: { onOpenPallet: () => void }) {
   return (
     <button
       onClick={onOpenPallet}
-      className="flex items-center justify-between w-60 px-3 py-1.5 rounded-lg bg-zinc-900/50 hover:bg-zinc-900 text-left border border-zinc-800/60 hover:border-zinc-700/60 transition group"
+      className="flex items-center justify-between w-60 px-3 py-1.5 rounded-xl bg-[#111217] hover:bg-[#151720] text-left border border-[rgba(255,255,255,0.06)] hover:border-[rgba(255,255,255,0.1)] transition-all group"
     >
-      <div className="flex items-center gap-2 text-zinc-500 group-hover:text-zinc-400">
+      <div className="flex items-center gap-2 text-[#56585E] group-hover:text-[#8B8D98]">
         <Search className="h-3.5 w-3.5" />
-        <span className="text-xs font-medium">Search workspaces...</span>
+        <span className="text-xs font-medium">Search...</span>
       </div>
-      <span className="text-[9px] bg-zinc-950 border border-zinc-800 rounded px-1.5 py-0.5 text-zinc-500 group-hover:text-zinc-400 font-mono select-none">
-        ⌘K
+      <span className="text-[10px] bg-[#0D0D10] border border-[rgba(255,255,255,0.06)] rounded-md px-1.5 py-0.5 text-[#56585E] group-hover:text-[#8B8D98] font-mono select-none">
+        Ctrl+K
       </span>
     </button>
   );

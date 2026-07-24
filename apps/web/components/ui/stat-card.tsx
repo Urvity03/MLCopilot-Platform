@@ -1,8 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { LucideIcon, TrendingUp, TrendingDown, Minus } from 'lucide-react';
-import { Card } from './card';
+import { LucideIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 export interface StatCardProps {
@@ -17,6 +16,7 @@ export interface StatCardProps {
   };
   chartData?: number[];
   loading?: boolean;
+  accentColor?: string;
 }
 
 export function StatCard({
@@ -24,27 +24,29 @@ export function StatCard({
   value,
   icon: Icon,
   description,
-  trend,
   chartData,
   loading = false,
+  accentColor = '#7C5CFC',
 }: StatCardProps) {
   if (loading) {
     return (
-      <Card hoverLift={false} hoverGlow={false} className="animate-shimmer h-32 flex flex-col justify-between">
-        <div className="space-y-2">
-          <div className="h-4 bg-zinc-800/60 rounded w-1/3" />
-          <div className="h-8 bg-zinc-800 rounded w-1/2" />
+      <div className="rounded-2xl bg-[#111217] border border-[rgba(255,255,255,0.06)] p-5 h-[140px] flex flex-col justify-between relative overflow-hidden">
+        <div className="space-y-2.5">
+          <div className="h-3 bg-[#181A20] rounded-lg w-2/5 animate-pulse" />
+          <div className="h-7 bg-[#181A20] rounded-lg w-1/3 animate-pulse" />
         </div>
-        <div className="h-3 bg-zinc-800/60 rounded w-2/3" />
-      </Card>
+        <div className="h-2.5 bg-[#181A20] rounded-lg w-3/5 animate-pulse" />
+        {/* Shimmer overlay */}
+        <div className="absolute inset-0 -translate-x-full animate-[shimmer_2s_infinite] bg-gradient-to-r from-transparent via-white/[0.02] to-transparent" />
+      </div>
     );
   }
 
-  // Generate SVG path for sparkline
+  // Generate SVG sparkline
   const sparklinePath = React.useMemo(() => {
     if (!chartData || chartData.length < 2) return '';
-    const width = 120;
-    const height = 30;
+    const width = 80;
+    const height = 24;
     const min = Math.min(...chartData);
     const max = Math.max(...chartData);
     const range = max - min === 0 ? 1 : max - min;
@@ -52,67 +54,75 @@ export function StatCard({
     return chartData
       .map((val, index) => {
         const x = (index / (chartData.length - 1)) * width;
-        const y = height - ((val - min) / range) * height * 0.8 - height * 0.1; // leave 10% padding top/bottom
+        const y = height - ((val - min) / range) * height * 0.8 - height * 0.1;
         return `${index === 0 ? 'M' : 'L'} ${x.toFixed(1)} ${y.toFixed(1)}`;
       })
       .join(' ');
   }, [chartData]);
 
+  // Area fill path
+  const areaPath = React.useMemo(() => {
+    if (!sparklinePath || !chartData || chartData.length < 2) return '';
+    return `${sparklinePath} L 80 24 L 0 24 Z`;
+  }, [sparklinePath, chartData]);
+
   return (
-    <Card className="flex flex-col justify-between h-36">
+    <div className="group rounded-2xl bg-[#111217] border border-[rgba(255,255,255,0.06)] p-5 h-[140px] flex flex-col justify-between relative overflow-hidden transition-all duration-300 hover:border-[rgba(124,92,252,0.12)] hover:shadow-[0_4px_24px_rgba(0,0,0,0.3)]">
+      {/* Subtle top accent line */}
+      <div 
+        className="absolute top-0 left-0 right-0 h-[1px] opacity-40 group-hover:opacity-70 transition-opacity"
+        style={{ background: `linear-gradient(90deg, transparent, ${accentColor}40, transparent)` }}
+      />
+      
       <div>
         <div className="flex items-center justify-between">
-          <span className="text-[11px] font-semibold text-zinc-500 uppercase tracking-wider">
+          <span className="text-[11px] font-medium text-[#56585E] uppercase tracking-wider">
             {title}
           </span>
           {Icon && (
-            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-zinc-900/80 text-zinc-400 border border-zinc-800/80">
-              <Icon className="h-4 w-4" />
+            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-[#181A20] text-[#56585E] group-hover:text-[#7C5CFC] transition-colors">
+              <Icon className="h-3.5 w-3.5" />
             </div>
           )}
         </div>
         
-        <div className="mt-2.5 flex items-baseline gap-2">
-          <span className="text-2xl font-bold tracking-tight text-white font-mono">
-            {value}
+        <div className="mt-2 flex items-baseline gap-3">
+          <span className="text-2xl font-bold tracking-tight text-[#F0F0F3]">
+            {typeof value === 'number' ? value.toLocaleString() : value}
           </span>
-          {trend && (
-            <div
-              className={cn(
-                "inline-flex items-center gap-0.5 rounded px-1.5 py-0.5 text-[10px] font-medium border",
-                trend.direction === 'up' && "bg-indigo-950/20 text-indigo-400 border-indigo-900/30",
-                trend.direction === 'down' && "bg-rose-950/20 text-rose-400 border-rose-900/30",
-                trend.direction === 'neutral' && "bg-zinc-900 text-zinc-400 border-zinc-800"
-              )}
-            >
-              {trend.direction === 'up' && <TrendingUp className="h-3 w-3" />}
-              {trend.direction === 'down' && <TrendingDown className="h-3 w-3" />}
-              {trend.direction === 'neutral' && <Minus className="h-3 w-3" />}
-              <span>{trend.value}</span>
-            </div>
-          )}
         </div>
       </div>
 
-      <div className="flex items-center justify-between mt-auto">
-        <span className="text-[11px] text-zinc-450 font-medium">
-          {description || 'No description'}
+      <div className="flex items-center justify-between">
+        <span className="text-[11px] text-[#56585E] font-medium">
+          {description || ''}
         </span>
         {chartData && chartData.length >= 2 && (
-          <div className="w-[120px] h-[30px] flex items-end">
-            <svg width="120" height="30" className="overflow-visible">
+          <div className="w-[80px] h-[24px]">
+            <svg width="80" height="24" className="overflow-visible">
+              <defs>
+                <linearGradient id={`area-${title.replace(/\s/g, '')}`} x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor={accentColor} stopOpacity="0.15" />
+                  <stop offset="100%" stopColor={accentColor} stopOpacity="0" />
+                </linearGradient>
+              </defs>
+              <path
+                d={areaPath}
+                fill={`url(#area-${title.replace(/\s/g, '')})`}
+              />
               <path
                 d={sparklinePath}
                 fill="none"
-                stroke={trend?.direction === 'down' ? '#f43f5e' : '#6366f1'}
+                stroke={accentColor}
                 strokeWidth="1.5"
                 strokeLinecap="round"
                 strokeLinejoin="round"
+                className="opacity-60 group-hover:opacity-100 transition-opacity"
               />
             </svg>
           </div>
         )}
       </div>
-    </Card>
+    </div>
   );
 }

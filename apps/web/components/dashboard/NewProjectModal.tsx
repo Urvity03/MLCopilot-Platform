@@ -1,6 +1,7 @@
 'use client';
 
 import * as React from 'react';
+import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -31,6 +32,7 @@ interface NewProjectModalProps {
 }
 
 export function NewProjectModal({ isOpen, onClose, prefilledData }: NewProjectModalProps) {
+  const router = useRouter();
   const { createProject, isCreating } = useProjects();
 
   const {
@@ -85,9 +87,10 @@ export function NewProjectModal({ isOpen, onClose, prefilledData }: NewProjectMo
         description: data.description || '',
       },
       {
-        onSuccess: () => {
+        onSuccess: (project) => {
           reset();
           onClose();
+          router.push(`/projects/${project.id}`);
         },
       }
     );
@@ -98,7 +101,7 @@ export function NewProjectModal({ isOpen, onClose, prefilledData }: NewProjectMo
       <DialogContent className="max-w-sm">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <Sparkles className="h-4.5 w-4.5 text-indigo-400" />
+            <Sparkles className="h-4 w-4 text-[#7C5CFC]" />
             <span>Create Workspace</span>
           </DialogTitle>
           <DialogDescription>
@@ -108,50 +111,50 @@ export function NewProjectModal({ isOpen, onClose, prefilledData }: NewProjectMo
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div className="space-y-1.5">
-            <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-wider">
+            <label className="block text-[10px] font-semibold text-[#8B8D98] uppercase tracking-wider">
               Project Name
             </label>
             <input
               type="text"
               {...register('name')}
               placeholder="e.g. Sentence Transformers"
-              className="w-full rounded-lg bg-zinc-900/50 border border-zinc-800/80 px-3 py-2 text-xs text-zinc-100 placeholder-zinc-500 focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/20 transition outline-none"
+              className="w-full rounded-xl bg-[#111217] border border-[rgba(255,255,255,0.06)] px-3 py-2.5 text-xs text-[#F0F0F3] placeholder-[#56585E] focus:border-[#7C5CFC]/40 focus:ring-1 focus:ring-[#7C5CFC]/20 outline-none transition-all"
               disabled={isCreating}
             />
             {errors.name && (
-              <p className="text-[10px] text-red-400 font-medium">{errors.name.message}</p>
+              <p className="text-[10px] text-[#FF5C74] font-medium">{errors.name.message}</p>
             )}
           </div>
 
           <div className="space-y-1.5">
-            <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-wider">
+            <label className="block text-[10px] font-semibold text-[#8B8D98] uppercase tracking-wider">
               Workspace URL Slug
             </label>
             <input
               type="text"
               {...register('slug')}
               placeholder="sentence-transformers"
-              className="w-full rounded-lg bg-zinc-900/50 border border-zinc-800/80 px-3 py-2 text-xs text-zinc-200 placeholder-zinc-500 focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/20 transition outline-none"
+              className="w-full rounded-xl bg-[#111217] border border-[rgba(255,255,255,0.06)] px-3 py-2.5 text-xs text-[#F0F0F3] placeholder-[#56585E] focus:border-[#7C5CFC]/40 focus:ring-1 focus:ring-[#7C5CFC]/20 outline-none transition-all"
               disabled={isCreating}
             />
             {errors.slug && (
-              <p className="text-[10px] text-red-400 font-medium">{errors.slug.message}</p>
+              <p className="text-[10px] text-[#FF5C74] font-medium">{errors.slug.message}</p>
             )}
           </div>
 
           <div className="space-y-1.5">
-            <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-wider">
+            <label className="block text-[10px] font-semibold text-[#8B8D98] uppercase tracking-wider">
               Description (Optional)
             </label>
             <textarea
               {...register('description')}
               placeholder="Provide a brief summary of the workspace corpus..."
               rows={3}
-              className="w-full rounded-lg bg-zinc-900/50 border border-zinc-800/80 px-3 py-2 text-xs text-zinc-100 placeholder-zinc-500 focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/20 transition resize-none outline-none"
+              className="w-full rounded-xl bg-[#111217] border border-[rgba(255,255,255,0.06)] px-3 py-2.5 text-xs text-[#F0F0F3] placeholder-[#56585E] focus:border-[#7C5CFC]/40 focus:ring-1 focus:ring-[#7C5CFC]/20 outline-none transition-all resize-none"
               disabled={isCreating}
             />
             {errors.description && (
-              <p className="text-[10px] text-red-400 font-medium">{errors.description.message}</p>
+              <p className="text-[10px] text-[#FF5C74] font-medium">{errors.description.message}</p>
             )}
           </div>
 
@@ -161,7 +164,7 @@ export function NewProjectModal({ isOpen, onClose, prefilledData }: NewProjectMo
               variant="ghost"
               size="sm"
               onClick={onClose}
-              className="text-zinc-400 hover:text-zinc-200"
+              className="text-[#8B8D98] hover:text-[#F0F0F3] hover:bg-[#1E2028]"
               disabled={isCreating}
             >
               Cancel
@@ -170,7 +173,7 @@ export function NewProjectModal({ isOpen, onClose, prefilledData }: NewProjectMo
               type="submit"
               variant="default"
               size="sm"
-              className="bg-primary hover:bg-primary/95 border border-indigo-500/20 shadow-md shadow-indigo-950/20 cursor-pointer active:translate-y-[0.5px]"
+              className="bg-[#7C5CFC] hover:bg-[#6B4FE0] text-white border border-[#7C5CFC]/10 active:scale-[0.97]"
               disabled={isCreating}
             >
               {isCreating ? (

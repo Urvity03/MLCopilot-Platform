@@ -1,7 +1,7 @@
 'use client';
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { chatService, ChatPayload, ConversationDetail } from '../services/chat';
+import { chatService, ChatPayload, ConversationDetail, ChatStreamCallbacks } from '../services/chat';
 import { Conversation } from '../types';
 
 export function useChat(projectId: string, conversationId?: string) {
@@ -19,15 +19,19 @@ export function useChat(projectId: string, conversationId?: string) {
     enabled: !!projectId && !!conversationId,
   });
 
+  const invalidateChatQueries = (targetConvId?: string) => {
+    const cid = targetConvId || conversationId;
+    if (cid) {
+      queryClient.invalidateQueries({ queryKey: ['conversation-detail', projectId, cid] });
+    }
+    queryClient.invalidateQueries({ queryKey: ['conversations', projectId] });
+    queryClient.invalidateQueries({ queryKey: ['dashboard-metrics'] });
+  };
+
   const chatMutation = useMutation({
     mutationFn: (payload: ChatPayload) => chatService.chat(projectId, payload),
     onSuccess: () => {
-      // Invalidate the detail query to fetch the updated message list
-      if (conversationId) {
-        queryClient.invalidateQueries({ queryKey: ['conversation-detail', projectId, conversationId] });
-      }
-      queryClient.invalidateQueries({ queryKey: ['conversations', projectId] });
-      queryClient.invalidateQueries({ queryKey: ['dashboard-metrics'] });
+      invalidateChatQueries();
     },
   });
 
@@ -39,14 +43,35 @@ export function useChat(projectId: string, conversationId?: string) {
     },
   });
 
+  const sendMessageStream = async (payload: ChatPayload, callbacks: ChatStreamCallbacks) => {
+    let resolvedConvId = payload.conversation_id || conversationId;
+
+    return chatService.chatStream(projectId, payload, {
+      ...callbacks,
+      onMetadata: (data) => {
+        if (data.conversation_id) {
+          resolvedConvId = data.conversation_id;
+        }
+        callbacks.onMetadata?.(data);
+      },
+      onDone: () => {
+        callbacks.onDone?.();
+        invalidateChatQueries(resolvedConvId);
+      },
+    });
+  };
+
   return {
     conversations: conversationsQuery.data || [],
     isLoadingConversations: conversationsQuery.isLoading,
     activeConversation: activeConversationQuery.data || null,
     isLoadingActiveConversation: activeConversationQuery.isLoading,
     sendMessage: chatMutation.mutateAsync,
+    sendMessageStream,
     isSendingMessage: chatMutation.isPending,
     deleteConversation: deleteMutation.mutate,
     isDeletingConversation: deleteMutation.isPending,
+    invalidateChatQueries,
   };
 }
+

@@ -47,6 +47,22 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     app.state.db_session_factory = create_session_factory(engine)
     app.state.redis = create_redis_client(settings)
 
+    # Log LLM provider configuration at startup without exposing credentials
+    provider = (settings.ai_provider or "openai").lower()
+    has_openai_key = bool(settings.openai_api_key.get_secret_value())
+    has_openrouter_key = bool(settings.openrouter_api_key.get_secret_value())
+    has_anthropic_key = bool(settings.anthropic_api_key.get_secret_value())
+
+    logger.info(
+        "llm.provider.startup",
+        configured_provider=provider,
+        has_openai_key=has_openai_key,
+        has_openrouter_key=has_openrouter_key,
+        has_anthropic_key=has_anthropic_key,
+        base_url=settings.openai_base_url or "https://api.openai.com/v1",
+        model=settings.openai_model,
+    )
+
     logger.info(
         "startup.complete",
         environment=settings.environment,

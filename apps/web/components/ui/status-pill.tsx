@@ -22,48 +22,43 @@ export function StatusPill({ status, className, ...props }: StatusPillProps) {
   const config = React.useMemo(() => {
     switch (status) {
       case 'embedded':
-        return {
-          bg: 'bg-indigo-950/20 text-indigo-400 border-indigo-900/30',
-          dot: 'bg-indigo-400',
-          label: 'Embedded',
-        };
       case 'success':
       case 'active':
         return {
-          bg: 'bg-emerald-950/20 text-emerald-400 border-emerald-900/30',
-          dot: 'bg-emerald-400',
-          label: status === 'success' ? 'Success' : 'Active',
+          bg: 'bg-[#3DD68C]/10 text-[#3DD68C] border-[#3DD68C]/15',
+          dot: 'bg-[#3DD68C]',
+          label: status === 'embedded' ? 'Ready' : status === 'success' ? 'Success' : 'Active',
         };
       case 'parsing':
       case 'embedding':
         return {
-          bg: 'bg-cyan-950/20 text-cyan-400 border-cyan-900/30',
-          dot: 'bg-cyan-400 animate-pulse',
+          bg: 'bg-[#7C5CFC]/10 text-[#7C5CFC] border-[#7C5CFC]/15',
+          dot: 'bg-[#7C5CFC] animate-pulse',
           label: status === 'parsing' ? 'Parsing' : 'Embedding',
         };
       case 'pending':
         return {
-          bg: 'bg-amber-950/15 text-amber-400 border-amber-900/20',
-          dot: 'bg-amber-400',
+          bg: 'bg-[#F5B83D]/10 text-[#F5B83D] border-[#F5B83D]/15',
+          dot: 'bg-[#F5B83D]',
           label: 'Pending',
         };
       case 'failed':
       case 'inactive':
         return {
-          bg: 'bg-rose-950/20 text-rose-400 border-rose-900/30',
-          dot: 'bg-rose-500',
+          bg: 'bg-[#FF5C74]/10 text-[#FF5C74] border-[#FF5C74]/15',
+          dot: 'bg-[#FF5C74]',
           label: status === 'failed' ? 'Failed' : 'Inactive',
         };
       case 'parsed':
         return {
-          bg: 'bg-violet-950/20 text-violet-400 border-violet-900/30',
-          dot: 'bg-violet-400',
+          bg: 'bg-[#4F8CFF]/10 text-[#4F8CFF] border-[#4F8CFF]/15',
+          dot: 'bg-[#4F8CFF]',
           label: 'Parsed',
         };
       default:
         return {
-          bg: 'bg-zinc-900 text-zinc-400 border-zinc-850',
-          dot: 'bg-zinc-500',
+          bg: 'bg-[#181A20] text-[#8B8D98] border-[rgba(255,255,255,0.06)]',
+          dot: 'bg-[#56585E]',
           label: status,
         };
     }
@@ -72,7 +67,7 @@ export function StatusPill({ status, className, ...props }: StatusPillProps) {
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 text-[10px] font-semibold tracking-wider uppercase font-sans shrink-0",
+        "inline-flex items-center gap-1.5 rounded-lg border px-2 py-0.5 text-[9px] font-semibold tracking-wide uppercase font-mono shrink-0 select-none",
         config.bg,
         className
       )}

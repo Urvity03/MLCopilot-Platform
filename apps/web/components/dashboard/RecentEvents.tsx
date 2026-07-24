@@ -1,6 +1,6 @@
 'use client';
 
-import { Upload, Plus, MessageSquare } from 'lucide-react';
+import { Upload, FolderPlus, MessageSquare } from 'lucide-react';
 import Link from 'next/link';
 
 interface EventItem {
@@ -19,72 +19,74 @@ interface RecentEventsProps {
 export function RecentEvents({ events }: RecentEventsProps) {
   if (events.length === 0) {
     return (
-      <div className="flex h-36 flex-col items-center justify-center text-center">
-        <p className="text-xs text-zinc-500 font-semibold">No recent workspace events recorded.</p>
+      <div className="flex h-32 flex-col items-center justify-center text-center">
+        <p className="text-[12px] text-[#56585E]">No recent activity</p>
+        <p className="text-[11px] text-[#56585E]/60 mt-1">Events will appear as you use MLCopilot</p>
       </div>
     );
   }
 
   const iconMap = {
     upload: Upload,
-    project: Plus,
+    project: FolderPlus,
     chat: MessageSquare,
   };
 
-  const colorMap = {
-    upload: 'text-indigo-400 bg-indigo-950/20 border-indigo-500/10 shadow-[0_0_10px_rgba(99,102,241,0.02)]',
-    project: 'text-cyan-400 bg-cyan-950/20 border-cyan-500/10 shadow-[0_0_10px_rgba(6,182,212,0.02)]',
-    chat: 'text-violet-400 bg-violet-950/20 border-violet-500/10 shadow-[0_0_10px_rgba(139,92,246,0.02)]',
+  const dotColorMap = {
+    upload: 'bg-[#4F8CFF]',
+    project: 'bg-[#7C5CFC]',
+    chat: 'bg-[#3DD68C]',
+  };
+
+  const formatRelativeTime = (timestamp: string) => {
+    const now = new Date();
+    const then = new Date(timestamp);
+    const diffMs = now.getTime() - then.getTime();
+    const diffMin = Math.floor(diffMs / 60000);
+    const diffHr = Math.floor(diffMin / 60);
+    const diffDay = Math.floor(diffHr / 24);
+
+    if (diffMin < 1) return 'Just now';
+    if (diffMin < 60) return `${diffMin}m ago`;
+    if (diffHr < 24) return `${diffHr}h ago`;
+    if (diffDay < 7) return `${diffDay}d ago`;
+    return then.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
   };
 
   return (
-    <div className="flow-root">
-      <ul role="list" className="-mb-8">
-        {events.map((item, idx) => {
-          const Icon = iconMap[item.type];
-          const colorClass = colorMap[item.type];
-          const isLast = idx === events.length - 1;
+    <div className="space-y-1">
+      {events.slice(0, 8).map((item) => {
+        const Icon = iconMap[item.type];
+        const dotColor = dotColorMap[item.type];
 
-          return (
-            <li key={item.id}>
-              <div className="relative pb-6" aria-label={`Event: ${item.title}`}>
-                {!isLast && (
-                  <span
-                    className="absolute left-4 top-4 -ml-px h-full w-px bg-zinc-900"
-                    aria-hidden="true"
-                  />
-                )}
-                <div className="relative flex space-x-3.5 items-center">
-                  <div>
-                    <span className={`h-8 w-8 rounded-lg flex items-center justify-center border ${colorClass}`}>
-                      <Icon className="h-3.5 w-3.5" aria-hidden="true" />
-                    </span>
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="text-xs space-y-0.5">
-                      <Link 
-                        href={item.link} 
-                        className="font-semibold text-zinc-200 hover:text-indigo-400 hover:underline transition-colors"
-                      >
-                        {item.title}
-                      </Link>
-                      <p className="text-[10px] text-zinc-500 font-medium">{item.subtitle}</p>
-                    </div>
-                  </div>
-                  <div className="flex-shrink-0 text-right whitespace-nowrap text-[9px] text-zinc-500 font-mono font-medium">
-                    {new Date(item.timestamp).toLocaleDateString('en-US', {
-                      month: 'short',
-                      day: 'numeric',
-                      hour: '2-digit',
-                      minute: '2-digit',
-                    })}
-                  </div>
-                </div>
-              </div>
-            </li>
-          );
-        })}
-      </ul>
+        return (
+          <Link
+            key={item.id}
+            href={item.link}
+            className="group flex items-start gap-3 px-3 py-2.5 rounded-lg transition-colors hover:bg-[#181A20]"
+          >
+            {/* Timeline dot */}
+            <div className="flex flex-col items-center mt-1.5 flex-shrink-0">
+              <div className={`h-2 w-2 rounded-full ${dotColor}`} />
+            </div>
+            
+            {/* Content */}
+            <div className="flex-1 min-w-0">
+              <p className="text-[12px] text-[#F0F0F3]/80 group-hover:text-[#F0F0F3] transition-colors truncate leading-tight">
+                {item.title}
+              </p>
+              <p className="text-[10px] text-[#56585E] mt-0.5 truncate">
+                {item.subtitle}
+              </p>
+            </div>
+
+            {/* Timestamp */}
+            <span className="text-[10px] text-[#56585E] flex-shrink-0 mt-0.5">
+              {formatRelativeTime(item.timestamp)}
+            </span>
+          </Link>
+        );
+      })}
     </div>
   );
 }

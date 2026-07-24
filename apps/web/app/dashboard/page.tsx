@@ -13,7 +13,7 @@ import { NewProjectModal } from '../../components/dashboard/NewProjectModal';
 import { AIRecommendations } from '../../components/dashboard/AIRecommendations';
 import { Section } from '../../components/ui/section';
 import { Skeleton } from '../../components/ui/skeletons';
-import { Cpu, Lock } from 'lucide-react';
+import { Cpu } from 'lucide-react';
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -52,25 +52,25 @@ export default function DashboardPage() {
   };
 
   return (
-    <div className="p-6 md:p-8 max-w-6xl mx-auto space-y-8">
+    <div className="p-6 md:p-8 max-w-6xl mx-auto space-y-8 animate-fade-in">
       {/* 1. Workspace Header */}
       <WorkspaceHeader />
 
-      {/* Executive Overview Summary Card */}
+      {/* Active System Overview Summary Card */}
       {!isLoading && metrics && (
-        <div className="p-5 rounded-xl border border-indigo-950/40 bg-indigo-950/5 relative overflow-hidden font-sans">
+        <div className="p-5 rounded-2xl border border-[rgba(124,92,252,0.15)] bg-[#7C5CFC]/[0.02] relative overflow-hidden font-sans shadow-[0_0_20px_rgba(124,92,252,0.05)]">
           <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none">
-            <Cpu className="h-20 w-20 text-indigo-500" />
+            <Cpu className="h-20 w-20 text-[#7C5CFC]" />
           </div>
-          <span className="text-[9px] font-bold text-indigo-400 font-mono tracking-wider uppercase">
+          <span className="text-[9px] font-bold text-[#7C5CFC] font-mono tracking-wider uppercase">
             Active System Overview
           </span>
-          <p className="text-xs text-zinc-350 leading-relaxed font-medium mt-2 max-w-2xl">
-            Core telemetry status: <span className="text-emerald-450 font-bold">OPERATIONAL</span>. 
-            MLCopilot is running across <span className="text-white font-semibold">{metrics.totalProjects} workspaces</span>, 
-            hosting <span className="text-white font-semibold">{metrics.totalDocuments} ingested documents</span> 
-            split into <span className="text-white font-semibold">{metrics.totalChunks} parsed database blocks</span>. 
-            A total of <span className="text-white font-semibold">{metrics.totalConversations} active RAG chat sessions</span> are running.
+          <p className="text-xs text-[#8B8D98] leading-relaxed font-medium mt-2 max-w-2xl">
+            Core telemetry status: <span className="text-[#3DD68C] font-bold">OPERATIONAL</span>. 
+            MLCopilot is running across <span className="text-[#F0F0F3] font-semibold">{metrics.totalProjects} workspaces</span>, 
+            hosting <span className="text-[#F0F0F3] font-semibold">{metrics.totalDocuments} ingested documents</span> 
+            split into <span className="text-[#F0F0F3] font-semibold">{metrics.totalChunks} parsed database blocks</span>. 
+            A total of <span className="text-[#F0F0F3] font-semibold">{metrics.totalConversations} active RAG chat sessions</span> are running.
           </p>
         </div>
       )}
@@ -78,13 +78,13 @@ export default function DashboardPage() {
       {/* 2. KPI Cards Section */}
       <Section aria-label="Key Performance Indicators">
         {isLoading ? (
-          <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
-            {Array.from({ length: 5 }).map((_, i) => (
-              <Skeleton key={i} className="h-36 rounded-xl bg-zinc-900/30 border border-zinc-800/20" />
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <Skeleton key={i} className="h-36 rounded-2xl bg-[#111217] border border-[rgba(255,255,255,0.06)] animate-pulse" />
             ))}
           </div>
         ) : isError || !metrics ? (
-          <div className="rounded-xl border border-red-900/20 bg-red-950/10 p-4 text-xs font-semibold text-red-400">
+          <div className="rounded-2xl border border-[#FF5C74]/20 bg-[#FF5C74]/5 p-4 text-xs font-semibold text-[#FF5C74]">
             Workspace summary metrics are temporarily unavailable.
           </div>
         ) : (
@@ -92,86 +92,20 @@ export default function DashboardPage() {
         )}
       </Section>
 
-      {/* Real-time Telemetry (Enterprise Placeholders) */}
-      <Section title="Real-Time Telemetry & Systems Status">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {/* Query Latency Telemetry */}
-          <div className="p-5 bg-zinc-900/10 border border-zinc-800/40 rounded-xl relative overflow-hidden flex flex-col justify-between min-h-[140px] font-sans">
-            <div className="absolute top-3 right-3 text-zinc-700">
-              <Lock className="h-4 w-4" />
-            </div>
-            <div>
-              <span className="text-[9px] font-bold text-zinc-550 font-mono tracking-wider uppercase">Query Retrieval Latency</span>
-              <h4 className="text-lg font-bold text-zinc-600 mt-2 font-mono">-- ms</h4>
-              <p className="text-[10px] text-zinc-500 font-medium leading-relaxed mt-1">
-                Monitor index lookup speeds and generation load curves.
-              </p>
-            </div>
-            <div className="text-[9px] font-bold text-indigo-400/80 uppercase font-mono mt-3 select-none">
-              🔒 ENTERPRISE PROFILE REQUIRED
-            </div>
-          </div>
-
-          {/* Background Worker Queues */}
-          <div className="p-5 bg-zinc-900/10 border border-zinc-800/40 rounded-xl relative overflow-hidden flex flex-col justify-between min-h-[140px] font-sans">
-            <div className="absolute top-3 right-3 text-zinc-700">
-              <Lock className="h-4 w-4" />
-            </div>
-            <div>
-              <span className="text-[9px] font-bold text-zinc-550 font-mono tracking-wider uppercase">Background Index Queue</span>
-              <h4 className="text-lg font-bold text-zinc-600 mt-2 font-mono">IDLE</h4>
-              <p className="text-[10px] text-zinc-550 font-medium leading-relaxed mt-1">
-                Active vector partitioning workers and ingestion pools.
-              </p>
-            </div>
-            <div className="text-[9px] font-bold text-indigo-400/80 uppercase font-mono mt-3 select-none">
-              🔒 COMING SOON IN V1.2
-            </div>
-          </div>
-
-          {/* pgvector Cache Hit Rate */}
-          <div className="p-5 bg-zinc-900/10 border border-zinc-800/40 rounded-xl relative overflow-hidden flex flex-col justify-between min-h-[140px] font-sans">
-            <div className="absolute top-3 right-3 text-zinc-700">
-              <Lock className="h-4 w-4" />
-            </div>
-            <div>
-              <span className="text-[9px] font-bold text-zinc-550 font-mono tracking-wider uppercase">vector Cache Hit Ratio</span>
-              <h4 className="text-lg font-bold text-zinc-600 mt-2 font-mono">-- %</h4>
-              <p className="text-[10px] text-zinc-550 font-medium leading-relaxed mt-1">
-                Analyze database index caches and pgvector query hits.
-              </p>
-            </div>
-            <div className="text-[9px] font-bold text-indigo-400/80 uppercase font-mono mt-3 select-none">
-              🔒 ENTERPRISE METRICS ONLY
-            </div>
-          </div>
-        </div>
-      </Section>
-
-      {/* 3. Quick Actions */}
-      <Section title="Quick Actions">
-        <QuickActions
-          onCreateProjectClick={handleCreateNewProject}
-          onNavigateToUploads={handleNavigateToUploads}
-          onNavigateToChat={handleNavigateToChat}
-          hasProjects={hasProjects}
-        />
-      </Section>
-
-      {/* 4. Core Layout Split Grid */}
+      {/* 3. Core Layout Split Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
-        {/* Left Side: Recent Projects list (takes 2 cols) */}
+        {/* Left Side: Recent Workspaces & Quick Actions */}
         <div className="lg:col-span-2 space-y-6">
-          <Section title="Recent Workspaces">
+          <Section title="Active Workspaces">
             {isLoading ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {Array.from({ length: 2 }).map((_, i) => (
-                  <Skeleton key={i} className="h-44 rounded-xl bg-zinc-900/30 border border-zinc-800/20" />
+              <div className="space-y-3">
+                {Array.from({ length: 3 }).map((_, i) => (
+                  <Skeleton key={i} className="h-16 rounded-xl bg-[#111217] border border-[rgba(255,255,255,0.06)]" />
                 ))}
               </div>
             ) : isError || !metrics ? (
-              <div className="p-6 rounded-xl border border-zinc-900 bg-zinc-950/20 text-center">
-                <p className="text-xs text-zinc-500 font-semibold">Workspace list could not be loaded.</p>
+              <div className="p-6 rounded-2xl border border-[rgba(255,255,255,0.06)] bg-[#111217] text-center">
+                <p className="text-xs text-[#8B8D98] font-semibold">Workspace list could not be loaded.</p>
               </div>
             ) : (
               <RecentProjects
@@ -181,17 +115,26 @@ export default function DashboardPage() {
               />
             )}
           </Section>
+
+          <Section title="Quick Actions">
+            <QuickActions
+              onCreateProjectClick={handleCreateNewProject}
+              onNavigateToUploads={handleNavigateToUploads}
+              onNavigateToChat={handleNavigateToChat}
+              hasProjects={hasProjects}
+            />
+          </Section>
         </div>
 
-        {/* Right Side: Storage & Timeline Activity Feed (takes 1 col) */}
+        {/* Right Side: Storage & Timeline Activity Feed */}
         <div className="space-y-6">
           {/* AI Platform Insights */}
-          <Section title="AI Platform Insights">
+          <Section title="AI Insights">
             {isLoading ? (
-              <Skeleton className="h-44 rounded-xl bg-zinc-900/30 border border-zinc-800/20" />
+              <Skeleton className="h-44 rounded-2xl bg-[#111217] border border-[rgba(255,255,255,0.06)]" />
             ) : isError || !metrics ? (
-              <div className="h-44 rounded-xl border border-zinc-900 bg-zinc-950/20 flex items-center justify-center">
-                <p className="text-xs text-zinc-500 font-semibold">Insights unavailable.</p>
+              <div className="h-44 rounded-2xl border border-[rgba(255,255,255,0.06)] bg-[#111217] flex items-center justify-center">
+                <p className="text-xs text-[#8B8D98] font-semibold">Insights unavailable.</p>
               </div>
             ) : (
               <AIRecommendations metrics={metrics} />
@@ -199,12 +142,12 @@ export default function DashboardPage() {
           </Section>
 
           {/* Storage Analysis */}
-          <Section title="Storage Analysis">
+          <Section title="Vector Indexes & Storage">
             {isLoading ? (
-              <Skeleton className="h-48 rounded-xl bg-zinc-900/30 border border-zinc-800/20" />
+              <Skeleton className="h-48 rounded-2xl bg-[#111217] border border-[rgba(255,255,255,0.06)]" />
             ) : isError || !metrics ? (
-              <div className="h-48 rounded-xl border border-zinc-900 bg-zinc-950/20 flex items-center justify-center">
-                <p className="text-xs text-zinc-500 font-semibold">Storage statistics unavailable.</p>
+              <div className="h-48 rounded-2xl border border-[rgba(255,255,255,0.06)] bg-[#111217] flex items-center justify-center">
+                <p className="text-xs text-[#8B8D98] font-semibold">Storage statistics unavailable.</p>
               </div>
             ) : (
               <StorageOverview stats={metrics.storageStats} />
@@ -213,15 +156,15 @@ export default function DashboardPage() {
 
           {/* Activity Timeline */}
           <Section title="Activity Logs">
-            <div className="rounded-xl border border-zinc-800/30 bg-zinc-900/10 p-5 shadow-[0_0_15px_rgba(0,0,0,0.1)]">
+            <div className="rounded-2xl border border-[rgba(255,255,255,0.06)] bg-[#111217] p-5 shadow-[0_0_15px_rgba(0,0,0,0.1)]">
               {isLoading ? (
                 <div className="space-y-3.5">
                   {Array.from({ length: 3 }).map((_, i) => (
-                    <Skeleton key={i} className="h-10 rounded-lg bg-zinc-900/30" />
+                    <Skeleton key={i} className="h-10 rounded-lg bg-[#181A20]" />
                   ))}
                 </div>
               ) : isError || !metrics ? (
-                <p className="text-xs text-zinc-500 font-semibold text-center py-4">Event feed log details unavailable.</p>
+                <p className="text-xs text-[#8B8D98] font-semibold text-center py-4">Event feed log details unavailable.</p>
               ) : (
                 <RecentEvents events={metrics.recentActivity} />
               )}

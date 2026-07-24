@@ -1,8 +1,6 @@
 'use client';
 
-import { FolderPlus, Upload, MessageSquare, ArrowRight } from 'lucide-react';
-import { Card } from '../ui/card';
-import { cn } from '@/lib/utils';
+import { FolderPlus, Upload, MessageSquare, Key } from 'lucide-react';
 
 interface QuickActionsProps {
   onCreateProjectClick: () => void;
@@ -19,33 +17,33 @@ export function QuickActions({
 }: QuickActionsProps) {
   const actions = [
     {
-      title: 'Initialize Workspace',
-      description: 'Create a new project workspace schema to begin ingesting files.',
+      title: 'New Workspace',
+      description: 'Create a project',
       icon: FolderPlus,
       onClick: onCreateProjectClick,
       disabled: false,
-      color: 'text-indigo-400 group-hover:text-indigo-350 border-indigo-950/40 bg-indigo-950/5',
+      shortcut: 'N',
     },
     {
-      title: 'Ingest Text Corpus',
-      description: 'Upload and parse PDFs, markdown, or text files into embeddings.',
+      title: 'Upload Documents',
+      description: 'Ingest files',
       icon: Upload,
       onClick: onNavigateToUploads,
       disabled: !hasProjects,
-      color: 'text-cyan-400 group-hover:text-cyan-350 border-cyan-950/40 bg-cyan-950/5',
+      shortcut: 'U',
     },
     {
-      title: 'AI Copilot Chat',
-      description: 'Interact with your workspace vectors using RAG streaming queries.',
+      title: 'AI Chat',
+      description: 'RAG conversation',
       icon: MessageSquare,
       onClick: onNavigateToChat,
       disabled: !hasProjects,
-      color: 'text-violet-400 group-hover:text-violet-350 border-violet-950/40 bg-violet-950/5',
+      shortcut: 'C',
     },
   ];
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+    <div className="grid grid-cols-3 gap-3">
       {actions.map((act, idx) => {
         const Icon = act.icon;
         return (
@@ -53,46 +51,23 @@ export function QuickActions({
             key={idx}
             onClick={act.onClick}
             disabled={act.disabled}
-            className={cn(
-              "w-full text-left rounded-xl transition-all duration-300 relative select-none group",
-              act.disabled
-                ? "opacity-40 cursor-not-allowed"
-                : "cursor-pointer"
-            )}
+            className={`group flex items-center gap-3 p-4 rounded-xl bg-[#111217] border border-[rgba(255,255,255,0.06)] transition-all duration-200 text-left cursor-pointer
+              ${act.disabled 
+                ? 'opacity-40 cursor-not-allowed' 
+                : 'hover:border-[rgba(124,92,252,0.12)] hover:bg-[#181A20] active:scale-[0.98]'
+              }`}
           >
-            <Card 
-              hoverLift={!act.disabled} 
-              hoverGlow={!act.disabled}
-              className={cn(
-                "p-5 flex gap-4 h-full items-start border-zinc-800/40 bg-zinc-900/10 relative overflow-hidden transition-all duration-350",
-                !act.disabled && "group-hover:border-indigo-500/25 group-hover:bg-zinc-900/20 group-hover:shadow-[0_4px_20px_rgba(0,0,0,0.4)]"
-              )}
+            <div className={`flex h-9 w-9 items-center justify-center rounded-xl flex-shrink-0 transition-colors
+              ${act.disabled ? 'bg-[#181A20] text-[#56585E]' : 'bg-[#7C5CFC]/10 text-[#7C5CFC]'}`}
             >
-              <div 
-                className={cn(
-                  "p-2.5 rounded-lg border flex-shrink-0 transition-colors",
-                  act.disabled 
-                    ? "border-zinc-800 text-zinc-650 bg-zinc-900/30" 
-                    : act.color
-                )}
-              >
-                <Icon className="h-4.5 w-4.5" />
-              </div>
-              <div className="space-y-1.5 flex-1 min-w-0 pr-4">
-                <div className="flex items-center gap-1.5">
-                  <p className={cn(
-                    "text-xs font-bold transition-colors", 
-                    act.disabled ? "text-zinc-500" : "text-zinc-200 group-hover:text-white"
-                  )}>
-                    {act.title}
-                  </p>
-                  {!act.disabled && (
-                    <ArrowRight className="h-3 w-3 text-indigo-400 opacity-0 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all shrink-0" />
-                  )}
-                </div>
-                <p className="text-[10px] text-zinc-500 leading-normal font-medium">{act.description}</p>
-              </div>
-            </Card>
+              <Icon className="h-4 w-4" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-[12px] font-medium text-[#F0F0F3] truncate">
+                {act.title}
+              </p>
+              <p className="text-[10px] text-[#56585E]">{act.description}</p>
+            </div>
           </button>
         );
       })}

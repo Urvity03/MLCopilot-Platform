@@ -3,47 +3,31 @@
 import * as React from 'react';
 import { cn } from '@/lib/utils';
 
-interface SectionProps extends React.HTMLAttributes<HTMLElement> {
+interface SectionProps extends React.HTMLAttributes<HTMLDivElement> {
   title?: string;
   description?: string;
-  actions?: React.ReactNode;
+  action?: React.ReactNode;
 }
 
-export function Section({
-  title,
-  description,
-  actions,
-  className,
-  children,
-  ...props
-}: SectionProps) {
+export function Section({ title, description, action, className, children, ...props }: SectionProps) {
   return (
-    <section
-      className={cn("space-y-4 mb-8 last:mb-0", className)}
-      {...props}
-    >
-      {(title || description || actions) && (
-        <div className="flex items-center justify-between gap-4 border-b border-zinc-900/40 pb-3">
-          <div className="space-y-0.5">
+    <section className={cn("space-y-4", className)} {...props}>
+      {(title || action) && (
+        <div className="flex items-center justify-between">
+          <div>
             {title && (
-              <h2 className="text-[11px] font-bold text-zinc-500 uppercase tracking-widest">
+              <h2 className="text-[13px] font-semibold text-[#F0F0F3] tracking-tight">
                 {title}
               </h2>
             )}
             {description && (
-              <p className="text-xs text-zinc-500 font-medium">
-                {description}
-              </p>
+              <p className="text-[11px] text-[#56585E] font-medium mt-0.5">{description}</p>
             )}
           </div>
-          {actions && (
-            <div className="flex items-center gap-2 shrink-0">
-              {actions}
-            </div>
-          )}
+          {action && <div>{action}</div>}
         </div>
       )}
-      <div className="w-full">{children}</div>
+      {children}
     </section>
   );
 }

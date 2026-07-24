@@ -68,13 +68,20 @@ class Settings(BaseSettings):
     minio_secure: bool = False
     minio_bucket: str = "mlcopilot"
 
-    # ── AI providers (wiring arrives with the ai/ layer) ──────────────
-    ai_provider: Literal["anthropic", "openai", "gemini", "ollama", "openrouter"] = "anthropic"
+    # ── AI providers ──────────────────────────────────────────────────
+    ai_provider: Literal["anthropic", "openai", "gemini", "ollama", "openrouter", "azure"] = "openai"
     anthropic_api_key: SecretStr = SecretStr("")
+    anthropic_model: str = "claude-3-5-sonnet-20241022"
     openai_api_key: SecretStr = SecretStr("")
+    openai_base_url: str = ""
+    openai_model: str = "gpt-4o-mini"
     google_api_key: SecretStr = SecretStr("")
     openrouter_api_key: SecretStr = SecretStr("")
+    openrouter_model: str = "openai/gpt-4o-mini"
     ollama_base_url: str = ""
+    azure_openai_api_key: SecretStr = SecretStr("")
+    azure_openai_endpoint: str = ""
+    azure_openai_deployment_name: str = "gpt-4o-mini"
     embedding_model_name: str = "all-MiniLM-L6-v2"
     embedding_dimension: int = 384
 

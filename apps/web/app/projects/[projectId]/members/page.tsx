@@ -9,10 +9,10 @@ import { Section } from '../../../../components/ui/section';
 import { Card } from '../../../../components/ui/card';
 import { Button } from '../../../../components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '../../../../components/ui/dialog';
-import { StatusPill } from '../../../../components/ui/status-pill';
 import { toast } from '../../../../components/ui/toast';
-import { Users, UserPlus, Shield, ShieldCheck, UserCheck, Trash2, Mail } from 'lucide-react';
+import { Users, UserPlus, Trash2, Mail } from 'lucide-react';
 import { SkeletonRow } from '../../../../components/ui/skeletons';
+import { GradientBadge } from '../../../../components/ui/gradient-badge';
 
 export default function MembersPage() {
   const params = useParams();
@@ -63,14 +63,16 @@ export default function MembersPage() {
     inviteMutation.mutate();
   };
 
-  const getRoleIcon = (role: string) => {
+  const getRoleVariant = (role: string) => {
     switch (role) {
       case 'owner':
-        return <ShieldCheck className="h-4 w-4 text-indigo-400" />;
+        return 'green';
       case 'admin':
-        return <Shield className="h-4 w-4 text-cyan-400" />;
+        return 'purple';
+      case 'member':
+        return 'blue';
       default:
-        return <UserCheck className="h-4 w-4 text-zinc-500" />;
+        return 'zinc';
     }
   };
 
@@ -83,17 +85,18 @@ export default function MembersPage() {
   }, [members]);
 
   return (
-    <div className="p-6 md:p-8 max-w-5xl mx-auto space-y-8 font-sans">
+    <div className="p-6 md:p-8 max-w-5xl mx-auto space-y-8 font-sans animate-fade-in">
       {/* 1. Page Header */}
       <PageHeader
         title="Workspace Members"
-        description="Manage workspace membership roles, permissions, and workspace access access control lists."
+        description="Manage workspace membership roles, permissions, and workspace access control lists."
+        icon={Users}
         actions={
           <Button
             onClick={() => setInviteOpen(true)}
             variant="default"
             size="sm"
-            className="bg-primary hover:bg-primary/95 border border-indigo-500/20 shadow-md shadow-indigo-950/20 cursor-pointer active:translate-y-[0.5px] gap-1.5"
+            className="bg-[#7C5CFC] hover:bg-[#6B4FE0] text-white border border-[#7C5CFC]/10 active:scale-[0.97] transition-all cursor-pointer gap-1.5"
           >
             <UserPlus className="h-3.5 w-3.5" />
             <span>Invite Member</span>
@@ -103,7 +106,7 @@ export default function MembersPage() {
 
       {/* 2. Active Members Directory */}
       <Section title="Active Membership Directory">
-        <Card className="bg-zinc-900/10 border-zinc-800/40 p-0 overflow-hidden">
+        <Card className="bg-[#111217] border border-[rgba(255,255,255,0.06)] p-0 overflow-hidden">
           {isLoading ? (
             <div className="p-6 space-y-3">
               {Array.from({ length: 3 }).map((_, i) => (
@@ -111,40 +114,39 @@ export default function MembersPage() {
               ))}
             </div>
           ) : isError ? (
-            <div className="p-6 text-xs font-semibold text-red-400">
+            <div className="p-6 text-xs font-semibold text-[#FF5C74]">
               Failed to load workspace members list.
             </div>
           ) : activeMembers.length === 0 ? (
-            <div className="p-8 text-center text-xs text-zinc-500 font-medium">
+            <div className="p-8 text-center text-xs text-[#8B8D98] font-medium">
               No active membership accounts found.
             </div>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse text-xs select-none">
                 <thead>
-                  <tr className="border-b border-zinc-900 bg-zinc-950/40 text-[10px] font-bold text-zinc-500 uppercase tracking-wider font-mono">
+                  <tr className="border-b border-[rgba(255,255,255,0.06)] bg-[#181A20]/50 text-[10px] font-bold text-[#56585E] uppercase tracking-wider font-mono">
                     <th className="p-4">User</th>
                     <th className="p-4">Role Authority</th>
                     <th className="p-4">Email Address</th>
                     <th className="p-4 text-right">Actions</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-zinc-900/40">
+                <tbody className="divide-y divide-[rgba(255,255,255,0.04)]">
                   {activeMembers.map((member) => (
-                    <tr key={member.user_id} className="hover:bg-zinc-900/5 transition-colors">
+                    <tr key={member.user_id} className="hover:bg-[#181A20]/30 transition-colors">
                       <td className="p-4 flex items-center gap-3">
-                        <div className="h-7 w-7 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center font-mono text-[10px] font-bold text-zinc-400 shrink-0">
+                        <div className="h-7 w-7 rounded-lg bg-[#7C5CFC]/10 border border-[#7C5CFC]/15 flex items-center justify-center font-mono text-[9px] font-bold text-[#7C5CFC] shrink-0">
                           {member.user?.full_name?.slice(0, 2).toUpperCase() || 'U'}
                         </div>
-                        <span className="font-semibold text-zinc-200">{member.user?.full_name}</span>
+                        <span className="font-semibold text-[#F0F0F3]">{member.user?.full_name}</span>
                       </td>
                       <td className="p-4">
-                        <span className="inline-flex items-center gap-1 text-[9px] font-bold text-indigo-400 font-mono uppercase bg-indigo-950/30 border border-indigo-900/20 px-2 py-0.5 rounded">
-                          {getRoleIcon(member.role)}
-                          <span>{member.role}</span>
-                        </span>
+                        <GradientBadge variant={getRoleVariant(member.role)}>
+                          {member.role}
+                        </GradientBadge>
                       </td>
-                      <td className="p-4 text-zinc-400 font-medium">{member.user?.email || member.user_id}</td>
+                      <td className="p-4 text-[#8B8D98] font-medium">{member.user?.email || member.user_id}</td>
                       <td className="p-4 text-right">
                         {member.role !== 'owner' && (
                           <button
@@ -154,7 +156,7 @@ export default function MembersPage() {
                               }
                             }}
                             disabled={removeMutation.isPending}
-                            className="p-1.5 rounded bg-rose-955/20 hover:bg-rose-955/40 border border-rose-900/20 text-rose-400 transition cursor-pointer active:translate-y-[0.5px] disabled:opacity-50"
+                            className="p-1.5 rounded-lg bg-[#FF5C74]/10 hover:bg-[#FF5C74]/20 border border-[#FF5C74]/15 text-[#FF5C74] transition-all cursor-pointer active:scale-[0.95] disabled:opacity-50"
                             title="Remove member"
                           >
                             <Trash2 className="h-3.5 w-3.5" />
@@ -172,38 +174,37 @@ export default function MembersPage() {
 
       {/* 3. Pending Invites Queue */}
       <Section title="Pending Workspace Invitations">
-        <Card className="bg-zinc-900/10 border-zinc-800/40 p-0 overflow-hidden">
+        <Card className="bg-[#111217] border border-[rgba(255,255,255,0.06)] p-0 overflow-hidden">
           {isLoading ? (
             <div className="p-6 space-y-3">
               <SkeletonRow />
             </div>
           ) : pendingMembers.length === 0 ? (
-            <div className="p-8 text-center text-xs text-zinc-550 font-medium select-none">
+            <div className="p-8 text-center text-xs text-[#56585E] font-medium select-none">
               No pending workspace invites. All tokens are active.
             </div>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse text-xs select-none">
                 <thead>
-                  <tr className="border-b border-zinc-900 bg-zinc-950/40 text-[10px] font-bold text-zinc-500 uppercase tracking-wider font-mono">
+                  <tr className="border-b border-[rgba(255,255,255,0.06)] bg-[#181A20]/50 text-[10px] font-bold text-[#56585E] uppercase tracking-wider font-mono">
                     <th className="p-4">Invited Member ID</th>
                     <th className="p-4">Invited Role</th>
                     <th className="p-4">Status Token</th>
                     <th className="p-4 text-right">Actions</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-zinc-900/40">
+                <tbody className="divide-y divide-[rgba(255,255,255,0.04)]">
                   {pendingMembers.map((member) => (
-                    <tr key={member.user_id} className="hover:bg-zinc-900/5 transition-colors">
-                      <td className="p-4 font-mono text-zinc-300 font-semibold">{member.user_id}</td>
+                    <tr key={member.user_id} className="hover:bg-[#181A20]/30 transition-colors">
+                      <td className="p-4 font-mono text-[#F0F0F3] font-semibold">{member.user_id}</td>
                       <td className="p-4">
-                        <span className="inline-flex items-center gap-1 text-[9px] font-bold text-zinc-400 font-mono uppercase bg-zinc-900/50 border border-zinc-800/80 px-2 py-0.5 rounded">
-                          {getRoleIcon(member.role)}
-                          <span>{member.role}</span>
-                        </span>
+                        <GradientBadge variant={getRoleVariant(member.role)}>
+                          {member.role}
+                        </GradientBadge>
                       </td>
                       <td className="p-4">
-                        <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[8px] font-bold tracking-wide uppercase border font-mono text-amber-400 bg-amber-955/20 border-amber-900/30 animate-pulse">
+                        <span className="inline-flex items-center px-1.5 py-0.5 rounded-lg text-[8px] font-bold tracking-wide uppercase border font-mono text-[#F5B83D] bg-[#F5B83D]/10 border-[#F5B83D]/15 animate-pulse">
                           Awaiting Bind
                         </span>
                       </td>
@@ -215,7 +216,7 @@ export default function MembersPage() {
                             }
                           }}
                           disabled={removeMutation.isPending}
-                          className="p-1.5 rounded bg-zinc-900/60 hover:bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-rose-400 transition cursor-pointer active:translate-y-[0.5px]"
+                          className="p-1.5 rounded-lg bg-[#181A20] hover:bg-[#1E2028] border border-[rgba(255,255,255,0.06)] text-[#8B8D98] hover:text-[#FF5C74] transition-all cursor-pointer active:scale-[0.95]"
                           title="Revoke Invitation"
                         >
                           <Trash2 className="h-3.5 w-3.5" />
@@ -235,7 +236,7 @@ export default function MembersPage() {
         <DialogContent className="max-w-sm">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <UserPlus className="h-4.5 w-4.5 text-indigo-400" />
+              <UserPlus className="h-4.5 w-4.5 text-[#7C5CFC]" />
               <span>Invite Member</span>
             </DialogTitle>
             <DialogDescription>
@@ -245,7 +246,7 @@ export default function MembersPage() {
 
           <form onSubmit={handleInvite} className="space-y-4">
             <div className="space-y-1.5">
-              <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-wider">
+              <label className="block text-[10px] font-semibold text-[#8B8D98] uppercase tracking-wider">
                 User ID / Account Email
               </label>
               <div className="relative flex items-center">
@@ -254,21 +255,21 @@ export default function MembersPage() {
                   value={inviteEmail}
                   onChange={(e) => setInviteEmail(e.target.value)}
                   placeholder="Enter User ID to associate"
-                  className="w-full rounded-lg bg-zinc-900/50 border border-zinc-800/80 px-3 py-2 pl-9 text-xs text-zinc-100 placeholder-zinc-500 focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/20 transition outline-none"
+                  className="w-full rounded-xl bg-[#111217] border border-[rgba(255,255,255,0.06)] px-3 py-2.5 pl-9 text-xs text-[#F0F0F3] placeholder-[#56585E] focus:border-[#7C5CFC]/40 focus:ring-1 focus:ring-[#7C5CFC]/20 outline-none transition-all"
                   required
                 />
-                <Mail className="absolute left-3 h-3.5 w-3.5 text-zinc-500" />
+                <Mail className="absolute left-3 h-3.5 w-3.5 text-[#56585E]" />
               </div>
             </div>
 
             <div className="space-y-1.5">
-              <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-wider">
+              <label className="block text-[10px] font-semibold text-[#8B8D98] uppercase tracking-wider">
                 Workspace Role Authority
               </label>
               <select
                 value={inviteRole}
                 onChange={(e: any) => setInviteRole(e.target.value)}
-                className="w-full rounded-lg bg-zinc-900/50 border border-zinc-800/80 px-3 py-2 text-xs text-zinc-200 focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/20 transition outline-none"
+                className="w-full rounded-xl bg-[#111217] border border-[rgba(255,255,255,0.06)] px-3 py-2.5 text-xs text-[#F0F0F3] focus:border-[#7C5CFC]/40 focus:ring-1 focus:ring-[#7C5CFC]/20 outline-none transition-all"
               >
                 <option value="admin">Administrator (Write access, manage members)</option>
                 <option value="member">Workspace Member (Read/Write documents/chat)</option>
@@ -282,7 +283,7 @@ export default function MembersPage() {
                 variant="ghost"
                 size="sm"
                 onClick={() => setInviteOpen(false)}
-                className="text-zinc-400"
+                className="text-[#8B8D98]"
                 disabled={inviteMutation.isPending}
               >
                 Cancel
@@ -291,7 +292,7 @@ export default function MembersPage() {
                 type="submit"
                 variant="default"
                 size="sm"
-                className="bg-primary hover:bg-primary/95 border border-indigo-500/20 shadow-md shadow-indigo-950/20 cursor-pointer active:translate-y-[0.5px]"
+                className="bg-[#7C5CFC] hover:bg-[#6B4FE0] text-white border border-[#7C5CFC]/10 active:scale-[0.97]"
                 disabled={inviteMutation.isPending}
               >
                 {inviteMutation.isPending ? 'Inviting...' : 'Send Invitation'}

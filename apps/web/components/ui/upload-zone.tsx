@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { UploadCloud, File, AlertCircle } from 'lucide-react';
+import { UploadCloud, AlertCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -93,13 +93,13 @@ export function UploadZone({
         onDrop={handleDrop}
         onClick={onButtonClick}
         animate={{
-          borderColor: isDragActive ? '#6366f1' : 'rgba(63, 63, 70, 0.4)',
-          backgroundColor: isDragActive ? 'rgba(99, 102, 241, 0.03)' : 'rgba(9, 9, 11, 0.2)',
+          borderColor: isDragActive ? '#7C5CFC' : 'rgba(255, 255, 255, 0.06)',
+          backgroundColor: isDragActive ? 'rgba(124, 92, 252, 0.03)' : '#111217',
         }}
         transition={{ duration: 0.2 }}
         className={cn(
-          "relative flex flex-col items-center justify-center border border-dashed rounded-xl p-10 text-center cursor-pointer transition-shadow select-none overflow-hidden min-h-[220px]",
-          isDragActive ? "shadow-[0_0_20px_rgba(99,102,241,0.06)] scale-[1.01]" : "hover:border-zinc-700/80 hover:shadow-[0_0_15px_rgba(255,255,255,0.01)]",
+          "relative flex flex-col items-center justify-center border border-dashed rounded-2xl p-10 text-center cursor-pointer select-none overflow-hidden min-h-[220px]",
+          isDragActive ? "shadow-[0_0_20px_rgba(124,92,252,0.06)]" : "hover:border-[rgba(124,92,252,0.15)]",
           isUploading && "pointer-events-none opacity-50"
         )}
       >
@@ -117,25 +117,25 @@ export function UploadZone({
         {isDragActive && (
           <motion.div 
             layoutId="drag-glow"
-            className="absolute inset-0 bg-gradient-to-r from-indigo-500/5 to-cyan-500/5 pointer-events-none"
+            className="absolute inset-0 bg-gradient-to-r from-[#7C5CFC]/5 to-[#4F8CFF]/5 pointer-events-none"
           />
         )}
 
-        <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-zinc-900 border border-zinc-800/80 text-zinc-500 group-hover:text-zinc-300 mb-4 shadow-[0_4px_10px_rgba(0,0,0,0.3)]">
-          <UploadCloud className={cn("h-5 w-5 transition-transform", isDragActive && "scale-110 text-indigo-400")} />
+        <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#181A20] border border-[rgba(255,255,255,0.06)] text-[#8B8D98] mb-4 shadow-[0_4px_10px_rgba(0,0,0,0.3)]">
+          <UploadCloud className={cn("h-5 w-5 transition-transform", isDragActive && "scale-110 text-[#7C5CFC]")} />
         </div>
 
-        <h3 className="text-xs font-semibold text-zinc-200">
+        <h3 className="text-xs font-semibold text-[#F0F0F3]">
           {isDragActive ? "Drop your documents here" : "Drag & drop files here, or click to choose"}
         </h3>
-        <p className="text-[10px] text-zinc-500 mt-1 font-medium">
+        <p className="text-[10px] text-[#56585E] mt-1 font-medium">
           Supports PDF, DOCX, Markdown, or plain Text (max. {maxSizeMB}MB)
         </p>
 
         {isUploading && (
-          <div className="absolute inset-0 bg-zinc-950/60 backdrop-blur-[1px] flex flex-col items-center justify-center gap-3">
-            <div className="h-5 w-5 animate-spin rounded-full border-2 border-primary border-t-transparent" />
-            <span className="text-[10px] font-semibold text-indigo-400 tracking-wider uppercase">Uploading...</span>
+          <div className="absolute inset-0 bg-[#09090B]/60 backdrop-blur-[1px] flex flex-col items-center justify-center gap-3">
+            <div className="h-5 w-5 animate-spin rounded-full border-2 border-[#7C5CFC] border-t-transparent" />
+            <span className="text-[10px] font-semibold text-[#7C5CFC] tracking-wider uppercase">Uploading...</span>
           </div>
         )}
       </motion.div>
@@ -147,7 +147,7 @@ export function UploadZone({
             initial={{ opacity: 0, y: 5 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 5 }}
-            className="mt-3 flex items-center gap-2 rounded-lg border border-red-950/50 bg-red-950/15 px-4 py-2.5 text-[11px] text-red-400"
+            className="mt-3 flex items-center gap-2 rounded-xl border border-[#FF5C74]/20 bg-[#FF5C74]/5 px-4 py-2.5 text-[11px] text-[#FF5C74]"
           >
             <AlertCircle className="h-4 w-4 shrink-0" />
             <span className="font-semibold">{error}</span>

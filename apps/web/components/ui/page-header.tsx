@@ -1,48 +1,34 @@
 'use client';
 
 import * as React from 'react';
-import { motion, HTMLMotionProps } from 'framer-motion';
 import { cn } from '@/lib/utils';
+import { LucideIcon } from 'lucide-react';
 
-interface PageHeaderProps extends HTMLMotionProps<'div'> {
+interface PageHeaderProps {
   title: string;
   description?: string;
+  icon?: LucideIcon;
   actions?: React.ReactNode;
+  className?: string;
 }
 
-export function PageHeader({
-  title,
-  description,
-  actions,
-  className,
-  ...props
-}: PageHeaderProps) {
+export function PageHeader({ title, description, icon: Icon, actions, className }: PageHeaderProps) {
   return (
-    <motion.div
-      initial={{ opacity: 0, y: -8 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4, ease: 'easeOut' }}
-      className={cn(
-        "flex flex-col md:flex-row md:items-center md:justify-between gap-4 pb-6 border-b border-zinc-900/60 mb-8",
-        className
-      )}
-      {...props}
-    >
-      <div className="space-y-1">
-        <h1 className="text-xl font-bold tracking-tight text-white sm:text-2xl font-sans">
-          {title}
-        </h1>
-        {description && (
-          <p className="text-xs text-zinc-400 font-medium max-w-xl leading-relaxed">
-            {description}
-          </p>
+    <div className={cn("flex items-start justify-between", className)}>
+      <div className="flex items-start gap-3">
+        {Icon && (
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#7C5CFC]/10 text-[#7C5CFC] border border-[#7C5CFC]/10 mt-0.5">
+            <Icon className="h-5 w-5" />
+          </div>
         )}
-      </div>
-      {actions && (
-        <div className="flex items-center gap-3 shrink-0">
-          {actions}
+        <div>
+          <h1 className="text-xl font-semibold text-[#F0F0F3] tracking-tight">{title}</h1>
+          {description && (
+            <p className="text-sm text-[#8B8D98] mt-1 max-w-xl">{description}</p>
+          )}
         </div>
-      )}
-    </motion.div>
+      </div>
+      {actions && <div className="flex items-center gap-2">{actions}</div>}
+    </div>
   );
 }

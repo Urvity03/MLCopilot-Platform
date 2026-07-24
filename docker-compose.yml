@@ -39,10 +39,14 @@ services:
   api:
     build:
       context: apps/api
-    command: uvicorn mlcopilot.main:app --host 0.0.0.0 --port 8000
+    command: uvicorn mlcopilot.main:app --host 0.0.0.0 --port 8000 --reload
     ports:
       - "8000:8000"
-    environment: *api-env
+    volumes:
+      - ./apps/api/src/mlcopilot:/opt/venv/lib/python3.12/site-packages/mlcopilot
+    environment:
+      <<: *api-env
+      HF_HUB_OFFLINE: "1"
     depends_on:
       postgres:
         condition: service_healthy

@@ -3,6 +3,24 @@ import { useRouter } from 'next/navigation';
 import { authService, RegisterPayload, LoginPayload } from '../services/auth';
 import { useAuthStore } from '../store/auth';
 
+function parseUserIdFromToken(token: string): string | null {
+  try {
+    const base64Url = token.split('.')[1];
+    if (!base64Url) return null;
+    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    const jsonPayload = decodeURIComponent(
+      atob(base64)
+        .split('')
+        .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+        .join('')
+    );
+    const parsed = JSON.parse(jsonPayload);
+    return parsed.sub || null;
+  } catch (e) {
+    return null;
+  }
+}
+
 export function useAuth() {
   const router = useRouter();
   const { setSession, logout: clearAuthStore } = useAuthStore();
@@ -15,10 +33,10 @@ export function useAuth() {
     onSuccess: ({ token, email }) => {
       const namePrefix = email.split('@')[0];
       const displayName = namePrefix.charAt(0).toUpperCase() + namePrefix.slice(1);
+      const userId = parseUserIdFromToken(token) || 'user-session';
 
-      // Create profile details from login input, treating the token as opaque
       const loggedInUser = {
-        id: 'opaque-session-id',
+        id: userId,
         email,
         full_name: displayName,
         is_active: true,
@@ -66,3 +84,4 @@ export function useAuth() {
     registerError: registerMutation.error,
   };
 }
+
