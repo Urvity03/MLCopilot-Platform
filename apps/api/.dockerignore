@@ -4,7 +4,6 @@ __pycache__/
 .mypy_cache/
 .pytest_cache/
 .ruff_cache/
-tests/
 Dockerfile
 .dockerignore
 .env
