@@ -15,12 +15,14 @@ WORKDIR /build
 
 # Dependency layer: cached unless pyproject/lock change.
 COPY pyproject.toml uv.lock ./
-RUN uv sync --frozen --no-dev --no-install-project
+RUN uv sync --frozen --no-install-project
 
 # Project layer.
 COPY src ./src
+COPY tests ./tests
 COPY README.md ./
-RUN uv sync --frozen --no-dev --no-editable
+RUN uv sync --frozen --no-editable
+RUN /opt/venv/bin/python -c "from sentence_transformers import SentenceTransformer; SentenceTransformer('all-MiniLM-L6-v2')"
 
 # ── Runtime ────────────────────────────────────────────────────────────
 FROM python:3.12-slim AS runtime
@@ -28,16 +30,19 @@ FROM python:3.12-slim AS runtime
 ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
     PATH="/opt/venv/bin:${PATH}" \
-    LOG_FORMAT=json
+    LOG_FORMAT=json \
+    HF_HOME="/home/app/.cache/huggingface"
 
-RUN groupadd --system app && useradd --system --gid app --home-dir /app app
+RUN groupadd --system app && useradd --system --gid app --home-dir /home/app app && mkdir -p /home/app/.cache/huggingface
 
 WORKDIR /app
-RUN chown app:app /app
+RUN chown -R app:app /home/app /app
 
 COPY --from=builder /opt/venv /opt/venv
+COPY --from=builder --chown=app:app /root/.cache/huggingface /home/app/.cache/huggingface
 COPY --chown=app:app alembic.ini ./alembic.ini
 COPY --chown=app:app alembic ./alembic
+COPY --chown=app:app tests ./tests
 COPY --chown=app:app docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
 RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 

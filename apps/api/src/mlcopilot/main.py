@@ -47,6 +47,18 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     app.state.db_session_factory = create_session_factory(engine)
     app.state.redis = create_redis_client(settings)
 
+    # Log LLM provider configuration at startup without exposing credentials
+    configured_provider = "gemini"
+    has_gemini_key = bool(settings.effective_gemini_api_key.get_secret_value())
+    gemini_model = settings.gemini_model
+
+    logger.info(
+        "llm.provider.startup",
+        configured_provider=configured_provider,
+        gemini_model=gemini_model,
+        has_gemini_key=has_gemini_key,
+    )
+
     logger.info(
         "startup.complete",
         environment=settings.environment,

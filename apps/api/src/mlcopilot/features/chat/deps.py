@@ -21,17 +21,14 @@ from mlcopilot.infrastructure.db.repositories.chat import (
     SqlAlchemyConversationRepository,
 )
 from mlcopilot.infrastructure.db.session import get_db_session
-from mlcopilot.infrastructure.llm.openai import OpenAIProvider
+from mlcopilot.infrastructure.llm import LLMFactory
 
 
 async def get_llm_provider(
     settings: Annotated[Settings, Depends(get_settings)],
 ) -> LLMProvider:
-    """Dependency injection wrapper providing the LLMProvider instance."""
-    return OpenAIProvider(
-        api_key=settings.openai_api_key.get_secret_value(),
-        model_name="gpt-4o-mini",
-    )
+    """Dependency injection wrapper providing the LLMProvider instance via LLMFactory."""
+    return LLMFactory.create_provider(settings)
 
 
 async def get_conversation_repository(

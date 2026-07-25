@@ -1,37 +1,28 @@
 import { Analytics } from '@vercel/analytics/next'
 import type { Metadata, Viewport } from 'next'
+import { Inter } from 'next/font/google'
 import './globals.css'
 
+const inter = Inter({
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-inter',
+})
+
 export const metadata: Metadata = {
-  title: 'v0 App',
-  description: 'Created with v0',
-  generator: 'v0.app',
-  icons: {
-    icon: [
-      {
-        url: '/icon-light-32x32.png',
-        media: '(prefers-color-scheme: light)',
-      },
-      {
-        url: '/icon-dark-32x32.png',
-        media: '(prefers-color-scheme: dark)',
-      },
-      {
-        url: '/icon.svg',
-        type: 'image/svg+xml',
-      },
-    ],
-    apple: '/apple-icon.png',
-  },
+  title: 'MLCopilot — AI Knowledge Operating System',
+  description: 'Enterprise AI platform for document intelligence, semantic search, and RAG-powered conversations.',
+  applicationName: 'MLCopilot',
 }
 
 export const viewport: Viewport = {
-  colorScheme: 'light dark',
-  themeColor: [
-    { media: '(prefers-color-scheme: light)', color: 'white' },
-    { media: '(prefers-color-scheme: dark)', color: 'black' },
-  ],
+  colorScheme: 'dark',
+  themeColor: '#09090B',
 }
+
+import { ThemeProvider } from '../components/common/ThemeProvider'
+import { QueryProvider } from '../components/common/QueryProvider'
+import { Toaster } from '../components/ui/toast'
 
 export default function RootLayout({
   children,
@@ -39,9 +30,23 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en">
-      <body className="antialiased">
-        {children}
+    <html lang="en" className={`dark ${inter.variable}`} style={{ colorScheme: 'dark' }}>
+      <body className={`${inter.className} antialiased bg-[#09090B] text-[#F0F0F3] min-h-screen relative overflow-x-hidden`}>
+        {/* Ambient grid pattern — subtle, like Linear */}
+        <div className="fixed inset-0 ambient-grid [mask-image:radial-gradient(ellipse_80%_50%_at_50%_-20%,#000_70%,transparent_100%)] pointer-events-none z-0 opacity-60" />
+        
+        {/* Ambient glow orbs */}
+        <div className="fixed -top-[300px] left-1/3 w-[800px] h-[800px] rounded-full bg-[#7C5CFC]/[0.03] blur-[150px] pointer-events-none z-0" />
+        <div className="fixed top-1/3 -right-[200px] w-[600px] h-[600px] rounded-full bg-[#4F8CFF]/[0.02] blur-[130px] pointer-events-none z-0" />
+        
+        <div className="relative z-10 min-h-screen flex flex-col">
+          <QueryProvider>
+            <ThemeProvider>
+              {children}
+              <Toaster />
+            </ThemeProvider>
+          </QueryProvider>
+        </div>
         {process.env.NODE_ENV === 'production' && <Analytics />}
       </body>
     </html>

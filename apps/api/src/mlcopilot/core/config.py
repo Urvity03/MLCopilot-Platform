@@ -37,7 +37,7 @@ class Settings(BaseSettings):
     # ── App ────────────────────────────────────────────────────────────
     environment: Literal["development", "test", "production"] = "development"
     api_v1_prefix: str = "/api/v1"
-    cors_origins: str = "http://localhost:3000"
+    cors_origins: str = "http://localhost:3000,http://127.0.0.1:3000"
 
     # ── Logging ───────────────────────────────────────────────────────
     log_level: Literal["DEBUG", "INFO", "WARNING", "ERROR"] = "INFO"
@@ -68,19 +68,24 @@ class Settings(BaseSettings):
     minio_secure: bool = False
     minio_bucket: str = "mlcopilot"
 
-    # ── AI providers (wiring arrives with the ai/ layer) ──────────────
-    ai_provider: Literal["anthropic", "openai", "gemini", "ollama", "openrouter"] = "anthropic"
-    anthropic_api_key: SecretStr = SecretStr("")
-    openai_api_key: SecretStr = SecretStr("")
+    # ── AI / LLM ───────────────────────────────────────────────────────
+    llm_provider: Literal["gemini"] = "gemini"
+
+    gemini_api_key: SecretStr = SecretStr("")
     google_api_key: SecretStr = SecretStr("")
-    openrouter_api_key: SecretStr = SecretStr("")
-    ollama_base_url: str = ""
+    gemini_model: str = "gemini-3.6-flash"
+
+    @property
+    def effective_gemini_api_key(self) -> SecretStr:
+        """Return gemini_api_key if set, falling back to google_api_key."""
+        key_val = self.gemini_api_key.get_secret_value().strip()
+        if key_val:
+            return self.gemini_api_key
+        return self.google_api_key
+
     embedding_model_name: str = "all-MiniLM-L6-v2"
     embedding_dimension: int = 384
-
-    # ── Integrations (wiring arrives with the integrations feature) ───
-    github_token: SecretStr = SecretStr("")
-    mlflow_tracking_uri: str = ""
+    # ── Integrations (wiring arrives with the integrations feature) ─── github_token: SecretStr = SecretStr("") mlflow_tracking_uri: str = ""
 
     # ── Health checks ─────────────────────────────────────────────────
     health_check_timeout_seconds: float = Field(default=2.0, gt=0)
