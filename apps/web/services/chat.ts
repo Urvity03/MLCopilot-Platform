@@ -47,7 +47,7 @@ export const chatService = {
     payload: ChatPayload,
     callbacks: ChatStreamCallbacks
   ): Promise<void> {
-    const rawBaseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1';
+    const rawBaseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000/api/v1';
     const baseUrl = rawBaseUrl.endsWith('/api/v1') ? rawBaseUrl : `${rawBaseUrl.replace(/\/+$/, '')}/api/v1`;
     const token = useAuthStore.getState().accessToken;
 
@@ -109,15 +109,24 @@ export const chatService = {
 
         if (!dataStr) continue;
 
+        console.log('[TRACE-7-BROWSER-RECEIVED-CHUNK]', new Date().toISOString(), { eventType, dataStr });
+
         try {
           const parsed = JSON.parse(dataStr);
           if (eventType === 'metadata') {
+            console.log('[TRACE-8-BROWSER-CALLBACK-EXECUTED]', new Date().toISOString(), 'onMetadata', parsed);
             callbacks.onMetadata?.(parsed);
           } else if (eventType === 'message') {
             if (parsed.text !== undefined) {
+              console.log('[TRACE-8-BROWSER-CALLBACK-EXECUTED]', new Date().toISOString(), 'onToken', parsed.text);
               callbacks.onToken?.(parsed.text);
             }
+          } else if (eventType === 'error' || parsed.error) {
+            const errMessage = parsed.error?.message || (typeof parsed.error === 'string' ? parsed.error : 'Streaming generation failed.');
+            console.log('[TRACE-8-BROWSER-CALLBACK-EXECUTED]', new Date().toISOString(), 'onError', errMessage);
+            callbacks.onError?.(new Error(errMessage));
           } else if (eventType === 'done') {
+            console.log('[TRACE-8-BROWSER-CALLBACK-EXECUTED]', new Date().toISOString(), 'onDone');
             callbacks.onDone?.();
           }
         } catch (e) {
