@@ -5,45 +5,49 @@ from __future__ import annotations
 from anyio import to_thread
 from sentence_transformers import SentenceTransformer
 
+from mlcopilot.core.logging import get_logger
 from mlcopilot.domain.embedding import EmbeddingProvider
+
+logger = get_logger("mlcopilot.infrastructure.embeddings.sentence_transformer")
 
 
 class SentenceTransformerEmbeddingProvider(EmbeddingProvider):
-    """Local vector embedding generator powered by sentence-transformers with instant fallback."""
+    """Local vector embedding generator powered by sentence-transformers."""
 
     def __init__(self, model_name: str = "all-MiniLM-L6-v2") -> None:
         self.model_name = model_name
-        self._model = None
-        self._failed_init = False
+        self._model: SentenceTransformer | None = None
+        self._get_model()
+
+    def _get_model(self) -> SentenceTransformer:
+        if self._model is not None:
+            return self._model
+
+        # 1. Try local files first (offline cache)
         try:
-            self._model = SentenceTransformer(model_name, local_files_only=True)
-        except Exception:
-            pass
+            self._model = SentenceTransformer(self.model_name, local_files_only=True)
+            logger.info("embedding.model_loaded_offline", model=self.model_name)
+            return self._model
+        except Exception as e_offline:
+            logger.info(
+                "embedding.model_offline_load_failed_attempting_download",
+                model=self.model_name,
+                details=str(e_offline),
+            )
 
-    def _get_model(self):
-        if self._failed_init:
-            return None
-        if self._model is None:
-            try:
-                self._model = SentenceTransformer(self.model_name, local_files_only=True)
-            except Exception:
-                try:
-                    self._model = SentenceTransformer(self.model_name)
-                except Exception:
-                    self._failed_init = True
-                    return None
-        return self._model
-
-
-
-    def _fallback_vector(self, text: str) -> list[float]:
-        import hashlib
-        h = hashlib.sha256(text.encode('utf-8')).digest()
-        vec = []
-        for i in range(384):
-            val = ((h[i % len(h)] + i * 17) % 256) / 256.0 - 0.5
-            vec.append(val)
-        return vec
+        # 2. Attempt online download/cache if local_files_only fails
+        try:
+            self._model = SentenceTransformer(self.model_name)
+            logger.info("embedding.model_downloaded_and_loaded", model=self.model_name)
+            return self._model
+        except Exception as e_online:
+            msg = (
+                f"Failed to load SentenceTransformer model '{self.model_name}'. "
+                f"Offline error: {e_offline}, Online error: {e_online}. "
+                "Semantic retrieval cannot operate without valid vector embeddings."
+            )
+            logger.error("embedding.model_init_failed", error=msg)
+            raise RuntimeError(msg) from e_online
 
     async def embed(self, text: str) -> list[float]:
         """Generate embedding vector for a single string chunk in a threadpool."""
@@ -55,23 +59,14 @@ class SentenceTransformerEmbeddingProvider(EmbeddingProvider):
 
     def _embed_sync(self, text: str) -> list[float]:
         model = self._get_model()
-        if model is not None:
-            try:
-                vector = model.encode(text, convert_to_numpy=True)
-                return [float(x) for x in vector.tolist()]
-            except Exception:
-                pass
-        return self._fallback_vector(text)
+        vector = model.encode(text, convert_to_numpy=True)
+        return [float(x) for x in vector.tolist()]
 
     def _embed_many_sync(self, texts: list[str]) -> list[list[float]]:
         if not texts:
             return []
         model = self._get_model()
-        if model is not None:
-            try:
-                vectors = model.encode(texts, convert_to_numpy=True)
-                return [[float(x) for x in row] for row in vectors.tolist()]
-            except Exception:
-                pass
-        return [self._fallback_vector(t) for t in texts]
+        vectors = model.encode(texts, convert_to_numpy=True)
+        return [[float(x) for x in row] for row in vectors.tolist()]
+
 
