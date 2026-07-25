@@ -12,16 +12,14 @@ x-api-env: &api-env
   MINIO_SECURE: "false"
   MINIO_BUCKET: mlcopilot
   JWT_SECRET: ${JWT_SECRET:-dev-only-change-me-in-production-0000}
-  ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
-  OPENAI_API_KEY: ${OPENAI_API_KEY:-}
-  OPENAI_BASE_URL: ${OPENAI_BASE_URL:-http://host.docker.internal:8099/v1}
+  GEMINI_API_KEY: ${GEMINI_API_KEY:-}
   GOOGLE_API_KEY: ${GOOGLE_API_KEY:-}
-  OPENROUTER_API_KEY: ${OPENROUTER_API_KEY:-}
-  OLLAMA_BASE_URL: ${OLLAMA_BASE_URL:-}
+  GEMINI_MODEL: ${GEMINI_MODEL:-gemini-3.6-flash}
   GITHUB_TOKEN: ${GITHUB_TOKEN:-}
   MLFLOW_TRACKING_URI: ${MLFLOW_TRACKING_URI:-}
   ENVIRONMENT: development
-  CORS_ORIGINS: http://localhost:3000
+  LOG_LEVEL: ${LOG_LEVEL:-DEBUG}
+  CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:3000,http://127.0.0.1:3000}
 
 services:
   web:

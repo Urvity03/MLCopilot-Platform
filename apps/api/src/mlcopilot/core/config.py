@@ -37,7 +37,7 @@ class Settings(BaseSettings):
     # ── App ────────────────────────────────────────────────────────────
     environment: Literal["development", "test", "production"] = "development"
     api_v1_prefix: str = "/api/v1"
-    cors_origins: str = "http://localhost:3000"
+    cors_origins: str = "http://localhost:3000,http://127.0.0.1:3000"
 
     # ── Logging ───────────────────────────────────────────────────────
     log_level: Literal["DEBUG", "INFO", "WARNING", "ERROR"] = "INFO"
@@ -68,26 +68,24 @@ class Settings(BaseSettings):
     minio_secure: bool = False
     minio_bucket: str = "mlcopilot"
 
-    # ── AI providers ──────────────────────────────────────────────────
-    ai_provider: Literal["anthropic", "openai", "gemini", "ollama", "openrouter", "azure"] = "openai"
-    anthropic_api_key: SecretStr = SecretStr("")
-    anthropic_model: str = "claude-3-5-sonnet-20241022"
-    openai_api_key: SecretStr = SecretStr("")
-    openai_base_url: str = ""
-    openai_model: str = "gpt-4o-mini"
+    # ── AI / LLM ───────────────────────────────────────────────────────
+    llm_provider: Literal["gemini"] = "gemini"
+
+    gemini_api_key: SecretStr = SecretStr("")
     google_api_key: SecretStr = SecretStr("")
-    openrouter_api_key: SecretStr = SecretStr("")
-    openrouter_model: str = "openai/gpt-4o-mini"
-    ollama_base_url: str = ""
-    azure_openai_api_key: SecretStr = SecretStr("")
-    azure_openai_endpoint: str = ""
-    azure_openai_deployment_name: str = "gpt-4o-mini"
+    gemini_model: str = "gemini-3.6-flash"
+
+    @property
+    def effective_gemini_api_key(self) -> SecretStr:
+        """Return gemini_api_key if set, falling back to google_api_key."""
+        key_val = self.gemini_api_key.get_secret_value().strip()
+        if key_val:
+            return self.gemini_api_key
+        return self.google_api_key
+
     embedding_model_name: str = "all-MiniLM-L6-v2"
     embedding_dimension: int = 384
-
-    # ── Integrations (wiring arrives with the integrations feature) ───
-    github_token: SecretStr = SecretStr("")
-    mlflow_tracking_uri: str = ""
+    # ── Integrations (wiring arrives with the integrations feature) ─── github_token: SecretStr = SecretStr("") mlflow_tracking_uri: str = ""
 
     # ── Health checks ─────────────────────────────────────────────────
     health_check_timeout_seconds: float = Field(default=2.0, gt=0)
