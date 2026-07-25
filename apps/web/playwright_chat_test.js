@@ -47,17 +47,28 @@ async function testChatFull() {
   });
 
   try {
-    // 1. Login
-    console.log('1. Navigating to Login...');
-    await page.goto('http://localhost:3000/login');
-    await page.waitForSelector('input[type="email"]');
-    await page.fill('input[type="email"]', 'lead_engineer@mlcopilot.dev');
+    const testEmail = `lead_engineer_${Date.now()}@mlcopilot.dev`;
+    console.log('1. Navigating to Register with:', testEmail);
+    await page.goto('http://127.0.0.1:3000/register');
+    await page.waitForSelector('input[name="full_name"]');
+    await page.fill('input[name="full_name"]', 'Lead Engineer');
+    await page.fill('input[type="email"]', testEmail);
     await page.fill('input[type="password"]', 'ProductionPassword123!');
     await page.click('button[type="submit"]');
 
+    // Wait for redirect to dashboard or login
+    await page.waitForTimeout(1000);
+    if (page.url().includes('/login')) {
+      console.log('Account exists or redirected to login, signing in...');
+      await page.waitForSelector('input[type="email"]');
+      await page.fill('input[type="email"]', 'lead_engineer@mlcopilot.dev');
+      await page.fill('input[type="password"]', 'ProductionPassword123!');
+      await page.click('button[type="submit"]');
+    }
+
     // 2. Wait for Dashboard
     console.log('2. Waiting for Dashboard...');
-    await page.waitForURL('**/dashboard');
+    await page.waitForURL('**/dashboard', { timeout: 15000 });
     await page.waitForSelector('text=Active Workspaces');
 
     // 3. Create fresh workspace
@@ -77,7 +88,7 @@ async function testChatFull() {
 
     // 5. Navigate to AI Chat
     console.log('5. Navigating to Chat Page...');
-    await page.goto(`http://localhost:3000/projects/${projectId}/chat`);
+    await page.goto(`http://127.0.0.1:3000/projects/${projectId}/chat`);
     await page.waitForSelector('textarea[placeholder*="Ask anything"]');
     await page.screenshot({ path: path.join(ARTIFACT_DIR, 'ai_chat_1_empty.png') });
 
