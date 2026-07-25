@@ -48,19 +48,15 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     app.state.redis = create_redis_client(settings)
 
     # Log LLM provider configuration at startup without exposing credentials
-    provider = (settings.ai_provider or "openai").lower()
-    has_openai_key = bool(settings.openai_api_key.get_secret_value())
-    has_openrouter_key = bool(settings.openrouter_api_key.get_secret_value())
-    has_anthropic_key = bool(settings.anthropic_api_key.get_secret_value())
+    configured_provider = "gemini"
+    has_gemini_key = bool(settings.effective_gemini_api_key.get_secret_value())
+    gemini_model = settings.gemini_model
 
     logger.info(
         "llm.provider.startup",
-        configured_provider=provider,
-        has_openai_key=has_openai_key,
-        has_openrouter_key=has_openrouter_key,
-        has_anthropic_key=has_anthropic_key,
-        base_url=settings.openai_base_url or "https://api.openai.com/v1",
-        model=settings.openai_model,
+        configured_provider=configured_provider,
+        gemini_model=gemini_model,
+        has_gemini_key=has_gemini_key,
     )
 
     logger.info(

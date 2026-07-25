@@ -146,6 +146,7 @@ class RAGService:
         await self._conversation_repo.commit()
 
         # 1. Retrieval
+        start_time = datetime.now(UTC)
         chunks = await self._retrieval_service.retrieve_relevant_chunks(
             project_id, question
         )
@@ -168,23 +169,59 @@ class RAGService:
             question, chunks, history[:-1]
         )
 
-        # 3. Stream Metadata first (conversation_id & citations)
+        # 3. RAG Debug Logging
+        full_constructed_prompt = (
+            f"=== SYSTEM PROMPT ===\n{system_prompt}\n\n"
+            f"{user_prompt}"
+        )
+        provider_name = getattr(self._generation_service._llm_provider, "_model_name", "configured_llm")
+
+        from mlcopilot.core.logging import get_logger
+        logger = get_logger("mlcopilot.features.chat.service")
+        logger.info(
+            "rag.query_debug",
+            question=question,
+            retrieved_count=len(chunks),
+            retrieved_chunk_ids=[str(c.chunk_id) for c in chunks],
+            retrieved_filenames=[c.filename for c in chunks],
+            similarity_scores=[round(c.score, 4) for c in chunks],
+            provider=provider_name,
+            constructed_prompt=full_constructed_prompt,
+        )
+        print(f"\n==================== [RAG DEBUG PROMPT LOG] ====================\n{full_constructed_prompt}\n================================================================\n", flush=True)
+
+        # 4. Stream Metadata first (conversation_id & citations)
         metadata_payload = {
             "conversation_id": str(conv.id),
             "citations": [self._citation_to_dict(c) for c in citations],
         }
-        yield f"event: metadata\ndata: {json.dumps(metadata_payload)}\n\n"
+        metadata_sse = f"event: metadata\ndata: {json.dumps(metadata_payload)}\n\n"
+        logger.info("[TRACE-3-CHATSERVICE-YIELD]", timestamp=datetime.now(UTC).isoformat(), event_type="metadata", payload=metadata_sse)
+        yield metadata_sse
 
-        # 4. Stream tokens
+        # 5. Stream tokens
         accumulated_text = []
-        async for token in self._generation_service.generate_response_stream(
-            system_prompt, user_prompt
-        ):
-            accumulated_text.append(token)
-            yield f"event: message\ndata: {json.dumps({'text': token})}\n\n"
+        try:
+            async for token in self._generation_service.generate_response_stream(
+                system_prompt, user_prompt
+            ):
+                accumulated_text.append(token)
+                msg_sse = f"event: message\ndata: {json.dumps({'text': token})}\n\n"
+                logger.info("[TRACE-3-CHATSERVICE-YIELD]", timestamp=datetime.now(UTC).isoformat(), event_type="message", payload=msg_sse)
+                yield msg_sse
+        except Exception as e:
+            logger.error("chat.stream_generation.error", error_type=type(e).__name__, details=str(e))
+            err_msg = str(e) or "LLM token generation failed."
+            err_sse = f"event: error\ndata: {json.dumps({'error': {'message': err_msg}})}\n\n"
+            logger.info("[TRACE-3-CHATSERVICE-YIELD]", timestamp=datetime.now(UTC).isoformat(), event_type="error", payload=err_sse)
+            yield err_sse
+            return
 
-        # 5. Persist assistant output to db
+        # 6. Persist assistant output to db
         full_answer = "".join(accumulated_text)
+        latency_ms = round((datetime.now(UTC) - start_time).total_seconds() * 1000, 2)
+        logger.info("rag.query_completed", question=question, latency_ms=latency_ms)
+
         assistant_msg = ChatMessage(
             id=uuid.uuid4(),
             conversation_id=conv.id,
@@ -196,7 +233,7 @@ class RAGService:
         await self._conversation_repo.add_message(assistant_msg)
         await self._conversation_repo.commit()
 
-        # 6. Stream final done event
+        # 7. Stream final done event
         yield "event: done\ndata: {\"done\": true}\n\n"
 
     def _citation_to_dict(self, cit: Citation) -> dict[str, Any]:

@@ -21,46 +21,14 @@ from mlcopilot.infrastructure.db.repositories.chat import (
     SqlAlchemyConversationRepository,
 )
 from mlcopilot.infrastructure.db.session import get_db_session
-from mlcopilot.infrastructure.llm.openai import OpenAIProvider
+from mlcopilot.infrastructure.llm import LLMFactory
 
 
 async def get_llm_provider(
     settings: Annotated[Settings, Depends(get_settings)],
 ) -> LLMProvider:
-    """Dependency injection wrapper providing the LLMProvider instance."""
-    from mlcopilot.core.logging import get_logger
-    logger = get_logger("mlcopilot.features.chat.deps")
-
-    provider_type = (settings.ai_provider or "openai").lower()
-    openai_key = settings.openai_api_key.get_secret_value()
-    openrouter_key = settings.openrouter_api_key.get_secret_value()
-    anthropic_key = settings.anthropic_api_key.get_secret_value()
-
-    # Detect provider based on settings or key presence
-    if provider_type == "openrouter" or (openrouter_key and not openai_key and not anthropic_key):
-        base_url = "https://openrouter.ai/api/v1"
-        model = settings.openrouter_model or "openai/gpt-4o-mini"
-        logger.info("llm.provider.instantiated", provider="openrouter", base_url=base_url, model=model, has_key=bool(openrouter_key))
-        return OpenAIProvider(api_key=openrouter_key, model_name=model, base_url=base_url)
-
-    elif provider_type == "azure":
-        base_url = settings.azure_openai_endpoint or None
-        model = settings.azure_openai_deployment_name or "gpt-4o-mini"
-        key = settings.azure_openai_api_key.get_secret_value()
-        logger.info("llm.provider.instantiated", provider="azure", base_url=base_url, model=model, has_key=bool(key))
-        return OpenAIProvider(api_key=key, model_name=model, base_url=base_url)
-
-    elif provider_type == "ollama":
-        base_url = settings.ollama_base_url or "http://host.docker.internal:11434/v1"
-        model = "llama3"
-        logger.info("llm.provider.instantiated", provider="ollama", base_url=base_url, model=model)
-        return OpenAIProvider(api_key="ollama", model_name=model, base_url=base_url)
-
-    else:
-        base_url = settings.openai_base_url or None
-        model = settings.openai_model or "gpt-4o-mini"
-        logger.info("llm.provider.instantiated", provider="openai", base_url=base_url or "https://api.openai.com/v1", model=model, has_key=bool(openai_key))
-        return OpenAIProvider(api_key=openai_key, model_name=model, base_url=base_url)
+    """Dependency injection wrapper providing the LLMProvider instance via LLMFactory."""
+    return LLMFactory.create_provider(settings)
 
 
 async def get_conversation_repository(

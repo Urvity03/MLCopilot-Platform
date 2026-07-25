@@ -42,15 +42,26 @@ async def chat_with_project(
     if not project:
         raise NotFoundError("Project not found")
 
+    from datetime import datetime, timezone
+    from mlcopilot.core.logging import get_logger
+    logger = get_logger("mlcopilot.features.chat.router")
+
+    now_iso = datetime.now(timezone.utc).isoformat()
+    logger.info("[TRACE-2-FASTAPI-REQUEST]", timestamp=now_iso, project_id=str(project_id), question=payload.question, stream=payload.stream)
+
     if payload.stream:
-        generator = rag_service.chat_stream(
-            project_id=context.project_id,
-            project_name=project.name,
-            user_id=context.user.id,
-            question=payload.question,
-            conversation_id=payload.conversation_id,
-        )
-        return StreamingResponse(generator, media_type="text/event-stream")
+        async def traced_generator():
+            async for item in rag_service.chat_stream(
+                project_id=context.project_id,
+                project_name=project.name,
+                user_id=context.user.id,
+                question=payload.question,
+                conversation_id=payload.conversation_id,
+            ):
+                logger.info("[TRACE-6-FASTAPI-RESPONSE-YIELD]", timestamp=datetime.now(timezone.utc).isoformat(), item=item)
+                yield item
+
+        return StreamingResponse(traced_generator(), media_type="text/event-stream")
 
     # Non-streaming complete generation
     resp = await rag_service.chat(
