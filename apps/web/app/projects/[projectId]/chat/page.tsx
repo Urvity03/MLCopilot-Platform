@@ -120,8 +120,11 @@ export default function ChatPage() {
           onToken: (token) => {
             setStreamingContent((prev) => prev + token);
           },
-          onDone: () => {
+          onDone: async () => {
             console.log('[CHAT UI] Stream complete event received');
+            if (invalidateChatQueries) {
+              await invalidateChatQueries(activeConvId);
+            }
             setIsStreaming(false);
             setStreamingUserMsg(null);
             setStreamingContent('');
