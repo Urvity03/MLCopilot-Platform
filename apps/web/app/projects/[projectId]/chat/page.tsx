@@ -43,7 +43,27 @@ export default function ChatPage() {
   const [input, setInput] = React.useState('');
   const [copiedId, setCopiedId] = React.useState<string | null>(null);
   const [selectedCitation, setSelectedCitation] = React.useState<any | null>(null);
-  const [activeModel, setActiveModel] = React.useState('gpt-4o');
+  const [llmDisplay, setLlmDisplay] = React.useState('Ollama • llama3.1:8b');
+
+  // Dynamically fetch configured LLM info from backend
+  React.useEffect(() => {
+    async function fetchLLMConfig() {
+      try {
+        const rawBase = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1';
+        const baseUrl = rawBase.endsWith('/api/v1') ? rawBase : `${rawBase.replace(/\/+$/, '')}/api/v1`;
+        const res = await fetch(`${baseUrl}/health/llm`);
+        if (res.ok) {
+          const data = await res.json();
+          if (data?.display_name) {
+            setLlmDisplay(data.display_name);
+          }
+        }
+      } catch (err) {
+        console.error('Failed to fetch active LLM config:', err);
+      }
+    }
+    fetchLLMConfig();
+  }, []);
 
   // Streaming UI state
   const [isStreaming, setIsStreaming] = React.useState(false);
@@ -260,11 +280,10 @@ export default function ChatPage() {
           </div>
 
           <div className="flex items-center gap-2">
-            {/* LLM Model Selector Dropdown Mock */}
+            {/* Active LLM Model Provider Display */}
             <div className="flex items-center gap-1.5 rounded-lg bg-[#111217] border border-[rgba(255,255,255,0.06)] px-2.5 py-1 text-[11px] font-medium text-[#8B8D98]">
               <Terminal className="h-3 w-3 text-[#7C5CFC]" />
-              <span>gpt-4o</span>
-              <ChevronDown className="h-3 w-3 opacity-60" />
+              <span>{llmDisplay}</span>
             </div>
             <span className="text-[9px] bg-[#7C5CFC]/10 border border-[#7C5CFC]/10 rounded-md px-2 py-0.5 text-[#7C5CFC] font-bold font-mono tracking-wider">
               RAG PIPELINE

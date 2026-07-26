@@ -33,3 +33,11 @@ class ReadinessResponse(BaseModel):
     status: Literal["ok", "degraded", "unavailable"]
     version: str
     checks: dict[str, DependencyCheck]
+
+
+class LLMInfoResponse(BaseModel):
+    """Configuration information for the active LLM provider and model."""
+
+    provider: str
+    model: str
+    display_name: str

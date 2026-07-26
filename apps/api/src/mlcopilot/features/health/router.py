@@ -17,11 +17,35 @@ from mlcopilot.features.health.deps import get_readiness_probes
 from mlcopilot.features.health.schemas import (
     DependencyCheck,
     LivenessResponse,
+    LLMInfoResponse,
     ReadinessResponse,
 )
 from mlcopilot.features.health.service import DependencyProbe, run_readiness_checks
 
 router = APIRouter(prefix="/health", tags=["health"])
+
+
+@router.get("/llm", response_model=LLMInfoResponse)
+async def get_llm_info(
+    settings: Annotated[Settings, Depends(get_settings)],
+) -> LLMInfoResponse:
+    """Return active LLM provider and model configuration."""
+    provider = (settings.llm_provider or "ollama").lower()
+    if provider == "ollama":
+        model = settings.ollama_model
+        display_name = f"Ollama • {model}"
+    elif provider == "gemini":
+        model = settings.gemini_model
+        display_name = f"Gemini • {model}"
+    else:
+        model = "openrouter"
+        display_name = f"OpenRouter • {model}"
+
+    return LLMInfoResponse(
+        provider=provider,
+        model=model,
+        display_name=display_name,
+    )
 
 
 @router.get("/live", response_model=LivenessResponse)
