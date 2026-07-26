@@ -145,11 +145,14 @@ class RAGService:
         await self._conversation_repo.add_message(user_msg)
         await self._conversation_repo.commit()
 
-        # 1. Retrieval
+        # 1. Retrieval timing
         start_time = datetime.now(UTC)
+        t_retrieval_start = datetime.now(UTC)
         chunks = await self._retrieval_service.retrieve_relevant_chunks(
             project_id, question
         )
+        retrieval_ms = round((datetime.now(UTC) - t_retrieval_start).total_seconds() * 1000, 2)
+
         citations = [
             Citation(
                 upload_id=c.upload_id,
@@ -162,12 +165,14 @@ class RAGService:
             for c in chunks
         ]
 
-        # 2. Prompt Assembly
+        # 2. Prompt Assembly timing
+        t_prompt_start = datetime.now(UTC)
         system_prompt = PromptBuilder.build_system_prompt(project_name)
         history = await self._conversation_repo.get_messages(conv.id)
         user_prompt = PromptBuilder.build_user_prompt(
             question, chunks, history[:-1]
         )
+        prompt_build_ms = round((datetime.now(UTC) - t_prompt_start).total_seconds() * 1000, 2)
 
         # 3. RAG Debug Logging
         full_constructed_prompt = (
@@ -186,9 +191,10 @@ class RAGService:
             retrieved_filenames=[c.filename for c in chunks],
             similarity_scores=[round(c.score, 4) for c in chunks],
             provider=provider_name,
+            retrieval_ms=retrieval_ms,
+            prompt_build_ms=prompt_build_ms,
             constructed_prompt=full_constructed_prompt,
         )
-        print(f"\n==================== [RAG DEBUG PROMPT LOG] ====================\n{full_constructed_prompt}\n================================================================\n", flush=True)
 
         # 4. Stream Metadata first (conversation_id & citations)
         metadata_payload = {
@@ -199,12 +205,18 @@ class RAGService:
         logger.info("[TRACE-3-CHATSERVICE-YIELD]", timestamp=datetime.now(UTC).isoformat(), event_type="metadata", payload=metadata_sse)
         yield metadata_sse
 
-        # 5. Stream tokens
+        # 5. Stream tokens & measure first token latency
         accumulated_text = []
+        t_llm_start = datetime.now(UTC)
+        first_token_ms: float | None = None
+
         try:
             async for token in self._generation_service.generate_response_stream(
                 system_prompt, user_prompt
             ):
+                if first_token_ms is None:
+                    first_token_ms = round((datetime.now(UTC) - t_llm_start).total_seconds() * 1000, 2)
+
                 accumulated_text.append(token)
                 msg_sse = f"event: message\ndata: {json.dumps({'text': token})}\n\n"
                 logger.info("[TRACE-3-CHATSERVICE-YIELD]", timestamp=datetime.now(UTC).isoformat(), event_type="message", payload=msg_sse)
@@ -217,11 +229,31 @@ class RAGService:
             yield err_sse
             return
 
-        # 6. Persist assistant output to db
-        full_answer = "".join(accumulated_text)
-        latency_ms = round((datetime.now(UTC) - start_time).total_seconds() * 1000, 2)
-        logger.info("rag.query_completed", question=question, latency_ms=latency_ms)
+        # 6. Performance breakdown metrics calculation & logging
+        total_ms = round((datetime.now(UTC) - start_time).total_seconds() * 1000, 2)
+        streaming_ms = round((datetime.now(UTC) - t_llm_start).total_seconds() * 1000, 2)
+        first_token_ms = first_token_ms or streaming_ms
 
+        logger.info(
+            "rag.performance_metrics",
+            retrieval_ms=retrieval_ms,
+            prompt_build_ms=prompt_build_ms,
+            first_token_ms=first_token_ms,
+            streaming_ms=streaming_ms,
+            total_ms=total_ms,
+        )
+        print(
+            f"\n[PIPELINE LATENCY BREAKDOWN]\n"
+            f"  - Retrieval:       {retrieval_ms} ms\n"
+            f"  - Prompt Build:    {prompt_build_ms} ms\n"
+            f"  - LLM First Token: {first_token_ms} ms\n"
+            f"  - Streaming:       {streaming_ms} ms\n"
+            f"  - Total:           {total_ms} ms\n",
+            flush=True,
+        )
+
+        # 7. Persist assistant output to db
+        full_answer = "".join(accumulated_text)
         assistant_msg = ChatMessage(
             id=uuid.uuid4(),
             conversation_id=conv.id,
@@ -233,7 +265,7 @@ class RAGService:
         await self._conversation_repo.add_message(assistant_msg)
         await self._conversation_repo.commit()
 
-        # 7. Stream final done event
+        # 8. Stream final done event
         yield "event: done\ndata: {\"done\": true}\n\n"
 
     def _citation_to_dict(self, cit: Citation) -> dict[str, Any]:

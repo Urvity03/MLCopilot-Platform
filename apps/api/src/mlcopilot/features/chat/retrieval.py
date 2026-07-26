@@ -35,9 +35,14 @@ class RetrievalService:
             project_id=project_id, query_vector=query_vector, top_k=top_k
         )
 
-        # 3. Map search results to domain RetrievedChunks
+        # 3. Deduplicate content and map search results to domain RetrievedChunks
+        seen_contents: set[str] = set()
         retrieved_chunks = []
-        for res in search_results:
+        for res in sorted(search_results, key=lambda r: r.score, reverse=True):
+            clean_content = res.content.strip()
+            if clean_content in seen_contents:
+                continue
+            seen_contents.add(clean_content)
             filename = res.metadata.get("filename", "Unknown Document")
             position = res.metadata.get("position", 0)
             retrieved_chunks.append(
