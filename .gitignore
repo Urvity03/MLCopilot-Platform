@@ -40,3 +40,8 @@ apps/api/openapi.json
 .idea/
 .vscode/
 *.log
+
+# Local debugging
+apps/api/scripts/
+rag_verification_report.json
+test_gemini.py
