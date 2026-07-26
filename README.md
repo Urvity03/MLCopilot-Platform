@@ -333,6 +333,28 @@ docker compose up --build
 
 ---
 
+## Local LLM Setup (Ollama Default)
+
+MLCopilot Platform uses **Ollama** as the default local LLM provider.
+
+1. **Install Ollama** on your host machine from [ollama.com](https://ollama.com).
+2. **Pull the default model**:
+   ```bash
+   ollama pull qwen3:8b
+   ```
+3. **Start the Ollama server**:
+   ```bash
+   ollama serve
+   ```
+4. **Run MLCopilot**:
+   ```bash
+   docker compose up
+   ```
+
+> **Optional Provider Switching**: To use Google Gemini instead of local Ollama, set `LLM_PROVIDER=gemini` and provide your `GEMINI_API_KEY` in `.env`.
+
+---
+
 ## Backend Development
 
 ```bash
