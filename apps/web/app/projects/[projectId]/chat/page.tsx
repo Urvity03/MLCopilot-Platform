@@ -457,10 +457,9 @@ export default function ChatPage() {
                           </ReactMarkdown>
                         </div>
                       ) : (
-                        <div className="flex items-center gap-1 py-2">
-                          <span className="h-1.5 w-1.5 rounded-full bg-[#7C5CFC] animate-bounce [animation-delay:-0.3s]" />
-                          <span className="h-1.5 w-1.5 rounded-full bg-[#7C5CFC] animate-bounce [animation-delay:-0.15s]" />
-                          <span className="h-1.5 w-1.5 rounded-full bg-[#7C5CFC] animate-bounce" />
+                        <div className="flex items-center gap-2 py-2 text-xs text-[#8B8D98] font-medium">
+                          <span className="h-1.5 w-1.5 rounded-full bg-[#7C5CFC] animate-ping" />
+                          <span>{streamingCitations.length > 0 ? "Thinking..." : "Searching workspace..."}</span>
                         </div>
                       )}
 
