@@ -48,16 +48,38 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     app.state.redis = create_redis_client(settings)
 
     # Log LLM provider configuration at startup without exposing credentials
-    configured_provider = "gemini"
-    has_gemini_key = bool(settings.effective_gemini_api_key.get_secret_value())
-    gemini_model = settings.gemini_model
+    provider_name = (settings.llm_provider or "ollama").lower()
 
-    logger.info(
-        "llm.provider.startup",
-        configured_provider=configured_provider,
-        gemini_model=gemini_model,
-        has_gemini_key=has_gemini_key,
-    )
+    if provider_name == "ollama":
+        from mlcopilot.infrastructure.llm.ollama import OllamaProvider
+
+        ollama_prov = OllamaProvider(
+            base_url=settings.ollama_base_url, model_name=settings.ollama_model
+        )
+        is_healthy = await ollama_prov.health_check()
+        if not is_healthy:
+            logger.error(
+                "Ollama server is unavailable at %s. Start it using: ollama serve",
+                settings.ollama_base_url,
+                provider="ollama",
+                base_url=settings.ollama_base_url,
+                model=settings.ollama_model,
+            )
+        else:
+            logger.info(
+                "llm.provider.ollama_ready",
+                provider="ollama",
+                base_url=settings.ollama_base_url,
+                model=settings.ollama_model,
+            )
+    else:
+        has_gemini_key = bool(settings.effective_gemini_api_key.get_secret_value())
+        logger.info(
+            "llm.provider.startup",
+            configured_provider=provider_name,
+            gemini_model=settings.gemini_model,
+            has_gemini_key=has_gemini_key,
+        )
 
     logger.info(
         "startup.complete",

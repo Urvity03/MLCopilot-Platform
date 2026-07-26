@@ -69,7 +69,10 @@ class Settings(BaseSettings):
     minio_bucket: str = "mlcopilot"
 
     # ── AI / LLM ───────────────────────────────────────────────────────
-    llm_provider: Literal["gemini"] = "gemini"
+    llm_provider: Literal["ollama", "gemini", "openrouter"] = "ollama"
+
+    ollama_base_url: str = "http://host.docker.internal:11434"
+    ollama_model: str = "qwen3:8b"
 
     gemini_api_key: SecretStr = SecretStr("")
     google_api_key: SecretStr = SecretStr("")
