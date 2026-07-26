@@ -88,6 +88,8 @@ class Settings(BaseSettings):
 
     embedding_model_name: str = "all-MiniLM-L6-v2"
     embedding_dimension: int = 384
+    rag_similarity_threshold: float = Field(default=0.35, ge=0.0, le=1.0)
+    rag_max_chunks: int = Field(default=3, ge=1, le=10)
     # ── Integrations (wiring arrives with the integrations feature) ─── github_token: SecretStr = SecretStr("") mlflow_tracking_uri: str = ""
 
     # ── Health checks ─────────────────────────────────────────────────

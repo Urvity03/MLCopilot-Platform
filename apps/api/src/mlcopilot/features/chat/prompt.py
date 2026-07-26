@@ -1,4 +1,4 @@
-"""PromptBuilder service for RAG system prompt formatting."""
+"""PromptBuilder service for RAG & general conversational system prompt formatting."""
 
 from __future__ import annotations
 
@@ -9,11 +9,11 @@ if TYPE_CHECKING:
 
 
 class PromptBuilder:
-    """Prompt assembler and formatter for RAG LLM queries."""
+    """Prompt assembler and formatter for RAG & conversational LLM queries."""
 
     @staticmethod
     def build_system_prompt(project_name: str) -> str:
-        """Construct the system instruction prompt for RAG queries."""
+        """Construct the system instruction prompt for grounded RAG queries."""
         return (
             f"You are MLCopilot, an advanced AI copilot for the project '{project_name}'. "
             "You will be given a user question, a conversational history, and a list of "
@@ -30,29 +30,24 @@ class PromptBuilder:
         )
 
     @staticmethod
+    def build_conversational_system_prompt(project_name: str) -> str:
+        """Construct system prompt for general questions when no document RAG context is used."""
+        return (
+            f"You are MLCopilot, an advanced AI copilot for the project '{project_name}'. "
+            "You are a helpful, intelligent, and knowledgeable assistant. "
+            "Answer the user's questions clearly, naturally, and accurately. "
+            "Maintain a professional, helpful, and concise technical tone."
+        )
+
+    @staticmethod
     def build_user_prompt(
         question: str,
         retrieved_chunks: list[RetrievedChunk],
         history: list[ChatMessage],
+        is_rag_mode: bool = True,
     ) -> str:
         """Assemble context chunks, history, and new query into the final prompt."""
-        # 1. Format context snippets
-        context_lines = []
-        for idx, chunk in enumerate(retrieved_chunks):
-            context_lines.append(
-                f"Source [{idx + 1}]:\n"
-                f"  - Document: {chunk.filename}\n"
-                f"  - Chunk ID: {chunk.chunk_id}\n"
-                f"  - Match Score: {chunk.score:.4f}\n"
-                f"  - Content:\n{chunk.content}\n"
-            )
-        context_str = (
-            "\n".join(context_lines)
-            if context_lines
-            else "No documents ingested in this project yet."
-        )
-
-        # 2. Format conversation history
+        # 1. Format conversation history
         history_lines = []
         for msg in history:
             role_label = "User" if msg.role == "user" else "Assistant"
@@ -61,9 +56,27 @@ class PromptBuilder:
             "\n".join(history_lines) if history_lines else "No prior history."
         )
 
-        # 3. Combine into final prompt
+        if is_rag_mode and retrieved_chunks:
+            # Format RAG context snippets
+            context_lines = []
+            for idx, chunk in enumerate(retrieved_chunks):
+                context_lines.append(
+                    f"Source [{idx + 1}]:\n"
+                    f"  - Document: {chunk.filename}\n"
+                    f"  - Chunk ID: {chunk.chunk_id}\n"
+                    f"  - Match Score: {chunk.score:.4f}\n"
+                    f"  - Content:\n{chunk.content}\n"
+                )
+            context_str = "\n".join(context_lines)
+            return (
+                f"=== RETRIEVED CONTEXT ===\n{context_str}\n\n"
+                f"=== CONVERSATIONAL HISTORY ===\n{history_str}\n\n"
+                f"=== NEW QUESTION ===\nUser: {question}\n\n"
+                "Assistant:"
+            )
+
+        # Conversational mode prompt (no context block)
         return (
-            f"=== RETRIEVED CONTEXT ===\n{context_str}\n\n"
             f"=== CONVERSATIONAL HISTORY ===\n{history_str}\n\n"
             f"=== NEW QUESTION ===\nUser: {question}\n\n"
             "Assistant:"

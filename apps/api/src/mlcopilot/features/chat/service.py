@@ -7,6 +7,7 @@ import uuid
 from datetime import UTC, datetime
 from typing import TYPE_CHECKING, Any
 
+from mlcopilot.core.config import get_settings
 from mlcopilot.domain.chat import ChatMessage, ChatResponse, Citation, Conversation
 from mlcopilot.features.chat.prompt import PromptBuilder
 
@@ -19,7 +20,7 @@ if TYPE_CHECKING:
 
 
 class RAGService:
-    """Thin orchestrating use-case service representing the RAG query flow."""
+    """Thin orchestrating use-case service representing the hybrid RAG/Conversational query flow."""
 
     def __init__(
         self,
@@ -80,30 +81,40 @@ class RAGService:
         )
         await self._conversation_repo.add_message(user_msg)
 
-        # 1. Retrieval
-        chunks = await self._retrieval_service.retrieve_relevant_chunks(
-            project_id, question
+        settings = get_settings()
+        raw_chunks = await self._retrieval_service.retrieve_relevant_chunks(
+            project_id, question, top_k=settings.rag_max_chunks
         )
-        citations = [
-            Citation(
-                upload_id=c.upload_id,
-                filename=c.filename,
-                chunk_id=c.chunk_id,
-                content=c.content,
-                position=c.position,
-                score=c.score,
+
+        # Confidence routing threshold check
+        threshold = settings.rag_similarity_threshold
+        relevant_chunks = [c for c in raw_chunks if c.score >= threshold]
+
+        if relevant_chunks:
+            citations = [
+                Citation(
+                    upload_id=c.upload_id,
+                    filename=c.filename,
+                    chunk_id=c.chunk_id,
+                    content=c.content,
+                    position=c.position,
+                    score=c.score,
+                )
+                for c in relevant_chunks
+            ]
+            system_prompt = PromptBuilder.build_system_prompt(project_name)
+            history = await self._conversation_repo.get_messages(conv.id)
+            user_prompt = PromptBuilder.build_user_prompt(
+                question, relevant_chunks, history[:-1], is_rag_mode=True
             )
-            for c in chunks
-        ]
+        else:
+            citations = []
+            system_prompt = PromptBuilder.build_conversational_system_prompt(project_name)
+            history = await self._conversation_repo.get_messages(conv.id)
+            user_prompt = PromptBuilder.build_user_prompt(
+                question, [], history[:-1], is_rag_mode=False
+            )
 
-        # 2. Prompt Assembly
-        system_prompt = PromptBuilder.build_system_prompt(project_name)
-        history = await self._conversation_repo.get_messages(conv.id)
-        user_prompt = PromptBuilder.build_user_prompt(
-            question, chunks, history[:-1]
-        )
-
-        # 3. Generation
         answer = await self._generation_service.generate_response(
             system_prompt, user_prompt
         )
@@ -145,67 +156,76 @@ class RAGService:
         await self._conversation_repo.add_message(user_msg)
         await self._conversation_repo.commit()
 
-        # 1. Retrieval timing
+        settings = get_settings()
         start_time = datetime.now(UTC)
+
+        # 1. Retrieval
         t_retrieval_start = datetime.now(UTC)
-        chunks = await self._retrieval_service.retrieve_relevant_chunks(
-            project_id, question
+        raw_chunks = await self._retrieval_service.retrieve_relevant_chunks(
+            project_id, question, top_k=settings.rag_max_chunks
         )
         retrieval_ms = round((datetime.now(UTC) - t_retrieval_start).total_seconds() * 1000, 2)
 
-        citations = [
-            Citation(
-                upload_id=c.upload_id,
-                filename=c.filename,
-                chunk_id=c.chunk_id,
-                content=c.content,
-                position=c.position,
-                score=c.score,
-            )
-            for c in chunks
-        ]
+        # 2. Confidence Routing (threshold check)
+        threshold = settings.rag_similarity_threshold
+        relevant_chunks = [c for c in raw_chunks if c.score >= threshold]
 
-        # 2. Prompt Assembly timing
         t_prompt_start = datetime.now(UTC)
-        system_prompt = PromptBuilder.build_system_prompt(project_name)
         history = await self._conversation_repo.get_messages(conv.id)
-        user_prompt = PromptBuilder.build_user_prompt(
-            question, chunks, history[:-1]
-        )
+
+        if relevant_chunks:
+            is_rag_mode = True
+            citations = [
+                Citation(
+                    upload_id=c.upload_id,
+                    filename=c.filename,
+                    chunk_id=c.chunk_id,
+                    content=c.content,
+                    position=c.position,
+                    score=c.score,
+                )
+                for c in relevant_chunks
+            ]
+            system_prompt = PromptBuilder.build_system_prompt(project_name)
+            user_prompt = PromptBuilder.build_user_prompt(
+                question, relevant_chunks, history[:-1], is_rag_mode=True
+            )
+        else:
+            is_rag_mode = False
+            citations = []
+            system_prompt = PromptBuilder.build_conversational_system_prompt(project_name)
+            user_prompt = PromptBuilder.build_user_prompt(
+                question, [], history[:-1], is_rag_mode=False
+            )
+
         prompt_build_ms = round((datetime.now(UTC) - t_prompt_start).total_seconds() * 1000, 2)
 
-        # 3. RAG Debug Logging
-        full_constructed_prompt = (
-            f"=== SYSTEM PROMPT ===\n{system_prompt}\n\n"
-            f"{user_prompt}"
-        )
+        # 3. Structured RAG Debug Logging
         provider_name = getattr(self._generation_service._llm_provider, "_model_name", "configured_llm")
-
         from mlcopilot.core.logging import get_logger
         logger = get_logger("mlcopilot.features.chat.service")
         logger.info(
             "rag.query_debug",
             question=question,
-            retrieved_count=len(chunks),
-            retrieved_chunk_ids=[str(c.chunk_id) for c in chunks],
-            retrieved_filenames=[c.filename for c in chunks],
-            similarity_scores=[round(c.score, 4) for c in chunks],
+            is_rag_mode=is_rag_mode,
+            retrieved_count=len(relevant_chunks),
+            raw_retrieved_count=len(raw_chunks),
+            similarity_scores=[round(c.score, 4) for c in relevant_chunks],
             provider=provider_name,
             retrieval_ms=retrieval_ms,
             prompt_build_ms=prompt_build_ms,
-            constructed_prompt=full_constructed_prompt,
         )
 
-        # 4. Stream Metadata first (conversation_id & citations)
+        # 4. Stream Metadata Event first (contains conversation_id & citations if RAG used)
         metadata_payload = {
             "conversation_id": str(conv.id),
             "citations": [self._citation_to_dict(c) for c in citations],
+            "is_rag_mode": is_rag_mode,
         }
         metadata_sse = f"event: metadata\ndata: {json.dumps(metadata_payload)}\n\n"
-        logger.info("[TRACE-3-CHATSERVICE-YIELD]", timestamp=datetime.now(UTC).isoformat(), event_type="metadata", payload=metadata_sse)
         yield metadata_sse
 
-        # 5. Stream tokens & measure first token latency
+        # 5. Stream Tokens & measure first-token latency
         accumulated_text = []
         t_llm_start = datetime.now(UTC)
         first_token_ms: float | None = None
@@ -219,40 +239,30 @@ class RAGService:
 
                 accumulated_text.append(token)
                 msg_sse = f"event: message\ndata: {json.dumps({'text': token})}\n\n"
-                logger.info("[TRACE-3-CHATSERVICE-YIELD]", timestamp=datetime.now(UTC).isoformat(), event_type="message", payload=msg_sse)
                 yield msg_sse
         except Exception as e:
             logger.error("chat.stream_generation.error", error_type=type(e).__name__, details=str(e))
             err_msg = str(e) or "LLM token generation failed."
             err_sse = f"event: error\ndata: {json.dumps({'error': {'message': err_msg}})}\n\n"
-            logger.info("[TRACE-3-CHATSERVICE-YIELD]", timestamp=datetime.now(UTC).isoformat(), event_type="error", payload=err_sse)
             yield err_sse
             return
 
-        # 6. Performance breakdown metrics calculation & logging
+        # 6. Metrics calculation & logging
         total_ms = round((datetime.now(UTC) - start_time).total_seconds() * 1000, 2)
         streaming_ms = round((datetime.now(UTC) - t_llm_start).total_seconds() * 1000, 2)
         first_token_ms = first_token_ms or streaming_ms
 
         logger.info(
             "rag.performance_metrics",
+            is_rag_mode=is_rag_mode,
             retrieval_ms=retrieval_ms,
             prompt_build_ms=prompt_build_ms,
             first_token_ms=first_token_ms,
             streaming_ms=streaming_ms,
             total_ms=total_ms,
         )
-        print(
-            f"\n[PIPELINE LATENCY BREAKDOWN]\n"
-            f"  - Retrieval:       {retrieval_ms} ms\n"
-            f"  - Prompt Build:    {prompt_build_ms} ms\n"
-            f"  - LLM First Token: {first_token_ms} ms\n"
-            f"  - Streaming:       {streaming_ms} ms\n"
-            f"  - Total:           {total_ms} ms\n",
-            flush=True,
-        )
 
-        # 7. Persist assistant output to db
+        # 7. Persist Assistant Response in DB
         full_answer = "".join(accumulated_text)
         assistant_msg = ChatMessage(
             id=uuid.uuid4(),
@@ -265,7 +275,7 @@ class RAGService:
         await self._conversation_repo.add_message(assistant_msg)
         await self._conversation_repo.commit()
 
-        # 8. Stream final done event
+        # 8. Final Done Event
         yield "event: done\ndata: {\"done\": true}\n\n"
 
     def _citation_to_dict(self, cit: Citation) -> dict[str, Any]:
