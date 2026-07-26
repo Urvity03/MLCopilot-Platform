@@ -29,6 +29,7 @@ class OllamaProvider(BaseLLMProvider):
         self._base_url = base_url.rstrip("/")
         self._model_name = model_name
         self._timeout_seconds = timeout_seconds
+        self._resolved_model: str | None = None
 
         logger.info(
             "llm.ollama.client_configured",
@@ -36,12 +37,32 @@ class OllamaProvider(BaseLLMProvider):
             model=self._model_name,
         )
 
-    def _build_payload(
+    async def _resolve_active_model(self) -> str:
+        """Resolve available model preference: qwen2.5:3b -> llama3.2:3b -> configured default."""
+        if self._resolved_model:
+            return self._resolved_model
+
+        try:
+            available = await self.list_models()
+            candidates = ["qwen2.5:3b", "qwen2.5-coder:3b", "llama3.2:3b", "llama3.2", self._model_name, "llama3.1:8b"]
+            for cand in candidates:
+                if any(m == cand or m.startswith(f"{cand}:") for m in available):
+                    self._resolved_model = cand
+                    logger.info("llm.ollama.model_resolved", selected=cand, available=available)
+                    return cand
+        except Exception:
+            pass
+
+        self._resolved_model = self._model_name
+        return self._model_name
+
+    async def _build_payload(
         self, system_prompt: str, user_prompt: str, stream: bool = False
     ) -> dict[str, Any]:
         """Construct standard Ollama REST API JSON payload."""
+        model = await self._resolve_active_model()
         payload: dict[str, Any] = {
-            "model": self._model_name,
+            "model": model,
             "prompt": user_prompt,
             "stream": stream,
             "options": {
@@ -89,7 +110,7 @@ class OllamaProvider(BaseLLMProvider):
     async def generate(self, system_prompt: str, user_prompt: str) -> str:
         """Execute a blocking complete text generation call via Ollama POST /api/generate API."""
         url = f"{self._base_url}/api/generate"
-        payload = self._build_payload(system_prompt, user_prompt, stream=False)
+        payload = await self._build_payload(system_prompt, user_prompt, stream=False)
         start_time = time.perf_counter()
 
         logger.info(
@@ -158,7 +179,7 @@ class OllamaProvider(BaseLLMProvider):
     ) -> AsyncIterator[str]:
         """Execute a streaming text generation call returning token chunks via Ollama POST /api/generate stream API."""
         url = f"{self._base_url}/api/generate"
-        payload = self._build_payload(system_prompt, user_prompt, stream=True)
+        payload = await self._build_payload(system_prompt, user_prompt, stream=True)
         start_time = time.perf_counter()
 
         logger.info(
