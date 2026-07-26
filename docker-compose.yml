@@ -14,7 +14,7 @@ x-api-env: &api-env
   JWT_SECRET: ${JWT_SECRET:-dev-only-change-me-in-production-0000}
   LLM_PROVIDER: ${LLM_PROVIDER:-ollama}
   OLLAMA_BASE_URL: ${OLLAMA_BASE_URL:-http://host.docker.internal:11434}
-  OLLAMA_MODEL: ${OLLAMA_MODEL:-qwen3:8b}
+  OLLAMA_MODEL: ${OLLAMA_MODEL:-llama3.1:8b}
   GEMINI_API_KEY: ${GEMINI_API_KEY:-}
   GOOGLE_API_KEY: ${GOOGLE_API_KEY:-}
   GEMINI_MODEL: ${GEMINI_MODEL:-gemini-3.6-flash}
