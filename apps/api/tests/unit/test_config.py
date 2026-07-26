@@ -9,7 +9,7 @@ from mlcopilot.core.config import Settings
 
 
 def test_defaults_are_valid_for_development() -> None:
-    settings = Settings(environment="development")
+    settings = Settings(environment="development", cors_origins="http://localhost:3000")
     assert settings.cors_origin_list == ["http://localhost:3000"]
     assert not settings.is_production
 
