@@ -1,45 +1,70 @@
 'use client';
 
 import * as React from 'react';
-import { useParams, useRouter } from 'next/navigation';
-import { useChat } from '../../../../hooks/useChat';
+import { useParams } from 'next/navigation';
 import { useProjects } from '../../../../hooks/useProjects';
+import { useChat } from '../../../../hooks/useChat';
 import { useUploads } from '../../../../hooks/useUploads';
-import { Card } from '../../../../components/ui/card';
-import { Drawer } from '../../../../components/ui/drawer';
-import { Button } from '../../../../components/ui/button';
-import { toast } from '../../../../components/ui/toast';
 import { 
-  Send, Bot, User, Trash2, Plus, MessageSquare, 
-  Copy, RotateCcw, Quote, Check, Sparkles, Database, X, ChevronDown, Terminal, Sliders, HelpCircle
+  Plus, 
+  Trash2, 
+  MessageSquare, 
+  Sparkles, 
+  Terminal, 
+  Quote, 
+  X, 
+  ArrowUp,
+  User, 
+  Bot, 
+  Copy, 
+  Check, 
+  RotateCcw,
+  Database,
+  AtSign,
+  Slash
 } from 'lucide-react';
+import { Button } from '../../../../components/ui/button';
+import { Drawer } from '../../../../components/ui/drawer';
+import { cn } from '../../../../lib/utils';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
+import { toast } from 'sonner';
 
 export default function ChatPage() {
   const params = useParams();
-  const projectId = params?.projectId as string;
-  const router = useRouter();
+  const projectId = params.projectId as string;
 
   const { projects } = useProjects();
-  const { uploads: files } = useUploads(projectId);
-  
-  // Track active conversation ID
   const [activeConvId, setActiveConvId] = React.useState<string | undefined>(undefined);
   
-  const { 
-    conversations, 
-    isLoadingConversations, 
-    activeConversation, 
-    isLoadingActiveConversation, 
-    sendMessage, 
+  const {
+    conversations,
+    isLoadingConversations,
+    activeConversation,
+    isLoadingActiveConversation,
+    sendMessage,
     sendMessageStream,
-    isSendingMessage, 
-    deleteConversation 
+    isSendingMessage,
+    deleteConversation,
+    invalidateChatQueries,
   } = useChat(projectId, activeConvId);
 
+  const { files } = useUploads(projectId);
+
+  // Active project context
+  const activeProject = React.useMemo(() => {
+    return projects.find((p) => p.id === projectId);
+  }, [projects, projectId]);
+
+  // Set the first conversation as active if none selected
+  React.useEffect(() => {
+    if (conversations.length > 0 && !activeConvId) {
+      setActiveConvId(conversations[0].id);
+    }
+  }, [conversations, activeConvId]);
+
+  // Local Chat Composer state
   const [input, setInput] = React.useState('');
   const [copiedId, setCopiedId] = React.useState<string | null>(null);
   const [selectedCitation, setSelectedCitation] = React.useState<any | null>(null);
@@ -71,20 +96,9 @@ export default function ChatPage() {
   const [streamingContent, setStreamingContent] = React.useState('');
   const [streamingCitations, setStreamingCitations] = React.useState<any[]>([]);
 
-  // Keyboard shortcut autocomplete popups states
+  // Autocomplete triggers
   const [showMentions, setShowMentions] = React.useState(false);
   const [showCommands, setShowCommands] = React.useState(false);
-
-  const activeProject = React.useMemo(() => {
-    return projects.find(p => p.id === projectId) || null;
-  }, [projects, projectId]);
-
-  // Set the first conversation as active if none selected
-  React.useEffect(() => {
-    if (conversations.length > 0 && !activeConvId) {
-      setActiveConvId(conversations[0].id);
-    }
-  }, [conversations, activeConvId]);
 
   const handleSend = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -101,7 +115,6 @@ export default function ChatPage() {
     setStreamingCitations([]);
 
     try {
-      console.log('[CHAT UI] Sending query stream:', { question: currentMsg, activeConvId });
       await sendMessageStream(
         {
           question: currentMsg,
@@ -109,7 +122,6 @@ export default function ChatPage() {
         },
         {
           onMetadata: (data) => {
-            console.log('[CHAT UI] Metadata event received:', data);
             if (data.conversation_id) {
               setActiveConvId(data.conversation_id);
             }
@@ -121,7 +133,6 @@ export default function ChatPage() {
             setStreamingContent((prev) => prev + token);
           },
           onDone: async () => {
-            console.log('[CHAT UI] Stream complete event received');
             if (invalidateChatQueries) {
               await invalidateChatQueries(activeConvId);
             }
@@ -174,11 +185,30 @@ export default function ChatPage() {
   };
 
   const handleCreateNewConversation = () => {
-    setActiveConvId(undefined); // Resetting active id will let the next message spawn a new conversation
+    setActiveConvId(undefined);
     setInput('');
     setShowMentions(false);
     setShowCommands(false);
     toast.success('Ready to start a new chat session.');
+  };
+
+  const handleDeleteConversation = (targetConvId: string) => {
+    const remaining = conversations.filter((c) => c.id !== targetConvId);
+    const wasActive = activeConvId === targetConvId;
+
+    deleteConversation(targetConvId, {
+      onSuccess: () => {
+        toast.success('Conversation purged.');
+      },
+    });
+
+    if (wasActive) {
+      if (remaining.length > 0) {
+        setActiveConvId(remaining[0].id);
+      } else {
+        setActiveConvId(undefined);
+      }
+    }
   };
 
   const handleCopyMessage = (msgId: string, content: string) => {
@@ -250,16 +280,9 @@ export default function ChatPage() {
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
-                      deleteConversation(conv.id, {
-                        onSuccess: () => {
-                          if (activeConvId === conv.id) {
-                            setActiveConvId(undefined);
-                          }
-                          toast.success('Conversation details purged.');
-                        }
-                      });
+                      handleDeleteConversation(conv.id);
                     }}
-                    className="opacity-0 group-hover:opacity-100 p-0.5 rounded text-[#56585E] hover:text-[#FF5C74] hover:bg-[#111217] transition-all"
+                    className="opacity-0 group-hover:opacity-100 p-1 rounded text-[#56585E] hover:text-[#FF5C74] hover:bg-[#111217] transition-all"
                     title="Purge session"
                   >
                     <Trash2 className="h-3 w-3" />
@@ -311,7 +334,7 @@ export default function ChatPage() {
                 </div>
                 <h3 className="text-sm font-semibold text-[#F0F0F3]">Ask MLCopilot anything</h3>
                 <p className="text-xs text-[#8B8D98] leading-relaxed mt-1">
-                  Query the custom indexed corpus using semantic similarity search. Answers cite matching context chunks.
+                  Query the workspace corpus or ask general programming & ML architecture questions naturally.
                 </p>
               </div>
 
@@ -320,7 +343,7 @@ export default function ChatPage() {
                 <p className="text-[10px] font-bold text-[#56585E] uppercase tracking-wider mb-2">AI Suggestions</p>
                 {[
                   "Summarize key parameters of the corpus",
-                  "What are the main architecture coordinates?",
+                  "Explain how machine learning pipelines work",
                   "Inspect data indexing limitations and constraints"
                 ].map((sug, idx) => (
                   <button
@@ -393,7 +416,7 @@ export default function ChatPage() {
                         </ReactMarkdown>
                       </div>
 
-                      {/* Citations block */}
+                      {/* Citations block - rendered ONLY when RAG citations exist */}
                       {isAssistant && msg.citations && msg.citations.length > 0 && (
                         <div className="pt-3 border-t border-[rgba(255,255,255,0.06)] mt-4 space-y-2">
                           <span className="text-[9px] font-bold text-[#56585E] uppercase tracking-wider flex items-center gap-1">
@@ -457,7 +480,7 @@ export default function ChatPage() {
                           </ReactMarkdown>
                         </div>
                       ) : (
-                        <div className="flex items-center gap-2 py-2 text-xs text-[#8B8D98] font-medium">
+                        <div className="flex items-center gap-2 py-2 text-xs text-[#8B8D98] font-medium select-none">
                           <span className="h-1.5 w-1.5 rounded-full bg-[#7C5CFC] animate-ping" />
                           <span>{streamingCitations.length > 0 ? "Thinking..." : "Searching workspace..."}</span>
                         </div>
@@ -491,13 +514,13 @@ export default function ChatPage() {
           )}
         </div>
 
-        {/* 3. Floating Composer / Glass Composer */}
+        {/* 3. Modern ChatGPT/Claude Redesigned Composer */}
         <div className="absolute bottom-6 left-6 right-6 z-20">
-          <div className="max-w-2xl mx-auto relative bg-[#111217]/65 backdrop-blur-xl border border-[rgba(255,255,255,0.06)] rounded-2xl p-3.5 shadow-2xl flex flex-col gap-2">
+          <div className="max-w-2xl mx-auto relative bg-[#13141B]/85 backdrop-blur-2xl border border-[rgba(255,255,255,0.08)] rounded-3xl p-3 shadow-[0_8px_32px_rgba(0,0,0,0.4)] flex flex-col gap-2.5 transition-all focus-within:border-[#7C5CFC]/40 focus-within:shadow-[0_0_24px_rgba(124,92,252,0.12)]">
             
             {/* Popups autocomplete triggers */}
             {showMentions && (
-              <div className="absolute bottom-full left-0 right-0 mb-2 bg-[#1E2028] border border-[rgba(255,255,255,0.08)] rounded-xl shadow-2xl z-50 p-2 max-h-48 overflow-y-auto">
+              <div className="absolute bottom-full left-0 right-0 mb-2 bg-[#1E2028] border border-[rgba(255,255,255,0.08)] rounded-2xl shadow-2xl z-50 p-2 max-h-48 overflow-y-auto">
                 <p className="text-[9px] font-bold text-[#56585E] uppercase tracking-wider px-2.5 py-1 select-none">Scope Query to File Context</p>
                 {files.length === 0 ? (
                   <p className="text-[10px] text-[#8B8D98] p-2 font-medium">No documents uploaded. Type file queries...</p>
@@ -521,7 +544,7 @@ export default function ChatPage() {
             )}
 
             {showCommands && (
-              <div className="absolute bottom-full left-0 right-0 mb-2 bg-[#1E2028] border border-[rgba(255,255,255,0.08)] rounded-xl shadow-2xl z-50 p-2 max-h-48 overflow-y-auto">
+              <div className="absolute bottom-full left-0 right-0 mb-2 bg-[#1E2028] border border-[rgba(255,255,255,0.08)] rounded-2xl shadow-2xl z-50 p-2 max-h-48 overflow-y-auto">
                 <p className="text-[9px] font-bold text-[#56585E] uppercase tracking-wider px-2.5 py-1 select-none">Slash Command Shortcuts</p>
                 {[
                   { cmd: 'explain', label: 'Explain the architecture of selected context.' },
@@ -545,8 +568,8 @@ export default function ChatPage() {
               </div>
             )}
 
-            {/* Input Row */}
-            <form onSubmit={handleSend} className="relative flex items-center">
+            {/* Top Textarea Input Row */}
+            <form onSubmit={handleSend} className="w-full">
               <textarea
                 value={input}
                 onChange={handleInputChange}
@@ -556,34 +579,60 @@ export default function ChatPage() {
                     handleSend(e);
                   }
                 }}
-                placeholder="Ask anything about your workspace corpus... (Type @ to search docs, / for commands)"
+                placeholder="Ask MLCopilot anything or type @ to filter documents..."
                 rows={1}
-                className="w-full bg-transparent border-0 pl-1 pr-12 py-1.5 text-xs text-[#F0F0F3] placeholder-[#56585E] transition-all resize-none max-h-24 overflow-y-auto leading-relaxed outline-none"
+                className="w-full bg-transparent text-xs text-[#F0F0F3] placeholder-[#56585E] px-2 py-1 outline-none resize-none min-h-[40px] max-h-32 overflow-y-auto leading-relaxed font-sans"
                 disabled={isSendingMessage}
               />
               
-              <button
-                type="submit"
-                disabled={!input.trim() || isSendingMessage}
-                className={cn(
-                  "absolute right-1 p-1.5 rounded-lg border transition-all cursor-pointer active:scale-[0.95]",
-                  input.trim() && !isSendingMessage
-                    ? "bg-[#7C5CFC] border-[#7C5CFC]/10 text-white hover:bg-[#6B4FE0]"
-                    : "bg-[#181A20] border-[rgba(255,255,255,0.06)] text-[#56585E] cursor-not-allowed"
-                )}
-              >
-                <Send className="h-3.5 w-3.5" />
-              </button>
-            </form>
-            
-            {/* Context helpers */}
-            <div className="flex items-center justify-between text-[9px] text-[#56585E] font-mono font-medium select-none px-1">
-              <div className="flex gap-3">
-                <span>SHIFT + ENTER for newline</span>
-                <span>Type @ to search doc context</span>
+              {/* Bottom Controls Bar */}
+              <div className="flex items-center justify-between pt-1 select-none">
+                <div className="flex items-center gap-1.5">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setInput(prev => prev + '@');
+                      setShowMentions(true);
+                    }}
+                    className="flex items-center gap-1 rounded-full bg-[#181A20] hover:bg-[#1E2028] border border-[rgba(255,255,255,0.06)] px-2.5 py-1 text-[10px] font-medium text-[#8B8D98] hover:text-[#F0F0F3] transition-all cursor-pointer"
+                    title="Scope context to document (@)"
+                  >
+                    <AtSign className="h-3 w-3 text-[#7C5CFC]" />
+                    <span>Doc Context</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setInput(prev => prev + '/');
+                      setShowCommands(true);
+                    }}
+                    className="flex items-center gap-1 rounded-full bg-[#181A20] hover:bg-[#1E2028] border border-[rgba(255,255,255,0.06)] px-2.5 py-1 text-[10px] font-medium text-[#8B8D98] hover:text-[#F0F0F3] transition-all cursor-pointer"
+                    title="Slash commands (/)"
+                  >
+                    <Slash className="h-3 w-3 text-[#7C5CFC]" />
+                    <span>Commands</span>
+                  </button>
+
+                  <span className="hidden sm:inline-block text-[9px] text-[#56585E] font-mono ml-2">
+                    Shift + Enter for new line
+                  </span>
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={!input.trim() || isSendingMessage || isStreaming}
+                  className={cn(
+                    "h-8 w-8 rounded-full flex items-center justify-center transition-all cursor-pointer active:scale-95 shrink-0",
+                    input.trim() && !isSendingMessage && !isStreaming
+                      ? "bg-[#7C5CFC] hover:bg-[#6B4FE0] text-white shadow-md shadow-[#7C5CFC]/20"
+                      : "bg-[#1E2028] text-[#56585E] cursor-not-allowed"
+                  )}
+                >
+                  <ArrowUp className="h-4 w-4" />
+                </button>
               </div>
-              <span>RAG PIPELINE READY</span>
-            </div>
+            </form>
           </div>
         </div>
       </main>
