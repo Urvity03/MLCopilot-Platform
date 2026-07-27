@@ -31,6 +31,12 @@ class OllamaProvider(BaseLLMProvider):
         self._timeout_seconds = timeout_seconds
         self._resolved_model: str | None = None
 
+        # Persistent HTTP client connection pool for zero socket creation overhead & HTTP keep-alive
+        self._client = httpx.AsyncClient(
+            timeout=httpx.Timeout(self._timeout_seconds, connect=5.0),
+            limits=httpx.Limits(max_keepalive_connections=20, max_connections=50),
+        )
+
         logger.info(
             "llm.ollama.client_configured",
             base_url=self._base_url,
@@ -59,14 +65,16 @@ class OllamaProvider(BaseLLMProvider):
     async def _build_payload(
         self, system_prompt: str, user_prompt: str, stream: bool = False
     ) -> dict[str, Any]:
-        """Construct standard Ollama REST API JSON payload."""
+        """Construct standard Ollama REST API JSON payload with model keep-alive."""
         model = await self._resolve_active_model()
         payload: dict[str, Any] = {
             "model": model,
             "prompt": user_prompt,
             "stream": stream,
+            "keep_alive": "15m",  # Keep model in RAM/VRAM memory between requests
             "options": {
                 "temperature": 0.0,
+                "num_ctx": 4096,
             },
         }
         if system_prompt and system_prompt.strip():
@@ -77,9 +85,8 @@ class OllamaProvider(BaseLLMProvider):
         """Check if the Ollama server is reachable and responding."""
         url = f"{self._base_url}/api/tags"
         try:
-            async with httpx.AsyncClient(timeout=5.0) as client:
-                response = await client.get(url)
-                return response.status_code == 200
+            response = await self._client.get(url, timeout=5.0)
+            return response.status_code == 200
         except Exception as e:
             logger.debug(
                 "llm.ollama.health_check_failed",
@@ -92,13 +99,12 @@ class OllamaProvider(BaseLLMProvider):
         """Retrieve available model tag names from the Ollama server."""
         url = f"{self._base_url}/api/tags"
         try:
-            async with httpx.AsyncClient(timeout=10.0) as client:
-                response = await client.get(url)
-                if response.is_error:
-                    response.raise_for_status()
-                data = response.json()
-                models = data.get("models", [])
-                return [m.get("name", "") for m in models if m.get("name")]
+            response = await self._client.get(url, timeout=10.0)
+            if response.is_error:
+                response.raise_for_status()
+            data = response.json()
+            models = data.get("models", [])
+            return [m.get("name", "") for m in models if m.get("name")]
         except Exception as e:
             logger.error(
                 "llm.ollama.list_models_failed",
@@ -118,51 +124,50 @@ class OllamaProvider(BaseLLMProvider):
             method="POST",
             url=url,
             provider="ollama",
-            model=self._model_name,
+            model=payload["model"],
         )
 
         try:
-            async with httpx.AsyncClient(timeout=self._timeout_seconds) as client:
-                response = await client.post(
-                    url,
-                    json=payload,
-                    headers={"Content-Type": "application/json"},
+            response = await self._client.post(
+                url,
+                json=payload,
+                headers={"Content-Type": "application/json"},
+            )
+
+            latency_ms = round((time.perf_counter() - start_time) * 1000, 2)
+            logger.info(
+                "llm.ollama.http_response",
+                status_code=response.status_code,
+                provider="ollama",
+                model=payload["model"],
+                latency_ms=latency_ms,
+            )
+
+            if response.status_code == 404:
+                raise ValueError(
+                    f"Ollama model '{payload['model']}' not found at {self._base_url}. "
+                    f"Run 'ollama pull {payload['model']}' on the host."
                 )
 
-                latency_ms = round((time.perf_counter() - start_time) * 1000, 2)
-                logger.info(
-                    "llm.ollama.http_response",
+            if response.is_error:
+                error_text = response.text
+                logger.error(
+                    "llm.ollama.generation.http_error",
                     status_code=response.status_code,
+                    response_body=error_text[:500],
                     provider="ollama",
-                    model=self._model_name,
-                    latency_ms=latency_ms,
+                    model=payload["model"],
                 )
+                response.raise_for_status()
 
-                if response.status_code == 404:
-                    raise ValueError(
-                        f"Ollama model '{self._model_name}' not found at {self._base_url}. "
-                        f"Run 'ollama pull {self._model_name}' on the host."
-                    )
-
-                if response.is_error:
-                    error_text = response.text
-                    logger.error(
-                        "llm.ollama.generation.http_error",
-                        status_code=response.status_code,
-                        response_body=error_text[:500],
-                        provider="ollama",
-                        model=self._model_name,
-                    )
-                    response.raise_for_status()
-
-                data = response.json()
-                return data.get("response", "")
+            data = response.json()
+            return data.get("response", "")
         except httpx.ConnectError as e:
             msg = (
                 f"Ollama server is unavailable at {self._base_url}. "
                 f"Ensure Ollama is running on the host ('ollama serve')."
             )
-            logger.error("llm.ollama.connection_refused", details=msg, provider="ollama", model=self._model_name)
+            logger.error("llm.ollama.connection_refused", details=msg, provider="ollama", model=payload["model"])
             raise RuntimeError(msg) from e
         except Exception as e:
             logger.error(
@@ -170,7 +175,7 @@ class OllamaProvider(BaseLLMProvider):
                 error_type=type(e).__name__,
                 details=str(e),
                 provider="ollama",
-                model=self._model_name,
+                model=payload["model"],
             )
             raise e
 
@@ -187,65 +192,64 @@ class OllamaProvider(BaseLLMProvider):
             method="POST",
             url=url,
             provider="ollama",
-            model=self._model_name,
+            model=payload["model"],
         )
 
         try:
-            async with httpx.AsyncClient(timeout=self._timeout_seconds) as client:
-                async with client.stream(
-                    "POST",
-                    url,
-                    json=payload,
-                    headers={"Content-Type": "application/json"},
-                ) as response:
-                    latency_ms = round((time.perf_counter() - start_time) * 1000, 2)
-                    logger.info(
-                        "llm.ollama.http_response_stream_started",
-                        status_code=response.status_code,
-                        provider="ollama",
-                        model=self._model_name,
-                        latency_ms=latency_ms,
+            async with self._client.stream(
+                "POST",
+                url,
+                json=payload,
+                headers={"Content-Type": "application/json"},
+            ) as response:
+                latency_ms = round((time.perf_counter() - start_time) * 1000, 2)
+                logger.info(
+                    "llm.ollama.http_response_stream_started",
+                    status_code=response.status_code,
+                    provider="ollama",
+                    model=payload["model"],
+                    latency_ms=latency_ms,
+                )
+
+                if response.status_code == 404:
+                    await response.aread()
+                    raise ValueError(
+                        f"Ollama model '{payload['model']}' not found at {self._base_url}. "
+                        f"Run 'ollama pull {payload['model']}' on the host."
                     )
 
-                    if response.status_code == 404:
-                        await response.aread()
-                        raise ValueError(
-                            f"Ollama model '{self._model_name}' not found at {self._base_url}. "
-                            f"Run 'ollama pull {self._model_name}' on the host."
-                        )
+                if response.is_error:
+                    await response.aread()
+                    error_text = response.text
+                    logger.error(
+                        "llm.ollama.generation_stream.http_error",
+                        status_code=response.status_code,
+                        response_body=error_text[:500],
+                        provider="ollama",
+                        model=payload["model"],
+                    )
+                    response.raise_for_status()
 
-                    if response.is_error:
-                        await response.aread()
-                        error_text = response.text
-                        logger.error(
-                            "llm.ollama.generation_stream.http_error",
-                            status_code=response.status_code,
-                            response_body=error_text[:500],
-                            provider="ollama",
-                            model=self._model_name,
-                        )
-                        response.raise_for_status()
+                async for line in response.aiter_lines():
+                    line = line.strip()
+                    if not line:
+                        continue
 
-                    async for line in response.aiter_lines():
-                        line = line.strip()
-                        if not line:
-                            continue
-
-                        try:
-                            data = json.loads(line)
-                            token = data.get("response", "")
-                            if token:
-                                yield token
-                            if data.get("done") is True:
-                                break
-                        except json.JSONDecodeError:
-                            continue
+                    try:
+                        data = json.loads(line)
+                        token = data.get("response", "")
+                        if token:
+                            yield token
+                        if data.get("done") is True:
+                            break
+                    except json.JSONDecodeError:
+                        continue
         except httpx.ConnectError as e:
             msg = (
                 f"Ollama server is unavailable at {self._base_url}. "
                 f"Ensure Ollama is running on the host ('ollama serve')."
             )
-            logger.error("llm.ollama.connection_refused_stream", details=msg, provider="ollama", model=self._model_name)
+            logger.error("llm.ollama.connection_refused_stream", details=msg, provider="ollama", model=payload["model"])
             raise RuntimeError(msg) from e
         except Exception as e:
             logger.error(
@@ -253,6 +257,6 @@ class OllamaProvider(BaseLLMProvider):
                 error_type=type(e).__name__,
                 details=str(e),
                 provider="ollama",
-                model=self._model_name,
+                model=payload["model"],
             )
             raise e
