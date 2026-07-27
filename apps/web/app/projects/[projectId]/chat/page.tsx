@@ -37,7 +37,8 @@ export default function ChatPage() {
 
   const { projects } = useProjects();
   const [activeConvId, setActiveConvId] = React.useState<string | undefined>(undefined);
-  
+  const messagesEndRef = React.useRef<HTMLDivElement>(null);
+
   const {
     conversations,
     isLoadingConversations,
@@ -99,6 +100,15 @@ export default function ChatPage() {
   // Autocomplete triggers
   const [showMentions, setShowMentions] = React.useState(false);
   const [showCommands, setShowCommands] = React.useState(false);
+
+  // Auto-scroll smooth to bottom on new messages / streaming tokens
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  React.useEffect(() => {
+    scrollToBottom();
+  }, [activeConversation?.messages, streamingContent, isStreaming]);
 
   const handleSend = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -510,6 +520,7 @@ export default function ChatPage() {
                   </motion.div>
                 </>
               )}
+              <div ref={messagesEndRef} />
             </div>
           )}
         </div>
