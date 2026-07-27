@@ -1,532 +1,105 @@
 # MLCopilot Platform
 
 <p align="center">
-  <b>An Enterprise-Ready AI Knowledge Platform for Document Intelligence, Semantic Search, and Retrieval-Augmented Generation (RAG).</b>
-</p>
-
-<p align="center">
-Built with <b>FastAPI • Next.js • PostgreSQL • pgvector • Redis • MinIO • Neo4j • Docker</b>
-</p>
-
-<p align="center">
-
-![Python](https://img.shields.io/badge/Python-3.12-blue?style=for-the-badge&logo=python)
-![FastAPI](https://img.shields.io/badge/FastAPI-Backend-009688?style=for-the-badge&logo=fastapi)
-![Next.js](https://img.shields.io/badge/Next.js-Frontend-black?style=for-the-badge&logo=next.js)
-![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=typescript)
-![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Database-336791?style=for-the-badge&logo=postgresql)
-![Docker](https://img.shields.io/badge/Docker-Containerized-2496ED?style=for-the-badge&logo=docker)
-![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)
-
+  <b>Enterprise-Grade AI Copilot & Hybrid RAG Engine for Machine Learning Projects</b>
 </p>
 
 ---
 
-# Table of Contents
+## ⚡ Overview
 
-- Overview
-- Key Features
-- Architecture
-- AI Pipelines
-- Technology Stack
-- Project Structure
-- API Overview
-- Getting Started
-- Development
-- Development Progress
-- Screenshots
-- Roadmap
-- Release History
-- Author
-- License
+**MLCopilot** is an enterprise AI platform that provides an intelligent, ChatGPT-like workspace copilot with RAG (Retrieval-Augmented Generation) capabilities. Users can register accounts, manage workspace projects, upload knowledge base documents (PDF, DOCX, TXT), and engage in fast, grounded, streaming conversations powered by local LLM infrastructure (Ollama) or cloud providers (Gemini).
 
 ---
 
-# Overview
+## ✨ Features
 
-MLCopilot Platform is a full-stack AI knowledge management platform that enables organizations to create intelligent workspaces powered by Retrieval-Augmented Generation (RAG).
-
-Users can upload documents, automatically generate embeddings, perform semantic search, and chat with their private knowledge base through a modern web interface.
-
-The platform follows **Clean Architecture**, ensuring scalability, maintainability, and clear separation of concerns across the entire system.
-
----
-
-# Key Features
-
-## Authentication & Security
-
-- JWT Authentication
-- Refresh Token Rotation
-- API Key Management
-- Role-Based Access Control (RBAC)
-- Protected Routes
-- Swagger Authorization
+- 🤖 **ChatGPT-Like Workspace Awareness**: Ask general programming questions or workspace-specific document queries seamlessly.
+- 🎯 **Confidence Routing & Hybrid RAG**: Automatically switches between Grounded Document RAG (with citations) and General Conversational Mode based on vector match score thresholds (`0.35`).
+- ⚡ **High-Performance Streaming**: SSE (Server-Sent Events) streaming with persistent HTTP Keep-Alive connection pooling and model memory residency (`15m` keep-alive).
+- 📚 **Document Indexing**: Multi-format document parser (PDF, DOCX, TXT) with automatic chunking and vector storage powered by PostgreSQL + `pgvector`.
+- 🔄 **Ollama Fallback & Candidate Selection**: Automatically prefers installed models (`qwen2.5:3b` → `llama3.2:3b` → `llama3.1:8b`).
+- 🎨 **Modern SaaS UX**: ChatGPT/Claude-style glassmorphism composer, multi-phase progress states (`Searching workspace...` → `Thinking...` → `Generating...`), and responsive layout.
 
 ---
 
-## Project Management
+## 🏗️ Tech Stack
 
-- Multi-project workspaces
-- Team collaboration
-- Membership management
-- Tenant isolation
-- Ownership transfer
-
----
-
-## Knowledge Base
-
-- PDF Parsing
-- DOCX Parsing
-- Markdown Parsing
-- TXT Parsing
-- Intelligent Text Chunking
-- MinIO Object Storage
+- **Frontend**: Next.js 14 (App Router), TypeScript, Tailwind CSS, TanStack React Query v5, Framer Motion, Lucide Icons.
+- **Backend API**: FastAPI (Python 3.12, Pydantic v2, Uvicorn, AsyncIO).
+- **Database & Storage**: PostgreSQL 16 + `pgvector`, Redis 7, MinIO S3 Object Storage.
+- **AI & RAG Engine**: SentenceTransformers (`all-MiniLM-L6-v2`), Ollama API (`llama3.1:8b` / `qwen2.5:3b`), Gemini REST API.
 
 ---
 
-## AI & Retrieval
+## 🚀 Quick Start (Local Setup)
 
-- Sentence Transformer Embeddings
-- pgvector Vector Database
-- HNSW Vector Indexing
-- Semantic Search
-- Retrieval-Augmented Generation (RAG)
-- Streaming AI Responses (SSE)
-- Citation Support
-- Conversation Persistence
+### Prerequisites
+- Docker Engine v24.0+ & Docker Compose
+- Ollama running locally (`ollama serve`) with at least one model pulled (`ollama pull llama3.1:8b`)
 
----
+### 1. Clone & Setup Environment
+```bash
+git clone https://github.com/your-org/MLCopilot-Platform.git
+cd MLCopilot-Platform
+cp production.env.example .env
+```
 
-## Engineering
+### 2. Start Full Stack via Docker Compose
+```bash
+docker compose up -d --build
+```
 
-- Clean Architecture
-- Monorepo Structure
-- Docker Compose
-- SQLAlchemy
-- Alembic
-- Pytest
-- Ruff
-- MyPy
-- Import Linter
+Access the application components:
+- **Web Application**: `http://localhost:3000`
+- **FastAPI API Documentation**: `http://localhost:8000/docs`
+- **API Health Endpoint**: `http://localhost:8000/api/v1/health/ready`
 
 ---
 
-# System Architecture
+## 🧪 Running Tests
 
-```mermaid
-flowchart TD
+### Backend Pytest Suite
+```bash
+docker compose exec api pytest tests/ -o asyncio_mode=auto -v
+```
 
-User --> Frontend
-
-Frontend[Next.js Frontend]
-
-Frontend --> API
-
-API[FastAPI Backend]
-
-API --> PostgreSQL
-
-API --> Redis
-
-API --> MinIO
-
-API --> Neo4j
-
-PostgreSQL --> pgvector
-
-MinIO --> DocumentParser
-
-DocumentParser --> Chunking
-
-Chunking --> Embeddings
-
-Embeddings --> pgvector
-
-pgvector --> SemanticSearch
-
-SemanticSearch --> LLM
-
-LLM --> StreamingChat
-
-StreamingChat --> User
+### Playwright E2E Verification
+```bash
+node apps/web/run_final_verification.js
 ```
 
 ---
 
-# Clean Architecture
-
-```mermaid
-flowchart TD
-
-A[FastAPI Routers]
-
-B[Application Services]
-
-C[Domain Layer]
-
-D[Infrastructure]
-
-A --> B
-
-B --> C
-
-C --> D
-```
-
----
-
-# Knowledge Base Pipeline
-
-```mermaid
-flowchart LR
-
-User --> Upload
-
-Upload --> MinIO
-
-MinIO --> Parser
-
-Parser --> Chunking
-
-Chunking --> Embeddings
-
-Embeddings --> pgvector
-```
-
----
-
-# Embedding Pipeline
-
-```mermaid
-flowchart LR
-
-Chunks --> SentenceTransformer
-
-SentenceTransformer --> VectorEmbeddings
-
-VectorEmbeddings --> pgvector
-
-pgvector --> HNSW
-```
-
----
-
-# Retrieval-Augmented Generation Pipeline
-
-```mermaid
-flowchart LR
-
-Question --> QueryEmbedding
-
-QueryEmbedding --> SemanticSearch
-
-SemanticSearch --> TopKChunks
-
-TopKChunks --> PromptBuilder
-
-PromptBuilder --> LLM
-
-LLM --> StreamingAnswer
-
-StreamingAnswer --> Citations
-```
-
----
-
-# High-Level Database
-
-```mermaid
-erDiagram
-
-USERS ||--o{ PROJECTS : owns
-
-PROJECTS ||--o{ UPLOADS : contains
-
-UPLOADS ||--o{ PARSED_CHUNKS : creates
-
-PARSED_CHUNKS ||--o{ EMBEDDINGS : generates
-
-PROJECTS ||--o{ CONVERSATIONS : has
-
-CONVERSATIONS ||--o{ CHAT_MESSAGES : contains
-```
-
----
-
-# Technology Stack
-
-| Layer | Technologies |
-|--------|--------------|
-| Frontend | Next.js, React, TypeScript, Tailwind CSS |
-| Backend | FastAPI, Python |
-| Database | PostgreSQL, SQLAlchemy |
-| Vector Database | pgvector |
-| AI | Sentence Transformers, OpenAI Provider |
-| Storage | MinIO |
-| Cache | Redis |
-| Graph Database | Neo4j |
-| DevOps | Docker, Docker Compose |
-| Testing | Pytest, Ruff, MyPy, Import Linter |
-
----
-
-# Project Structure
+## 📁 Repository Folder Structure
 
 ```text
-MLCopilot-Platform
-│
-├── apps
-│   ├── api
-│   └── web
-│
-├── docs
-│   ├── architecture
-│   ├── api
-│   ├── diagrams
-│   └── images
-│
-├── packages
-│
-├── docker-compose.yml
-│
-└── README.md
+MLCopilot-Platform/
+├── apps/
+│   ├── api/                  # FastAPI Backend Application
+│   │   ├── src/mlcopilot/    # Core Python Packages & Routers
+│   │   ├── tests/            # Pytest Unit & Integration Suite
+│   │   └── Dockerfile
+│   └── web/                  # Next.js 14 Frontend Application
+│       ├── app/              # Next.js App Router Pages & Components
+│       ├── hooks/            # Custom React Query Hooks
+│       └── Dockerfile
+├── docs/                     # Technical Documentation & Architecture
+│   └── architecture.md
+├── .github/workflows/        # CI/CD Pipeline Definitions
+├── docker-compose.yml        # Infrastructure Stack Compose Specification
+├── DEPLOYMENT.md             # Production Deployment Instructions
+├── RELEASE_NOTES.md          # Release Notes & Verified Features
+├── CHANGELOG.md              # Project Version Change Log
+└── FINAL_BENCHMARKS.md       # Latency & Performance Benchmarks
 ```
 
 ---
 
-# API Overview
-
-| Endpoint | Description |
-|-----------|-------------|
-| POST /auth/register | Register User |
-| POST /auth/login | Login |
-| POST /auth/logout | Logout |
-| POST /projects | Create Project |
-| GET /projects | List Projects |
-| POST /projects/{id}/uploads | Upload Documents |
-| POST /projects/{id}/search | Semantic Search |
-| POST /projects/{id}/chat | RAG Chat |
-| GET /api-keys | List API Keys |
-| POST /api-keys | Generate API Key |
-
----
-
-# Getting Started
-
-## Clone Repository
-
-```bash
-git clone https://github.com/Urvity03/MLCopilot-Platform.git
-
-cd MLCopilot-Platform
-```
-
----
-
-## Start Entire Platform
-
-```bash
-docker compose up --build
-```
-
----
-
-## Local LLM Setup (Ollama Default)
-
-MLCopilot Platform uses **Ollama** as the default local LLM provider.
-
-1. **Install Ollama** on your host machine from [ollama.com](https://ollama.com).
-2. **Pull the default model**:
-   ```bash
-   ollama pull qwen3:8b
-   ```
-3. **Start the Ollama server**:
-   ```bash
-   ollama serve
-   ```
-4. **Run MLCopilot**:
-   ```bash
-   docker compose up
-   ```
-
-> **Optional Provider Switching**: To use Google Gemini instead of local Ollama, set `LLM_PROVIDER=gemini` and provide your `GEMINI_API_KEY` in `.env`.
-
----
-
-## Backend Development
-
-```bash
-cd apps/api
-
-uvicorn mlcopilot.main:app --reload
-```
-
----
-
-## Frontend Development
-
-```bash
-cd apps/web
-
-pnpm install
-
-pnpm dev
-```
-
----
-
-## API Documentation
-
-Swagger UI
-
-```
-http://localhost:8000/api/v1/docs
-```
-
-Frontend
-
-```
-http://localhost:3000
-```
-
----
-
-# Development
-
-Run code quality tools:
-
-```bash
-ruff check src tests
-
-mypy src
-
-pytest
-
-lint-imports
-```
-
----
-
-# Development Progress
-
-| Module | Status |
-|----------|--------|
-| Backend Foundation | ✅ |
-| Authentication | ✅ |
-| RBAC | ✅ |
-| Project Management | ✅ |
-| Knowledge Base | ✅ |
-| Parsing | ✅ |
-| Intelligent Chunking | ✅ |
-| Embeddings | ✅ |
-| Semantic Search | ✅ |
-| RAG Backend | ✅ |
-| Streaming Chat | ✅ |
-| API Keys | ✅ |
-| Next.js Frontend | 🚧 Active Development |
-| Production UI | 🚧 |
-
----
-
-# Project Highlights
-
-- Clean Architecture
-- Modular Monorepo
-- JWT Authentication
-- Multi-Project Workspaces
-- Secure Document Uploads
-- Vector Database using pgvector
-- Semantic Search
-- Streaming AI Chat
-- Citation Support
-- Dockerized Deployment
-- Redis Caching
-- Neo4j Integration
-- MinIO Object Storage
-
----
-
-# Screenshots
-
-> Screenshots will be added after the frontend reaches feature-complete status.
-
-Suggested screenshots:
-
-- Dashboard
-- AI Chat
-- Upload Manager
-- Project Workspace
-- Knowledge Base
-- Members
-- Settings
-- Mobile Dashboard
-- Mobile Chat
-
-# Roadmap
-
-## Completed
-
-- Backend Foundation
-- Authentication
-- RBAC
-- Project Management
-- Knowledge Base
-- Document Parsing
-- Intelligent Chunking
-- Embedding Generation
-- Semantic Search
-- Retrieval-Augmented Generation
-- Streaming Chat
-- Citation Support
-
----
-
-## Upcoming
-
-- Premium SaaS UI
-- Multi-LLM Support
-- Hybrid Search
-- Knowledge Graph Expansion
-- OCR Pipeline
-- Experiment Tracking
-- Model Registry
-- Monitoring Dashboard
-- CI/CD
-- Kubernetes Deployment
-
----
-
-# Release History
-
-| Version | Highlights |
-|----------|------------|
-| **v0.1.0** | Backend Foundation, Authentication, RBAC |
-| **v0.2.0** | Knowledge Base, Parsing, Chunking, Embeddings, Semantic Search |
-| **v0.3.0** | RAG Backend, Streaming Chat, Citations, Conversations |
-| **v0.4.0** *(In Progress)* | Next.js Frontend, Dashboard, Project Workspace, Upload Center |
-
----
-
-# Author
-
-**Urvi Tyagi**
-
-**GitHub:** https://github.com/Urvity03
-
-**LinkedIn:** https://www.linkedin.com/in/urvi-tyagi-17b302286/
-
----
-
-# License
-
-This project is licensed under the **MIT License**.
-
----
-
-<p align="center">
-
-⭐ If you found this project interesting, consider giving it a star!
-
-</p>
+## 📖 Additional Documentation
+
+- 📄 [Production Deployment Guide](DEPLOYMENT.md)
+- 📐 [Architecture Specifications](docs/architecture.md)
+- 🚀 [Release Notes](RELEASE_NOTES.md)
+- 📊 [Performance Benchmarks](FINAL_BENCHMARKS.md)
+- 📜 [Changelog](CHANGELOG.md)
