@@ -19,13 +19,13 @@ export function useChat(projectId: string, conversationId?: string) {
     enabled: !!projectId && !!conversationId,
   });
 
-  const invalidateChatQueries = (targetConvId?: string) => {
+  const invalidateChatQueries = async (targetConvId?: string) => {
     const cid = targetConvId || conversationId;
     if (cid) {
-      queryClient.invalidateQueries({ queryKey: ['conversation-detail', projectId, cid] });
+      await queryClient.invalidateQueries({ queryKey: ['conversation-detail', projectId, cid] });
     }
-    queryClient.invalidateQueries({ queryKey: ['conversations', projectId] });
-    queryClient.invalidateQueries({ queryKey: ['dashboard-metrics'] });
+    await queryClient.invalidateQueries({ queryKey: ['conversations', projectId] });
+    await queryClient.invalidateQueries({ queryKey: ['dashboard-metrics'] });
   };
 
   const chatMutation = useMutation({
@@ -37,7 +37,25 @@ export function useChat(projectId: string, conversationId?: string) {
 
   const deleteMutation = useMutation({
     mutationFn: (convId: string) => chatService.deleteConversation(projectId, convId),
-    onSuccess: () => {
+    onMutate: async (deletedConvId: string) => {
+      await queryClient.cancelQueries({ queryKey: ['conversations', projectId] });
+      const previousConversations = queryClient.getQueryData<Conversation[]>(['conversations', projectId]);
+
+      if (previousConversations) {
+        queryClient.setQueryData<Conversation[]>(
+          ['conversations', projectId],
+          previousConversations.filter((c) => c.id !== deletedConvId)
+        );
+      }
+
+      return { previousConversations };
+    },
+    onError: (_err, _deletedConvId, context) => {
+      if (context?.previousConversations) {
+        queryClient.setQueryData(['conversations', projectId], context.previousConversations);
+      }
+    },
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ['conversations', projectId] });
       queryClient.invalidateQueries({ queryKey: ['dashboard-metrics'] });
     },
@@ -54,9 +72,9 @@ export function useChat(projectId: string, conversationId?: string) {
         }
         callbacks.onMetadata?.(data);
       },
-      onDone: () => {
+      onDone: async () => {
+        await invalidateChatQueries(resolvedConvId);
         callbacks.onDone?.();
-        invalidateChatQueries(resolvedConvId);
       },
     });
   };
@@ -74,4 +92,3 @@ export function useChat(projectId: string, conversationId?: string) {
     invalidateChatQueries,
   };
 }
-
