@@ -367,51 +367,53 @@ export default function ChatPage() {
               </div>
             </div>
           ) : (
-            <div className="space-y-6 max-w-2xl mx-auto">
+            <div className="space-y-6 max-w-3xl mx-auto pb-8">
               {messages.map((msg) => {
                 const isAssistant = msg.role === 'assistant';
                 return (
                   <motion.div
                     key={msg.id}
-                    initial={{ opacity: 0, y: 10 }}
+                    initial={{ opacity: 0, y: 8 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.3 }}
+                    transition={{ duration: 0.25 }}
                     className={cn(
-                      "flex gap-4 p-4.5 rounded-2xl border leading-relaxed text-xs",
-                      isAssistant
-                        ? "bg-[#111217] border-[rgba(255,255,255,0.06)] shadow-[0_4px_16px_rgba(0,0,0,0.3)]"
-                        : "bg-[#181A20]/40 border-[rgba(255,255,255,0.04)]"
+                      "flex gap-3 text-xs leading-relaxed max-w-full",
+                      isAssistant ? "justify-start" : "justify-end"
                     )}
                   >
-                    {/* Role Icon */}
-                    <div className={cn(
-                      "h-8 w-8 rounded-lg border flex items-center justify-center shrink-0 shadow-sm",
-                      isAssistant
-                        ? "bg-[#7C5CFC]/10 border-[#7C5CFC]/10 text-[#7C5CFC]"
-                        : "bg-[#181A20] border-[rgba(255,255,255,0.06)] text-[#8B8D98]"
-                    )}>
-                      {isAssistant ? <Bot className="h-4 w-4" /> : <User className="h-4 w-4" />}
-                    </div>
+                    {/* Role Icon for Assistant */}
+                    {isAssistant && (
+                      <div className="h-8 w-8 rounded-xl border flex items-center justify-center shrink-0 bg-[#7C5CFC]/10 border-[#7C5CFC]/20 text-[#7C5CFC] shadow-sm">
+                        <Bot className="h-4 w-4" />
+                      </div>
+                    )}
 
-                    <div className="flex-1 space-y-3 min-w-0">
-                      <div className="flex items-center justify-between select-none">
+                    <div className={cn(
+                      "space-y-2 min-w-0 max-w-[85%]",
+                      isAssistant ? "w-full" : "items-end"
+                    )}>
+                      {/* Top Header Label & Actions */}
+                      <div className={cn(
+                        "flex items-center gap-2 select-none px-1",
+                        isAssistant ? "justify-between" : "justify-end"
+                      )}>
                         <span className="text-[10px] font-bold text-[#56585E] uppercase tracking-wider">
-                          {isAssistant ? 'MLCopilot' : 'Developer'}
+                          {isAssistant ? 'MLCopilot' : 'You'}
                         </span>
                         
-                        <div className="flex items-center gap-1.5">
+                        <div className="flex items-center gap-1">
                           <button
                             onClick={() => handleCopyMessage(msg.id, msg.content)}
-                            className="p-1 rounded hover:bg-[#181A20] text-[#56585E] hover:text-[#8B8D98] transition-all"
-                            title="Copy message text"
+                            className="p-1 rounded hover:bg-[#181A20] text-[#56585E] hover:text-[#8B8D98] transition-all cursor-pointer"
+                            title="Copy message"
                           >
                             {copiedId === msg.id ? <Check className="h-3.5 w-3.5 text-[#3DD68C]" /> : <Copy className="h-3.5 w-3.5" />}
                           </button>
                           {!isAssistant && (
                             <button
                               onClick={() => handleRegenerate(msg.content)}
-                              className="p-1 rounded hover:bg-[#181A20] text-[#56585E] hover:text-[#8B8D98] transition-all"
-                              title="Regenerate prompt answer"
+                              className="p-1 rounded hover:bg-[#181A20] text-[#56585E] hover:text-[#8B8D98] transition-all cursor-pointer"
+                              title="Regenerate response"
                             >
                               <RotateCcw className="h-3.5 w-3.5" />
                             </button>
@@ -419,35 +421,52 @@ export default function ChatPage() {
                         </div>
                       </div>
 
-                      {/* Markdown representation */}
-                      <div className="prose prose-invert prose-xs text-[#F0F0F3]/90 leading-relaxed font-sans max-w-none select-text">
-                        <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                          {msg.content}
-                        </ReactMarkdown>
-                      </div>
-
-                      {/* Citations block - rendered ONLY when RAG citations exist */}
-                      {isAssistant && msg.citations && msg.citations.length > 0 && (
-                        <div className="pt-3 border-t border-[rgba(255,255,255,0.06)] mt-4 space-y-2">
-                          <span className="text-[9px] font-bold text-[#56585E] uppercase tracking-wider flex items-center gap-1">
-                            <Quote className="h-3 w-3 text-[#7C5CFC]" />
-                            <span>Context Citations</span>
-                          </span>
-                          <div className="flex flex-wrap gap-1.5">
-                            {msg.citations.map((cite, cIdx) => (
-                              <button
-                                key={cIdx}
-                                onClick={() => setSelectedCitation(cite)}
-                                className="inline-flex items-center gap-1.5 rounded-lg bg-[#181A20] hover:bg-[#1E2028] border border-[rgba(255,255,255,0.06)] px-2.5 py-1 text-[10px] font-medium text-[#8B8D98] hover:text-[#7C5CFC] transition-all cursor-pointer select-none"
-                              >
-                                <span className="text-[#7C5CFC] font-semibold">[{cIdx + 1}]</span>
-                                <span className="truncate max-w-[120px]">{cite.filename}</span>
-                              </button>
-                            ))}
-                          </div>
+                      {/* Content Bubble / Card */}
+                      <div className={cn(
+                        "p-4 rounded-2xl border text-xs shadow-sm",
+                        isAssistant
+                          ? "bg-[#111217] border-[rgba(255,255,255,0.06)] text-[#F0F0F3]"
+                          : "bg-gradient-to-r from-[#7C5CFC] to-[#6C47FF] border-transparent text-white font-medium shadow-[0_4px_20px_rgba(124,92,252,0.2)]"
+                      )}>
+                        <div className={cn(
+                          "prose prose-xs leading-relaxed font-sans max-w-none select-text",
+                          isAssistant ? "prose-invert text-[#F0F0F3]/95" : "text-white"
+                        )}>
+                          <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                            {msg.content}
+                          </ReactMarkdown>
                         </div>
-                      )}
+
+                        {/* Citations block - rendered ONLY when RAG citations exist */}
+                        {isAssistant && msg.citations && msg.citations.length > 0 && (
+                          <div className="pt-3 border-t border-[rgba(255,255,255,0.06)] mt-3 space-y-2">
+                            <span className="text-[9px] font-bold text-[#56585E] uppercase tracking-wider flex items-center gap-1">
+                              <Quote className="h-3 w-3 text-[#7C5CFC]" />
+                              <span>Context Citations</span>
+                            </span>
+                            <div className="flex flex-wrap gap-1.5">
+                              {msg.citations.map((cite, cIdx) => (
+                                <button
+                                  key={cIdx}
+                                  onClick={() => setSelectedCitation(cite)}
+                                  className="inline-flex items-center gap-1.5 rounded-lg bg-[#181A20] hover:bg-[#1E2028] border border-[rgba(255,255,255,0.06)] px-2.5 py-1 text-[10px] font-medium text-[#8B8D98] hover:text-[#7C5CFC] transition-all cursor-pointer select-none"
+                                >
+                                  <span className="text-[#7C5CFC] font-semibold">[{cIdx + 1}]</span>
+                                  <span className="truncate max-w-[120px]">{cite.filename}</span>
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
                     </div>
+
+                    {/* Role Icon for User */}
+                    {!isAssistant && (
+                      <div className="h-8 w-8 rounded-xl border flex items-center justify-center shrink-0 bg-[#181A20] border-[rgba(255,255,255,0.06)] text-[#8B8D98] shadow-sm">
+                        <User className="h-4 w-4" />
+                      </div>
+                    )}
                   </motion.div>
                 );
               })}
@@ -457,65 +476,72 @@ export default function ChatPage() {
                 <>
                   {streamingUserMsg && !messages.some(m => m.role === 'user' && m.content === streamingUserMsg) && (
                     <motion.div
-                      initial={{ opacity: 0, y: 10 }}
+                      initial={{ opacity: 0, y: 8 }}
                       animate={{ opacity: 1, y: 0 }}
-                      className="flex gap-4 p-4.5 rounded-2xl border bg-[#181A20]/40 border-[rgba(255,255,255,0.04)] leading-relaxed text-xs"
+                      className="flex gap-3 text-xs leading-relaxed justify-end max-w-full"
                     >
-                      <div className="h-8 w-8 rounded-lg border flex items-center justify-center shrink-0 bg-[#181A20] border-[rgba(255,255,255,0.06)] text-[#8B8D98]">
-                        <User className="h-4 w-4" />
-                      </div>
-                      <div className="flex-1 space-y-3 min-w-0">
-                        <span className="text-[10px] font-bold text-[#56585E] uppercase tracking-wider block">Developer</span>
-                        <div className="prose prose-invert prose-xs text-[#F0F0F3]/90 leading-relaxed font-sans max-w-none select-text">
+                      <div className="space-y-2 min-w-0 max-w-[85%] items-end">
+                        <div className="flex items-center justify-end select-none px-1">
+                          <span className="text-[10px] font-bold text-[#56585E] uppercase tracking-wider">You</span>
+                        </div>
+                        <div className="p-4 rounded-2xl bg-gradient-to-r from-[#7C5CFC] to-[#6C47FF] text-white font-medium shadow-[0_4px_20px_rgba(124,92,252,0.2)]">
                           {streamingUserMsg}
                         </div>
+                      </div>
+                      <div className="h-8 w-8 rounded-xl border flex items-center justify-center shrink-0 bg-[#181A20] border-[rgba(255,255,255,0.06)] text-[#8B8D98]">
+                        <User className="h-4 w-4" />
                       </div>
                     </motion.div>
                   )}
 
                   <motion.div
-                    initial={{ opacity: 0, y: 10 }}
+                    initial={{ opacity: 0, y: 8 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="flex gap-4 p-4.5 rounded-2xl border bg-[#111217] border-[rgba(255,255,255,0.06)] shadow-[0_4px_16px_rgba(0,0,0,0.3)] leading-relaxed text-xs"
+                    className="flex gap-3 text-xs leading-relaxed justify-start max-w-full"
                   >
-                    <div className="h-8 w-8 rounded-lg border bg-[#7C5CFC]/10 border-[#7C5CFC]/10 text-[#7C5CFC] flex items-center justify-center shrink-0">
+                    <div className="h-8 w-8 rounded-xl border flex items-center justify-center shrink-0 bg-[#7C5CFC]/10 border-[#7C5CFC]/20 text-[#7C5CFC] shadow-sm">
                       <Bot className="h-4 w-4" />
                     </div>
-                    <div className="flex-1 space-y-3 min-w-0">
-                      <span className="text-[10px] font-bold text-[#56585E] uppercase tracking-wider block">MLCopilot</span>
-                      {streamingContent ? (
-                        <div className="prose prose-invert prose-xs text-[#F0F0F3]/90 leading-relaxed font-sans max-w-none select-text">
-                          <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                            {streamingContent}
-                          </ReactMarkdown>
-                        </div>
-                      ) : (
-                        <div className="flex items-center gap-2 py-2 text-xs text-[#8B8D98] font-medium select-none">
-                          <span className="h-1.5 w-1.5 rounded-full bg-[#7C5CFC] animate-ping" />
-                          <span>{streamingCitations.length > 0 ? "Thinking..." : "Searching workspace..."}</span>
-                        </div>
-                      )}
-
-                      {streamingCitations.length > 0 && (
-                        <div className="pt-3 border-t border-[rgba(255,255,255,0.06)] mt-4 space-y-2">
-                          <span className="text-[9px] font-bold text-[#56585E] uppercase tracking-wider flex items-center gap-1">
-                            <Quote className="h-3 w-3 text-[#7C5CFC]" />
-                            <span>Context Citations</span>
-                          </span>
-                          <div className="flex flex-wrap gap-1.5">
-                            {streamingCitations.map((cite, cIdx) => (
-                              <button
-                                key={cIdx}
-                                onClick={() => setSelectedCitation(cite)}
-                                className="inline-flex items-center gap-1.5 rounded-lg bg-[#181A20] hover:bg-[#1E2028] border border-[rgba(255,255,255,0.06)] px-2.5 py-1 text-[10px] font-medium text-[#8B8D98] hover:text-[#7C5CFC] transition-all cursor-pointer select-none"
-                              >
-                                <span className="text-[#7C5CFC] font-semibold">[{cIdx + 1}]</span>
-                                <span className="truncate max-w-[120px]">{cite.filename}</span>
-                              </button>
-                            ))}
+                    <div className="space-y-2 min-w-0 max-w-[85%] w-full">
+                      <div className="flex items-center justify-between select-none px-1">
+                        <span className="text-[10px] font-bold text-[#56585E] uppercase tracking-wider">MLCopilot</span>
+                      </div>
+                      <div className="p-4 rounded-2xl bg-[#111217] border border-[rgba(255,255,255,0.06)] text-[#F0F0F3] shadow-sm">
+                        {streamingContent ? (
+                          <div className="prose prose-invert prose-xs leading-relaxed font-sans max-w-none select-text">
+                            <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                              {streamingContent}
+                            </ReactMarkdown>
+                            <span className="inline-block w-1.5 h-3.5 bg-[#7C5CFC] animate-pulse ml-1 align-middle" />
                           </div>
-                        </div>
-                      )}
+                        ) : (
+                          <div className="flex items-center gap-2 py-1 text-xs text-[#8B8D98] font-medium select-none">
+                            <span className="h-2 w-2 rounded-full bg-[#7C5CFC] animate-ping" />
+                            <span>{streamingCitations.length > 0 ? "Analyzing vector embeddings..." : "Querying workspace documents..."}</span>
+                          </div>
+                        )}
+
+                        {streamingCitations.length > 0 && (
+                          <div className="pt-3 border-t border-[rgba(255,255,255,0.06)] mt-3 space-y-2">
+                            <span className="text-[9px] font-bold text-[#56585E] uppercase tracking-wider flex items-center gap-1">
+                              <Quote className="h-3 w-3 text-[#7C5CFC]" />
+                              <span>Context Citations</span>
+                            </span>
+                            <div className="flex flex-wrap gap-1.5">
+                              {streamingCitations.map((cite, cIdx) => (
+                                <button
+                                  key={cIdx}
+                                  onClick={() => setSelectedCitation(cite)}
+                                  className="inline-flex items-center gap-1.5 rounded-lg bg-[#181A20] hover:bg-[#1E2028] border border-[rgba(255,255,255,0.06)] px-2.5 py-1 text-[10px] font-medium text-[#8B8D98] hover:text-[#7C5CFC] transition-all cursor-pointer select-none"
+                                >
+                                  <span className="text-[#7C5CFC] font-semibold">[{cIdx + 1}]</span>
+                                  <span className="truncate max-w-[120px]">{cite.filename}</span>
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </motion.div>
                 </>

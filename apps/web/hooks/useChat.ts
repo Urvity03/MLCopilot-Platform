@@ -72,8 +72,8 @@ export function useChat(projectId: string, conversationId?: string) {
         }
         callbacks.onMetadata?.(data);
       },
-      onDone: async () => {
-        await invalidateChatQueries(resolvedConvId);
+      onDone: () => {
+        invalidateChatQueries(resolvedConvId).catch(() => {});
         callbacks.onDone?.();
       },
     });

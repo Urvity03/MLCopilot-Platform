@@ -29,7 +29,7 @@ class OllamaProvider(BaseLLMProvider):
         self._base_url = base_url.rstrip("/")
         self._model_name = model_name
         self._timeout_seconds = timeout_seconds
-        self._resolved_model: str | None = None
+        self._resolved_model: str | None = "qwen2.5:3b"
 
         # Persistent HTTP client connection pool for zero socket creation overhead & HTTP keep-alive
         self._client = httpx.AsyncClient(

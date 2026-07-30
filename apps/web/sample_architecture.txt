@@ -1,0 +1,8 @@
+MLCopilot System Architecture Document
+Overview:
+MLCopilot is an enterprise AI platform for machine learning teams.
+Components:
+1. FastAPI Backend: Handles authentication, workspace CRUD, and LLM streaming.
+2. Next.js Web Frontend: Renders reactive dashboard, project workspaces, and RAG chat.
+3. PostgreSQL Database: Stores users, projects, document metadata, and conversation histories.
+4. RAG Vector Search: Ingests documents and indexes embeddings for citation retrieval.
