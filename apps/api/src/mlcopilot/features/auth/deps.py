@@ -7,14 +7,19 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from mlcopilot.core.config import Settings, get_settings
 from mlcopilot.domain.auth import AuthContext
 from mlcopilot.domain.errors import AuthenticationError
+from mlcopilot.features.auth.oauth_service import OAuthService
 from mlcopilot.features.auth.repository import (
     ApiKeyRepository,
+    OAuthAccountRepository,
+    PasswordResetTokenRepository,
     RefreshTokenRepository,
     UserRepository,
 )
 from mlcopilot.features.auth.service import AuthService
 from mlcopilot.infrastructure.db.repositories import (
     SqlAlchemyApiKeyRepository,
+    SqlAlchemyOAuthAccountRepository,
+    SqlAlchemyPasswordResetTokenRepository,
     SqlAlchemyRefreshTokenRepository,
     SqlAlchemyUserRepository,
 )
@@ -45,12 +50,30 @@ async def get_api_key_repository(
     return SqlAlchemyApiKeyRepository(session)
 
 
+async def get_oauth_account_repository(
+    session: Annotated[AsyncSession, Depends(get_db_session)],
+) -> OAuthAccountRepository:
+    """FastAPI dependency to resolve OAuthAccountRepository."""
+    return SqlAlchemyOAuthAccountRepository(session)
+
+
+async def get_password_reset_token_repository(
+    session: Annotated[AsyncSession, Depends(get_db_session)],
+) -> PasswordResetTokenRepository:
+    """FastAPI dependency to resolve PasswordResetTokenRepository."""
+    return SqlAlchemyPasswordResetTokenRepository(session)
+
+
 async def get_auth_service(
     user_repo: Annotated[UserRepository, Depends(get_user_repository)],
     refresh_token_repo: Annotated[
         RefreshTokenRepository, Depends(get_refresh_token_repository)
     ],
     api_key_repo: Annotated[ApiKeyRepository, Depends(get_api_key_repository)],
+    oauth_repo: Annotated[OAuthAccountRepository, Depends(get_oauth_account_repository)],
+    password_reset_repo: Annotated[
+        PasswordResetTokenRepository, Depends(get_password_reset_token_repository)
+    ],
     settings: Annotated[Settings, Depends(get_settings)],
 ) -> AuthService:
     """FastAPI dependency to resolve AuthService with all its collaborators."""
@@ -61,8 +84,21 @@ async def get_auth_service(
         password_hasher=PasswordHasher(),
         jwt_manager=JWTManager(secret=settings.jwt_secret.get_secret_value()),
         api_key_manager=ApiKeyManager(),
+        oauth_repo=oauth_repo,
+        password_reset_repo=password_reset_repo,
     )
 
+
+async def get_oauth_service(
+    settings: Annotated[Settings, Depends(get_settings)],
+    auth_service: Annotated[AuthService, Depends(get_auth_service)],
+) -> OAuthService:
+    """FastAPI dependency to resolve OAuthService."""
+    return OAuthService(
+        settings=settings,
+        auth_service=auth_service,
+        jwt_manager=JWTManager(secret=settings.jwt_secret.get_secret_value()),
+    )
 
 
 _http_bearer = HTTPBearer(auto_error=False)
@@ -109,5 +145,3 @@ async def get_current_user(
         return AuthContext(user=user, via="api_key", api_key_scopes=api_key.scopes)
 
     raise AuthenticationError("Not authenticated", code="unauthenticated")
-
-

@@ -128,11 +128,11 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.include_router(health_router, prefix=settings.api_v1_prefix)
     app.include_router(auth_router, prefix=settings.api_v1_prefix)
     app.include_router(api_keys_router, prefix=settings.api_v1_prefix)
+    app.include_router(chat_router, prefix=settings.api_v1_prefix)
     app.include_router(projects_router, prefix=settings.api_v1_prefix)
     app.include_router(uploads_router, prefix=settings.api_v1_prefix)
     app.include_router(memory_router, prefix=settings.api_v1_prefix)
     app.include_router(search_router, prefix=settings.api_v1_prefix)
-    app.include_router(chat_router, prefix=settings.api_v1_prefix)
 
     return app
 

@@ -1,4 +1,6 @@
-from sqlalchemy import Boolean, String, text
+from datetime import datetime
+
+from sqlalchemy import Boolean, DateTime, String, text
 from sqlalchemy.dialects.postgresql import CITEXT
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -16,9 +18,9 @@ class User(UUIDMixin, TimestampMixin, Base):
         index=True,
         nullable=False,
     )
-    password_hash: Mapped[str] = mapped_column(
+    password_hash: Mapped[str | None] = mapped_column(
         String(255),
-        nullable=False,
+        nullable=True,
     )
     full_name: Mapped[str] = mapped_column(
         String(255),
@@ -35,4 +37,12 @@ class User(UUIDMixin, TimestampMixin, Base):
         default=False,
         server_default=text("false"),
         nullable=False,
+    )
+    avatar_url: Mapped[str | None] = mapped_column(
+        String(512),
+        nullable=True,
+    )
+    last_login: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True),
+        nullable=True,
     )

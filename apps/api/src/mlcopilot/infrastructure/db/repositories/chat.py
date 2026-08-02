@@ -122,6 +122,12 @@ class SqlAlchemyConversationRepository:
         if db_conv:
             await self._session.delete(db_conv)
 
+    async def update_title(self, conversation_id: uuid.UUID, title: str) -> None:
+        """Update a conversation title."""
+        db_conv = await self._session.get(ConversationModel, conversation_id)
+        if db_conv:
+            db_conv.title = title
+
     async def add_message(self, message: ChatMessage) -> None:
         """Persist a single chat message turn."""
         db_msg = ChatMessageModel(

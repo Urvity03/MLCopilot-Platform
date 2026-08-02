@@ -28,7 +28,7 @@ class Settings(BaseSettings):
     """All environment variables consumed by the API, workers, and tools."""
 
     model_config = SettingsConfigDict(
-        env_file=".env",
+        env_file=(".env", "../.env", "../../.env"),
         env_file_encoding="utf-8",
         case_sensitive=False,
         extra="ignore",
@@ -91,6 +91,21 @@ class Settings(BaseSettings):
     rag_similarity_threshold: float = Field(default=0.35, ge=0.0, le=1.0)
     rag_max_chunks: int = Field(default=3, ge=1, le=10)
     # ── Integrations (wiring arrives with the integrations feature) ─── github_token: SecretStr = SecretStr("") mlflow_tracking_uri: str = ""
+
+    # ── OAuth ──────────────────────────────────────────────────────────
+    google_client_id: str = ""
+    google_client_secret: SecretStr = SecretStr("")
+    github_client_id: str = ""
+    github_client_secret: SecretStr = SecretStr("")
+    oauth_redirect_base: str = "http://localhost:8000"
+    frontend_url: str = "http://localhost:3000"
+
+    # ── SMTP (optional, for password reset) ───────────────────────────
+    smtp_host: str = ""
+    smtp_port: int = 587
+    smtp_user: str = ""
+    smtp_password: SecretStr = SecretStr("")
+    smtp_from_email: str = "noreply@mlcopilot.dev"
 
     # ── Health checks ─────────────────────────────────────────────────
     health_check_timeout_seconds: float = Field(default=2.0, gt=0)

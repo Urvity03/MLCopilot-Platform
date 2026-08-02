@@ -11,9 +11,11 @@ class User:
 
     id: UUID
     email: str
-    password_hash: str
+    password_hash: str | None
     full_name: str
     is_active: bool
     is_superuser: bool
     created_at: datetime
     updated_at: datetime
+    avatar_url: str | None = None
+    last_login: datetime | None = None

@@ -26,6 +26,7 @@ class UserResponse(BaseModel):
     is_superuser: bool
     created_at: datetime
     updated_at: datetime
+    avatar_url: str | None = None
 
 
 class LoginRequest(BaseModel):
@@ -33,6 +34,7 @@ class LoginRequest(BaseModel):
 
     email: EmailStr = Field(..., description="User account email address.")
     password: str = Field(..., description="Account password.")
+    remember_me: bool = Field(default=False, description="Whether to issue persistent session cookie.")
 
 
 class TokenResponse(BaseModel):
@@ -71,3 +73,27 @@ class ApiKeyCreateResponse(BaseModel):
 
     plain_key: str
     api_key: ApiKeyResponse
+
+
+class ForgotPasswordRequest(BaseModel):
+    email: EmailStr = Field(..., description="Account email address.")
+
+
+class ForgotPasswordResponse(BaseModel):
+    message: str
+    reset_link: str | None = None
+
+
+class ResetPasswordRequest(BaseModel):
+    token: str = Field(..., min_length=1, description="Password reset token.")
+    new_password: str = Field(..., min_length=6, description="New password.")
+
+
+class OAuthAccountResponse(BaseModel):
+    id: UUID
+    provider: str
+    provider_email: str | None = None
+    provider_name: str | None = None
+    provider_avatar: str | None = None
+    created_at: datetime
+

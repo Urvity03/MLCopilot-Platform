@@ -15,8 +15,6 @@ if TYPE_CHECKING:
 
 
 class SqlAlchemyUserRepository:
-    """SQLAlchemy implementation of the UserRepository protocol."""
-
     def __init__(self, session: AsyncSession) -> None:
         self._session = session
 
@@ -30,17 +28,17 @@ class SqlAlchemyUserRepository:
             is_superuser=db_user.is_superuser,
             created_at=db_user.created_at,
             updated_at=db_user.updated_at,
+            avatar_url=db_user.avatar_url,
+            last_login=db_user.last_login,
         )
 
     async def get_by_id(self, user_id: UUID) -> DomainUser | None:
-        """Retrieve a user by ID."""
         db_user = await self._session.get(DbUser, user_id)
         if not db_user:
             return None
         return self._to_domain(db_user)
 
     async def get_by_email(self, email: str) -> DomainUser | None:
-        """Retrieve a user by case-insensitive email."""
         result = await self._session.execute(select(DbUser).where(DbUser.email == email))
         db_user = result.scalar_one_or_none()
         if not db_user:
@@ -48,7 +46,6 @@ class SqlAlchemyUserRepository:
         return self._to_domain(db_user)
 
     async def add(self, user: DomainUser) -> None:
-        """Save a new user."""
         db_user = DbUser(
             id=user.id,
             email=user.email,
@@ -58,12 +55,13 @@ class SqlAlchemyUserRepository:
             is_superuser=user.is_superuser,
             created_at=user.created_at,
             updated_at=user.updated_at,
+            avatar_url=user.avatar_url,
+            last_login=user.last_login,
         )
         self._session.add(db_user)
         await self._session.flush()
 
     async def update(self, user: DomainUser) -> None:
-        """Update an existing user."""
         db_user = await self._session.get(DbUser, user.id)
         if not db_user:
             msg = f"User with ID {user.id} not found"
@@ -75,4 +73,6 @@ class SqlAlchemyUserRepository:
         db_user.is_active = user.is_active
         db_user.is_superuser = user.is_superuser
         db_user.updated_at = user.updated_at
+        db_user.avatar_url = user.avatar_url
+        db_user.last_login = user.last_login
         await self._session.flush()

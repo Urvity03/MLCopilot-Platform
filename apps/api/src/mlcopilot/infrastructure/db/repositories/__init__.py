@@ -2,6 +2,12 @@ from mlcopilot.infrastructure.db.repositories.api_key import SqlAlchemyApiKeyRep
 from mlcopilot.infrastructure.db.repositories.memory import (
     SqlAlchemyMemoryRepository,
 )
+from mlcopilot.infrastructure.db.repositories.oauth_account import (
+    SqlAlchemyOAuthAccountRepository,
+)
+from mlcopilot.infrastructure.db.repositories.password_reset_token import (
+    SqlAlchemyPasswordResetTokenRepository,
+)
 from mlcopilot.infrastructure.db.repositories.project import (
     SqlAlchemyMembershipRepository,
     SqlAlchemyProjectRepository,
@@ -16,6 +22,8 @@ __all__ = [
     "SqlAlchemyApiKeyRepository",
     "SqlAlchemyMembershipRepository",
     "SqlAlchemyMemoryRepository",
+    "SqlAlchemyOAuthAccountRepository",
+    "SqlAlchemyPasswordResetTokenRepository",
     "SqlAlchemyProjectRepository",
     "SqlAlchemyRefreshTokenRepository",
     "SqlAlchemyUploadRepository",

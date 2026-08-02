@@ -2,6 +2,8 @@ from mlcopilot.infrastructure.db.models.api_key import ApiKey
 from mlcopilot.infrastructure.db.models.chat import ChatMessageModel, ConversationModel
 from mlcopilot.infrastructure.db.models.embedding import ChunkEmbeddingModel
 from mlcopilot.infrastructure.db.models.memory import MemoryLink, MemoryRecord
+from mlcopilot.infrastructure.db.models.oauth_account import OAuthAccount
+from mlcopilot.infrastructure.db.models.password_reset_token import PasswordResetToken
 from mlcopilot.infrastructure.db.models.project import Project, ProjectMember
 from mlcopilot.infrastructure.db.models.refresh_token import RefreshToken
 from mlcopilot.infrastructure.db.models.upload import ParsedChunkModel, UploadModel
@@ -14,7 +16,9 @@ __all__ = [
     "ConversationModel",
     "MemoryLink",
     "MemoryRecord",
+    "OAuthAccount",
     "ParsedChunkModel",
+    "PasswordResetToken",
     "Project",
     "ProjectMember",
     "RefreshToken",
