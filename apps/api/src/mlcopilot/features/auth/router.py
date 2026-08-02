@@ -195,10 +195,9 @@ async def oauth_google_callback(
     logger = get_logger("mlcopilot.features.auth.router")
 
     try:
+        access_token, refresh_token = await oauth_service.handle_google_callback(code, state)
     except Exception:
         raise
-
-    access_token, refresh_token = await oauth_service.handle_google_callback(code, state)
 
     redirect_url = f"{settings.frontend_url}/auth/callback"
     resp = RedirectResponse(url=redirect_url, status_code=status.HTTP_302_FOUND)
@@ -209,10 +208,9 @@ async def oauth_google_callback(
         raise
 
     try:
+        return resp
     except Exception:
         raise
-
-    return resp
 
 
 @router.get("/oauth/github")
