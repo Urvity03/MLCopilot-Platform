@@ -93,13 +93,13 @@ export function UploadZone({
         onDrop={handleDrop}
         onClick={onButtonClick}
         animate={{
-          borderColor: isDragActive ? '#7C5CFC' : 'rgba(255, 255, 255, 0.06)',
+          borderColor: isDragActive ? 'var(--primary)' : 'rgba(255, 255, 255, 0.06)',
           backgroundColor: isDragActive ? 'rgba(124, 92, 252, 0.03)' : '#111217',
         }}
         transition={{ duration: 0.2 }}
         className={cn(
           "relative flex flex-col items-center justify-center border border-dashed rounded-2xl p-10 text-center cursor-pointer select-none overflow-hidden min-h-[220px]",
-          isDragActive ? "shadow-[0_0_20px_rgba(124,92,252,0.06)]" : "hover:border-[rgba(124,92,252,0.15)]",
+          isDragActive ? "shadow-[0_0_20px_rgba(124,92,252,0.06)]" : "hover:border-[var(--primary)]/20",
           isUploading && "pointer-events-none opacity-50"
         )}
       >
@@ -117,12 +117,12 @@ export function UploadZone({
         {isDragActive && (
           <motion.div 
             layoutId="drag-glow"
-            className="absolute inset-0 bg-gradient-to-r from-[#7C5CFC]/5 to-[#4F8CFF]/5 pointer-events-none"
+            className="absolute inset-0 bg-gradient-to-r from-[var(--primary)]/5 to-[#4F8CFF]/5 pointer-events-none"
           />
         )}
 
         <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#181A20] border border-[rgba(255,255,255,0.06)] text-[#8B8D98] mb-4 shadow-[0_4px_10px_rgba(0,0,0,0.3)]">
-          <UploadCloud className={cn("h-5 w-5 transition-transform", isDragActive && "scale-110 text-[#7C5CFC]")} />
+          <UploadCloud className={cn("h-5 w-5 transition-transform", isDragActive && "scale-110 text-[var(--primary)]")} />
         </div>
 
         <h3 className="text-xs font-semibold text-[#F0F0F3]">
@@ -134,8 +134,8 @@ export function UploadZone({
 
         {isUploading && (
           <div className="absolute inset-0 bg-[#09090B]/60 backdrop-blur-[1px] flex flex-col items-center justify-center gap-3">
-            <div className="h-5 w-5 animate-spin rounded-full border-2 border-[#7C5CFC] border-t-transparent" />
-            <span className="text-[10px] font-semibold text-[#7C5CFC] tracking-wider uppercase">Uploading...</span>
+            <div className="h-5 w-5 animate-spin rounded-full border-2 border-[var(--primary)] border-t-transparent" />
+            <span className="text-[10px] font-semibold text-[var(--primary)] tracking-wider uppercase">Uploading...</span>
           </div>
         )}
       </motion.div>

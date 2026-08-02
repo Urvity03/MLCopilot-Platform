@@ -17,11 +17,11 @@ export function WorkspaceHeader() {
   return (
     <div className="space-y-1">
       <div className="flex items-center gap-2">
-        <div className="flex h-6 w-6 items-center justify-center rounded-lg bg-[#7C5CFC]/10">
-          <Sparkles className="h-3.5 w-3.5 text-[#7C5CFC]" />
+        <div className="flex h-6 w-6 items-center justify-center rounded-lg bg-[var(--primary)]/10">
+          <Sparkles className="h-3.5 w-3.5 text-[var(--primary)]" />
         </div>
-        <span className="text-[11px] font-medium text-[#7C5CFC] uppercase tracking-wider">
-          Command Center
+        <span className="text-[11px] font-medium text-[var(--primary)] uppercase tracking-wider">
+          Enterprise Workspace
         </span>
       </div>
       <h1 className="text-2xl font-semibold tracking-tight">

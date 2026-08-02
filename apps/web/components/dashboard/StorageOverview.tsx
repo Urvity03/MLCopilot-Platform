@@ -25,7 +25,7 @@ export function StorageOverview({ stats }: StorageOverviewProps) {
     <Card className="p-5 relative overflow-hidden">
       <div className="flex items-center gap-3">
         <div className="h-8 w-8 rounded-lg bg-[#181A20] border border-[rgba(255,255,255,0.06)] flex items-center justify-center text-[#8B8D98]">
-          <HardDrive className="h-4 w-4 text-[#7C5CFC]" />
+          <HardDrive className="h-4 w-4 text-[var(--primary)]" />
         </div>
         <div>
           <h4 className="text-xs font-semibold text-[#F0F0F3]">Storage Quota Status</h4>
@@ -41,7 +41,7 @@ export function StorageOverview({ stats }: StorageOverviewProps) {
         </div>
         <div className="h-2 w-full bg-[#181A20] rounded-full overflow-hidden border border-[rgba(255,255,255,0.04)]">
           <div 
-            className="h-full bg-[#7C5CFC] rounded-full transition-all duration-500 shadow-[0_0_10px_rgba(124,92,252,0.2)]" 
+            className="h-full bg-[var(--primary)] rounded-full transition-all duration-500 shadow-[0_0_10px_rgba(124,92,252,0.2)]" 
             style={{ width: `${utilizationPercentage}%` }} 
           />
         </div>

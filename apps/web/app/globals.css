@@ -62,38 +62,38 @@
 }
 
 :root {
-  color-scheme: dark;
-  --background: #09090B;
-  --foreground: #F0F0F3;
-  --card: #111217;
-  --card-foreground: #F0F0F3;
-  --popover: #1E2028;
-  --popover-foreground: #F0F0F3;
+  color-scheme: light;
+  --background: #F8FAFC;
+  --foreground: #0F172A;
+  --card: #FFFFFF;
+  --card-foreground: #0F172A;
+  --popover: #FFFFFF;
+  --popover-foreground: #0F172A;
   --primary: #7C5CFC;
   --primary-foreground: #ffffff;
-  --secondary: #181A20;
-  --secondary-foreground: #F0F0F3;
-  --muted: #181A20;
-  --muted-foreground: #8B8D98;
-  --accent: #4F8CFF;
+  --secondary: #F1F5F9;
+  --secondary-foreground: #0F172A;
+  --muted: #F1F5F9;
+  --muted-foreground: #64748B;
+  --accent: #3B82F6;
   --accent-foreground: #ffffff;
-  --destructive: #FF5C74;
-  --border: rgba(255, 255, 255, 0.06);
-  --input: rgba(255, 255, 255, 0.06);
-  --ring: rgba(124, 92, 252, 0.4);
+  --destructive: #EF4444;
+  --border: #E2E8F0;
+  --input: #E2E8F0;
+  --ring: rgba(124, 92, 252, 0.3);
   --chart-1: #7C5CFC;
-  --chart-2: #4F8CFF;
-  --chart-3: #3DD68C;
+  --chart-2: #3B82F6;
+  --chart-3: #10B981;
   --chart-4: #F5B83D;
-  --chart-5: #FF5C74;
+  --chart-5: #EF4444;
   --radius: 0.75rem;
-  --sidebar: #0D0D10;
-  --sidebar-foreground: #8B8D98;
+  --sidebar: #FFFFFF;
+  --sidebar-foreground: #64748B;
   --sidebar-primary: #7C5CFC;
   --sidebar-primary-foreground: #ffffff;
   --sidebar-accent: rgba(124, 92, 252, 0.08);
-  --sidebar-accent-foreground: #F0F0F3;
-  --sidebar-border: rgba(255, 255, 255, 0.04);
+  --sidebar-accent-foreground: #0F172A;
+  --sidebar-border: #E2E8F0;
   --sidebar-ring: rgba(124, 92, 252, 0.3);
 }
 
@@ -152,6 +152,25 @@
   ::-webkit-scrollbar-thumb:hover {
     background: rgba(124, 92, 252, 0.3);
   }
+}
+
+/* ─── Font Density System ─────────────────────────────────────────────────── */
+html[data-density="compact"] {
+  font-size: 13px;
+}
+html[data-density="compact"] .p-6 {
+  padding: 1rem !important;
+}
+
+html[data-density="default"] {
+  font-size: 14px;
+}
+
+html[data-density="comfortable"] {
+  font-size: 15px;
+}
+html[data-density="comfortable"] .p-6 {
+  padding: 1.75rem !important;
 }
 
 /* ─── Surface System ─────────────────────────────────────────────────────── */
@@ -446,3 +465,145 @@
     box-shadow: 0 0 6px rgba(255, 92, 116, 0.4);
   }
 }
+
+/* ─── Font Density System ─────────────────────────────────────────────────── */
+html[data-density="compact"] {
+  font-size: 13px;
+  --spacing-density: 0.85;
+}
+html[data-density="compact"] aside {
+  width: 210px !important;
+}
+html[data-density="compact"] .p-6,
+html[data-density="compact"] main {
+  padding: 1rem !important;
+}
+html[data-density="compact"] .p-5,
+html[data-density="compact"] .p-4 {
+  padding: 0.75rem !important;
+}
+html[data-density="compact"] .space-y-6 > * + * {
+  margin-top: 0.85rem !important;
+}
+html[data-density="compact"] .space-y-4 > * + * {
+  margin-top: 0.65rem !important;
+}
+
+html[data-density="default"] {
+  font-size: 14px;
+}
+
+html[data-density="comfortable"] {
+  font-size: 15px;
+  --spacing-density: 1.15;
+}
+html[data-density="comfortable"] aside {
+  width: 270px !important;
+}
+html[data-density="comfortable"] .p-6,
+html[data-density="comfortable"] main {
+  padding: 2rem !important;
+}
+html[data-density="comfortable"] .p-5,
+html[data-density="comfortable"] .p-4 {
+  padding: 1.25rem !important;
+}
+html[data-density="comfortable"] .space-y-6 > * + * {
+  margin-top: 2rem !important;
+}
+html[data-density="comfortable"] .space-y-4 > * + * {
+  margin-top: 1.25rem !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Light Mode Override System
+   Maps hardcoded dark-mode hex colors to light-mode equivalents.
+   Applied when <html> does NOT have the "dark" class (i.e. light mode).
+   This avoids modifying any component files.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── Surface / Background Overrides ──────────────────────────────────────── */
+html:not(.dark) .bg-\[\#09090B\] { background-color: var(--background) !important; }
+html:not(.dark) .bg-\[\#0D0D10\] { background-color: #F1F5F9 !important; }
+html:not(.dark) .bg-\[\#0D0D10\]\/50 { background-color: rgba(241, 245, 249, 0.5) !important; }
+html:not(.dark) .bg-\[\#111217\] { background-color: var(--card) !important; }
+html:not(.dark) .bg-\[\#111217\]\/60 { background-color: rgba(255, 255, 255, 0.6) !important; }
+html:not(.dark) .bg-\[\#141418\] { background-color: #F8FAFC !important; }
+html:not(.dark) .bg-\[\#181A20\] { background-color: #F1F5F9 !important; }
+html:not(.dark) .bg-\[\#1E2028\] { background-color: #E2E8F0 !important; }
+html:not(.dark) .bg-\[\#0D0E12\] { background-color: #F1F5F9 !important; }
+html:not(.dark) .bg-\[\#2A2B33\] { background-color: #CBD5E1 !important; }
+
+/* ── Text Color Overrides ────────────────────────────────────────────────── */
+html:not(.dark) .text-\[\#F0F0F3\] { color: var(--foreground) !important; }
+html:not(.dark) .text-\[\#8B8D98\] { color: #64748B !important; }
+html:not(.dark) .text-\[\#56585E\] { color: #94A3B8 !important; }
+html:not(.dark) .text-white { color: white !important; }
+
+/* ── Border Overrides ────────────────────────────────────────────────────── */
+html:not(.dark) .border-\[rgba\(255\,255\,255\,0\.06\)\] { border-color: var(--border) !important; }
+html:not(.dark) .border-\[rgba\(255\,255\,255\,0\.04\)\] { border-color: var(--border) !important; }
+html:not(.dark) .border-\[rgba\(255\,255\,255\,0\.08\)\] { border-color: var(--border) !important; }
+html:not(.dark) .border-\[rgba\(255\,255\,255\,0\.1\)\] { border-color: #CBD5E1 !important; }
+
+/* ── Placeholder Overrides ───────────────────────────────────────────────── */
+html:not(.dark) .placeholder-\[\#56585E\]::placeholder { color: #94A3B8 !important; }
+html:not(.dark) .placeholder\:text-\[\#56585E\]::placeholder { color: #94A3B8 !important; }
+
+/* ── Hover State Overrides ───────────────────────────────────────────────── */
+html:not(.dark) .hover\:bg-\[\#181A20\]:hover { background-color: #E2E8F0 !important; }
+html:not(.dark) .hover\:bg-\[\#1E2028\]:hover { background-color: #CBD5E1 !important; }
+html:not(.dark) .hover\:text-\[\#F0F0F3\]:hover { color: var(--foreground) !important; }
+html:not(.dark) .hover\:text-white:hover { color: var(--foreground) !important; }
+html:not(.dark) .hover\:border-\[rgba\(255\,255\,255\,0\.1\)\]:hover { border-color: #CBD5E1 !important; }
+
+/* ── Sidebar Specific ────────────────────────────────────────────────────── */
+html:not(.dark) aside { 
+  background-color: #FFFFFF !important;
+  border-color: var(--border) !important;
+}
+
+/* ── Glass Card Light Mode ───────────────────────────────────────────────── */
+html:not(.dark) .border-glow {
+  background: rgba(255, 255, 255, 0.8) !important;
+  border-color: var(--border) !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.04) !important;
+}
+
+/* ── Scrollbar Light Mode ────────────────────────────────────────────────── */
+html:not(.dark) ::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.12) !important;
+}
+html:not(.dark) ::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.2) !important;
+}
+
+/* ── Ambient Grid Light Mode ─────────────────────────────────────────────── */
+html:not(.dark) .ambient-grid {
+  opacity: 0.1 !important;
+}
+
+/* ── Dialog / Modal Light Mode ───────────────────────────────────────────── */
+html:not(.dark) [role="dialog"] {
+  background-color: #FFFFFF !important;
+  border-color: var(--border) !important;
+}
+
+/* ── Input Light Mode ────────────────────────────────────────────────────── */
+html:not(.dark) input,
+html:not(.dark) textarea,
+html:not(.dark) select {
+  background-color: #FFFFFF !important;
+  border-color: var(--border) !important;
+  color: var(--foreground) !important;
+}
+html:not(.dark) input::placeholder,
+html:not(.dark) textarea::placeholder {
+  color: #94A3B8 !important;
+}
+
+/* ── Shadow Overrides for Light Mode ─────────────────────────────────────── */
+html:not(.dark) .shadow-2xl {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08), 0 1px 4px rgba(0, 0, 0, 0.04) !important;
+}
+

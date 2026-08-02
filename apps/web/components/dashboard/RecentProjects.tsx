@@ -52,7 +52,7 @@ export function RecentProjects({ projects, onCreateClick, onSelectTemplate }: Re
           {['Create Workspace', 'Upload Docs', 'Generate Embeddings', 'Start Chatting'].map((step, i) => (
             <div key={step} className="flex items-center gap-2">
               <div className="flex items-center gap-1.5">
-                <span className="flex h-5 w-5 items-center justify-center rounded-full bg-[#7C5CFC]/10 text-[#7C5CFC] text-[9px] font-bold">
+                <span className="flex h-5 w-5 items-center justify-center rounded-full bg-[var(--primary)]/10 text-[var(--primary)] text-[9px] font-bold">
                   {i + 1}
                 </span>
                 <span className="whitespace-nowrap">{step}</span>
@@ -70,9 +70,9 @@ export function RecentProjects({ projects, onCreateClick, onSelectTemplate }: Re
               <button
                 key={idx}
                 onClick={() => onSelectTemplate({ name: tpl.name, slug: tpl.slug, description: tpl.description })}
-                className="group w-full text-left rounded-xl bg-[#181A20] border border-[rgba(255,255,255,0.06)] p-4 transition-all duration-200 hover:border-[rgba(124,92,252,0.15)] hover:bg-[#1E2028] cursor-pointer active:scale-[0.98]"
+                className="group w-full text-left rounded-xl bg-[#181A20] border border-[rgba(255,255,255,0.06)] p-4 transition-all duration-200 hover:border-[var(--primary)]/20 hover:bg-[#1E2028] cursor-pointer active:scale-[0.98]"
               >
-                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#7C5CFC]/10 text-[#7C5CFC] mb-3">
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[var(--primary)]/10 text-[var(--primary)] mb-3">
                   <TplIcon className="h-4 w-4" />
                 </div>
                 <h4 className="text-[12px] font-semibold text-[#F0F0F3] group-hover:text-white transition-colors">
@@ -90,7 +90,7 @@ export function RecentProjects({ projects, onCreateClick, onSelectTemplate }: Re
           <span className="text-[11px] text-[#56585E]">Or start with a blank workspace</span>
           <button
             onClick={onCreateClick}
-            className="rounded-xl bg-[#7C5CFC] hover:bg-[#6B4FE0] text-white text-[12px] font-medium px-4 py-2 transition-all active:scale-[0.97] cursor-pointer"
+            className="rounded-xl bg-[var(--primary)] hover:bg-[var(--primary)]/90 text-white text-[12px] font-medium px-4 py-2 transition-all active:scale-[0.97] cursor-pointer shadow-lg shadow-[var(--primary)]/20"
           >
             <div className="flex items-center gap-1.5">
               <Plus className="h-3.5 w-3.5" />
@@ -122,9 +122,9 @@ export function RecentProjects({ projects, onCreateClick, onSelectTemplate }: Re
         >
           <Link
             href={`/projects/${proj.id}`}
-            className="group flex items-center gap-4 p-4 rounded-xl bg-[#111217] border border-[rgba(255,255,255,0.06)] transition-all duration-200 hover:border-[rgba(124,92,252,0.12)] hover:bg-[#181A20]"
+            className="group flex items-center gap-4 p-4 rounded-xl bg-[#111217] border border-[rgba(255,255,255,0.06)] transition-all duration-200 hover:border-[var(--primary)]/20 hover:bg-[#181A20]"
           >
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#181A20] text-[#56585E] group-hover:text-[#7C5CFC] group-hover:bg-[#7C5CFC]/10 transition-all flex-shrink-0">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#181A20] text-[#56585E] group-hover:text-[var(--primary)] group-hover:bg-[var(--primary)]/10 transition-all flex-shrink-0">
               <Folder className="h-5 w-5" />
             </div>
             <div className="flex-1 min-w-0">

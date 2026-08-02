@@ -42,7 +42,7 @@ export function ErrorView({
         {showBackButton && (
           <Link
             href="/dashboard"
-            className="flex items-center justify-center gap-2 rounded-xl bg-[#7C5CFC] hover:bg-[#6B4FE0] px-5 py-2.5 text-xs font-semibold text-white transition-all cursor-pointer active:scale-[0.97]"
+            className="flex items-center justify-center gap-2 rounded-xl bg-[var(--primary)] hover:bg-[var(--primary)]/90 px-5 py-2.5 text-xs font-semibold text-white transition-all cursor-pointer active:scale-[0.97] shadow-lg shadow-[var(--primary)]/20"
           >
             <ArrowLeft className="h-3.5 w-3.5" />
             Back to Dashboard

@@ -58,7 +58,7 @@ export function QuickActions({
               }`}
           >
             <div className={`flex h-9 w-9 items-center justify-center rounded-xl flex-shrink-0 transition-colors
-              ${act.disabled ? 'bg-[#181A20] text-[#56585E]' : 'bg-[#7C5CFC]/10 text-[#7C5CFC]'}`}
+              ${act.disabled ? 'bg-[#181A20] text-[#56585E]' : 'bg-[var(--primary)]/10 text-[var(--primary)]'}`}
             >
               <Icon className="h-4 w-4" />
             </div>

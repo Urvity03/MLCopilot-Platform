@@ -38,7 +38,7 @@ export function EmptyState({
         {['Workspace', 'Upload', 'Embed', 'Chat'].map((step, i) => (
           <div key={step} className="flex items-center gap-1.5">
             <div className="flex items-center gap-1">
-              <span className="flex h-4 w-4 items-center justify-center rounded-full bg-[#7C5CFC]/10 text-[#7C5CFC] text-[8px] font-bold">
+              <span className="flex h-4 w-4 items-center justify-center rounded-full bg-[var(--primary)]/10 text-[var(--primary)] text-[8px] font-bold">
                 {i + 1}
               </span>
               <span className="uppercase tracking-wider">{step}</span>
@@ -53,7 +53,7 @@ export function EmptyState({
           onClick={onAction}
           variant="default"
           size="sm"
-          className="bg-[#7C5CFC] hover:bg-[#6B4FE0] text-white border border-[#7C5CFC]/10 active:scale-[0.97] transition-all cursor-pointer font-medium px-4 rounded-xl"
+          className="bg-[var(--primary)] hover:bg-[var(--primary)]/90 text-white border border-[var(--primary)]/10 active:scale-[0.97] transition-all cursor-pointer font-medium px-4 rounded-xl"
         >
           {actionText}
         </Button>

@@ -34,7 +34,7 @@ export function RecentEvents({ events }: RecentEventsProps) {
 
   const dotColorMap = {
     upload: 'bg-[#4F8CFF]',
-    project: 'bg-[#7C5CFC]',
+    project: 'bg-[var(--primary)]',
     chat: 'bg-[#3DD68C]',
   };
 

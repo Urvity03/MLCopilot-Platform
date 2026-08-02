@@ -16,6 +16,9 @@ import { ProtectedRoute } from '../common/ProtectedRoute';
 import { CommandPalette } from '../ui/command-palette';
 import { NewProjectModal } from '../dashboard/NewProjectModal';
 import { motion, AnimatePresence } from 'framer-motion';
+import { NotificationDropdown } from './NotificationDropdown';
+import { UserProfileDropdown } from './UserProfileDropdown';
+import { UserPreferencesModal, PreferenceTab } from '../ui/UserPreferencesModal';
 import { cn } from '@/lib/utils';
 
 // ─── Sidebar Nav Item ──────────────────────────────────────────────────────────
@@ -36,15 +39,15 @@ function SidebarNavItem({
       className={cn(
         'relative flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium transition-all duration-200',
         isActive
-          ? 'text-[#F0F0F3] bg-[#7C5CFC]/10'
-          : 'text-[#8B8D98] hover:text-[#F0F0F3] hover:bg-[#181A20]'
+          ? 'text-[var(--foreground)] bg-[var(--primary)]/10'
+          : 'text-[#8B8D98] hover:text-[var(--foreground)] hover:bg-[#181A20]'
       )}
     >
       {/* Active left accent bar */}
       {isActive && (
-        <span className="absolute left-0 top-1/2 -translate-y-1/2 w-[2px] h-4 rounded-r-full bg-[#7C5CFC]" />
+        <span className="absolute left-0 top-1/2 -translate-y-1/2 w-[2px] h-4 rounded-r-full bg-[var(--primary)]" />
       )}
-      <Icon className={cn('h-[18px] w-[18px] shrink-0', isActive ? 'text-[#7C5CFC]' : 'text-[#56585E]')} />
+      <Icon className={cn('h-[18px] w-[18px] shrink-0', isActive ? 'text-[var(--primary)]' : 'text-[#56585E]')} />
       <span>{label}</span>
     </Link>
   );
@@ -72,6 +75,11 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const [projectDropdownOpen, setProjectDropdownOpen] = React.useState(false);
   const [commandCenterOpen, setCommandCenterOpen] = React.useState(false);
   const [newProjectOpen, setNewProjectOpen] = React.useState(false);
+  const [notificationsOpen, setNotificationsOpen] = React.useState(false);
+  const [unreadNotificationsCount, setUnreadNotificationsCount] = React.useState(0);
+  const [userDropdownOpen, setUserDropdownOpen] = React.useState(false);
+  const [preferencesModalOpen, setPreferencesModalOpen] = React.useState(false);
+  const [preferencesTab, setPreferencesTab] = React.useState<PreferenceTab>('appearance');
 
   const projectRef = React.useRef<HTMLDivElement>(null);
 
@@ -234,14 +242,14 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 aria-haspopup="listbox"
                 aria-expanded={projectDropdownOpen}
               >
-                <span className="h-7 w-7 rounded-lg bg-gradient-to-br from-[#7C5CFC] to-[#6C47FF] flex items-center justify-center text-white font-mono text-xs font-bold shadow-[0_0_20px_rgba(124,92,252,0.15)] shrink-0">
+                <span className="h-7 w-7 rounded-lg bg-[var(--primary)] flex items-center justify-center text-white font-mono text-xs font-bold shadow-[0_0_20px_rgba(124,92,252,0.15)] shrink-0">
                   M
                 </span>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-semibold text-[#F0F0F3] truncate">MLCopilot</p>
                   {activeProject && (
                     <p className="text-[10px] text-[#56585E] truncate flex items-center gap-1">
-                      <span className="h-1.5 w-1.5 rounded-full bg-[#7C5CFC] shrink-0" />
+                      <span className="h-1.5 w-1.5 rounded-full bg-[var(--primary)] shrink-0" />
                       {activeProject.name}
                     </p>
                   )}
@@ -277,13 +285,13 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                         className={cn(
                           'w-full text-left px-3 py-2 text-xs font-medium transition-all flex items-center justify-between cursor-pointer',
                           activeProject?.id === p.id
-                            ? 'bg-[#7C5CFC]/10 text-[#B4A0FF]'
+                            ? 'bg-[var(--primary)]/10 text-[var(--primary)] font-bold'
                             : 'text-[#8B8D98] hover:bg-[#1C1D24] hover:text-[#F0F0F3]'
                         )}
                       >
                         <span className="flex items-center gap-2 truncate">
                           {activeProject?.id === p.id && (
-                            <span className="h-1.5 w-1.5 rounded-full bg-[#7C5CFC] shrink-0" />
+                            <span className="h-1.5 w-1.5 rounded-full bg-[var(--primary)] shrink-0" />
                           )}
                           <span className="truncate">{p.name}</span>
                         </span>
@@ -345,7 +353,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                       >
                         <span className={cn(
                           'h-1.5 w-1.5 rounded-full shrink-0 transition-colors',
-                          activeProject?.id === p.id ? 'bg-[#7C5CFC]' : 'bg-[#2A2B33]'
+                          activeProject?.id === p.id ? 'bg-[var(--primary)]' : 'bg-[#2A2B33]'
                         )} />
                         <span className="truncate">{p.name}</span>
                       </Link>
@@ -448,14 +456,26 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
             {/* Right: Actions */}
             <div className="flex items-center gap-3">
-              {/* Notification Bell */}
-              <button
-                className="p-2 rounded-lg text-[#56585E] hover:text-[#F0F0F3] hover:bg-[#181A20] transition-all relative"
-                aria-label="Notifications"
-              >
-                <Bell className="h-4 w-4" />
-                <span className="absolute top-1.5 right-1.5 h-1.5 w-1.5 rounded-full bg-[#7C5CFC] ring-2 ring-[#09090B]" />
-              </button>
+              {/* Notification Bell Dropdown Wrapper */}
+              <div className="relative">
+                <button
+                  onClick={() => setNotificationsOpen(!notificationsOpen)}
+                  className="p-2 rounded-lg text-[#56585E] hover:text-[#F0F0F3] hover:bg-[#181A20] transition-all relative cursor-pointer"
+                  aria-label="Notifications"
+                  aria-expanded={notificationsOpen}
+                >
+                  <Bell className="h-4 w-4" />
+                  {unreadNotificationsCount > 0 && (
+                    <span className="absolute top-1.5 right-1.5 h-1.5 w-1.5 rounded-full bg-[var(--primary)] ring-2 ring-[#09090B]" />
+                  )}
+                </button>
+
+                <NotificationDropdown
+                  isOpen={notificationsOpen}
+                  onClose={() => setNotificationsOpen(false)}
+                  onUnreadCountChange={setUnreadNotificationsCount}
+                />
+              </div>
 
               {/* Command Palette Trigger */}
               <button
@@ -471,11 +491,32 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               {/* Quick Ingest */}
               <button
                 onClick={() => setNewProjectOpen(true)}
-                className="hidden sm:inline-flex items-center gap-1.5 rounded-lg bg-[#7C5CFC] hover:bg-[#6C4FE8] text-xs font-semibold text-white px-3.5 py-2 transition-all shadow-lg shadow-[#7C5CFC]/10 cursor-pointer active:scale-[0.98]"
+                className="hidden sm:inline-flex items-center gap-1.5 rounded-lg bg-[var(--primary)] hover:bg-[var(--primary)]/90 text-xs font-semibold text-white px-3.5 py-2 transition-all shadow-lg shadow-[var(--primary)]/10 cursor-pointer active:scale-[0.98]"
               >
                 <FolderPlus className="h-3.5 w-3.5" />
                 <span>New Project</span>
               </button>
+
+              {/* Top Right Avatar Profile Dropdown */}
+              <div className="relative">
+                <button
+                  onClick={() => setUserDropdownOpen(!userDropdownOpen)}
+                  className="h-8 w-8 rounded-full bg-[var(--primary)] flex items-center justify-center text-[11px] text-white font-bold font-mono shrink-0 cursor-pointer ring-2 ring-transparent hover:ring-[var(--primary)]/50 transition-all shadow-md active:scale-95"
+                  aria-label="User Profile Menu"
+                  aria-expanded={userDropdownOpen}
+                >
+                  {userInitials}
+                </button>
+
+                <UserProfileDropdown
+                  isOpen={userDropdownOpen}
+                  onClose={() => setUserDropdownOpen(false)}
+                  onOpenPreferences={(tab) => {
+                    setPreferencesTab(tab);
+                    setPreferencesModalOpen(true);
+                  }}
+                />
+              </div>
             </div>
           </header>
 
@@ -605,10 +646,21 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         {/* ────────────────────────────────────────────────────────────────── */}
         {/* Global Command Palette                                            */}
         {/* ────────────────────────────────────────────────────────────────── */}
-        <CommandPalette open={commandCenterOpen} onOpenChange={setCommandCenterOpen} />
+        <CommandPalette
+          open={commandCenterOpen}
+          onOpenChange={setCommandCenterOpen}
+          onOpenNewProject={() => setNewProjectOpen(true)}
+        />
 
         {/* Global New Project Modal */}
         <NewProjectModal isOpen={newProjectOpen} onClose={() => setNewProjectOpen(false)} />
+
+        {/* Global User Preferences Modal */}
+        <UserPreferencesModal
+          isOpen={preferencesModalOpen}
+          onClose={() => setPreferencesModalOpen(false)}
+          initialTab={preferencesTab}
+        />
       </div>
     </ProtectedRoute>
   );

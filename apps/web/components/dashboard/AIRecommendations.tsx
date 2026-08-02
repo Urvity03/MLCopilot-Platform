@@ -42,16 +42,17 @@ export function AIRecommendations({ metrics }: AIRecommendationsProps) {
 
   return (
     <Card className="p-5 relative overflow-hidden">
-      {/* Glow highlight */}
-      <div className="absolute top-0 right-0 p-4 opacity-[0.03] select-none pointer-events-none">
-        <Sparkles className="h-16 w-16 text-[#7C5CFC]" />
+      {/* Decorative background glow */}
+      <div className="absolute top-0 right-0 p-8 pointer-events-none opacity-5">
+        <Sparkles className="h-16 w-16 text-[var(--primary)]" />
       </div>
 
-      <div className="flex items-center gap-3">
-        <div className="h-8 w-8 rounded-lg bg-[#7C5CFC]/10 border border-[#7C5CFC]/10 flex items-center justify-center text-[#7C5CFC] shrink-0">
+      <div className="flex items-start gap-4">
+        <div className="h-8 w-8 rounded-lg bg-[var(--primary)]/10 border border-[var(--primary)]/10 flex items-center justify-center text-[var(--primary)] shrink-0">
           <Sparkles className="h-4 w-4" />
         </div>
-        <div>
+        <div className="flex-1 min-w-0">
+          <p className="font-semibold text-[9px] uppercase tracking-wider text-[var(--primary)] mb-1 select-none">RECOMMENDED ACTION</p>
           <h4 className="text-xs font-semibold text-[#F0F0F3]">AI Platform Insights</h4>
           <p className="text-[10px] text-[#56585E] font-medium">Copilot automated actions</p>
         </div>

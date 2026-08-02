@@ -44,15 +44,15 @@ export function FileCard({
     if (isFailed) return { text: 'Failed', color: 'text-[#FF5C74] bg-[#FF5C74]/10 border-[#FF5C74]/15' };
     if (isEmbedded) return { text: 'Ready', color: 'text-[#3DD68C] bg-[#3DD68C]/10 border-[#3DD68C]/15' };
     if (upload.embedding_status === 'embedding') return { text: 'Embedding', color: 'text-[#4F8CFF] bg-[#4F8CFF]/10 border-[#4F8CFF]/15 animate-pulse' };
-    return { text: 'Parsing', color: 'text-[#7C5CFC] bg-[#7C5CFC]/10 border-[#7C5CFC]/15 animate-pulse' };
+    return { text: 'Parsing', color: 'text-[var(--primary)] bg-[var(--primary)]/10 border-[var(--primary)]/15 animate-pulse' };
   }, [isFailed, isEmbedded, upload.embedding_status]);
 
   return (
-    <Card className="p-4.5 bg-[#111217] border border-[rgba(255,255,255,0.06)] hover:border-[#7C5CFC]/20 group flex flex-col justify-between h-44 relative overflow-hidden font-sans">
+    <Card className="p-4.5 bg-[#111217] border border-[rgba(255,255,255,0.06)] hover:border-[var(--primary)]/20 group flex flex-col justify-between h-44 relative overflow-hidden font-sans">
       <div>
         <div className="flex items-start justify-between gap-3">
           <div className="flex items-center gap-2.5 min-w-0">
-            <div className="h-8 w-8 rounded-lg bg-[#181A20] border border-[rgba(255,255,255,0.06)] flex items-center justify-center text-[#8B8D98] group-hover:text-[#7C5CFC] group-hover:bg-[#7C5CFC]/10 group-hover:border-[#7C5CFC]/10 transition-all font-mono text-[9px] font-bold shrink-0">
+            <div className="h-8 w-8 rounded-lg bg-[#181A20] border border-[rgba(255,255,255,0.06)] flex items-center justify-center text-[#8B8D98] group-hover:text-[var(--primary)] group-hover:bg-[var(--primary)]/10 group-hover:border-[var(--primary)]/10 transition-all font-mono text-[9px] font-bold shrink-0">
               {extension}
             </div>
             <div className="min-w-0">
@@ -87,7 +87,7 @@ export function FileCard({
               <span className={`h-2 w-2 rounded-full border transition-all ${
                 isFailed && !step.active ? 'bg-[#181A20] border-[#181A20]' :
                 isFailed && step.active && idx === 3 ? 'bg-[#FF5C74] border-[#FF5C74] shadow-[0_0_8px_rgba(255,92,116,0.3)]' :
-                step.active ? 'bg-[#7C5CFC] border-[#7C5CFC] shadow-[0_0_8px_rgba(124,92,252,0.3)]' :
+                step.active ? 'bg-[var(--primary)] border-[var(--primary)] shadow-[0_0_8px_var(--primary-shadow,rgba(124,92,252,0.3))]' :
                 'bg-[#181A20] border-[#181A20]'
               }`} />
               <span className={`text-[8px] font-mono tracking-tighter uppercase font-semibold ${
@@ -103,7 +103,7 @@ export function FileCard({
         <div className="mt-4 flex flex-wrap gap-2 items-center">
           {chunkCount !== undefined ? (
             <GradientBadge variant="purple" className="gap-1 flex items-center">
-              <Database className="h-3 w-3 text-[#7C5CFC]" />
+              <Database className="h-3 w-3 text-[var(--primary)]" />
               <span>{chunkCount} CHUNKS</span>
             </GradientBadge>
           ) : (

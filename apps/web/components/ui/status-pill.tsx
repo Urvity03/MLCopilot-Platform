@@ -32,8 +32,8 @@ export function StatusPill({ status, className, ...props }: StatusPillProps) {
       case 'parsing':
       case 'embedding':
         return {
-          bg: 'bg-[#7C5CFC]/10 text-[#7C5CFC] border-[#7C5CFC]/15',
-          dot: 'bg-[#7C5CFC] animate-pulse',
+          bg: 'bg-[var(--primary)]/10 text-[var(--primary)] border-[var(--primary)]/15',
+          dot: 'bg-[var(--primary)] animate-pulse',
           label: status === 'parsing' ? 'Parsing' : 'Embedding',
         };
       case 'pending':

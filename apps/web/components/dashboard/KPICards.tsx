@@ -22,7 +22,7 @@ export function KPICards({ metrics }: KPICardsProps) {
       value: metrics.totalProjects,
       icon: Layers,
       description: 'Active projects',
-      accentColor: '#7C5CFC',
+      accentColor: 'var(--primary)',
       chartData: [0, Math.max(1, metrics.totalProjects - 2), Math.max(1, metrics.totalProjects - 1), metrics.totalProjects],
     },
     {

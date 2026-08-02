@@ -26,7 +26,7 @@ export function StatCard({
   description,
   chartData,
   loading = false,
-  accentColor = '#7C5CFC',
+  accentColor = 'var(--primary)',
 }: StatCardProps) {
   if (loading) {
     return (
@@ -67,11 +67,11 @@ export function StatCard({
   }, [sparklinePath, chartData]);
 
   return (
-    <div className="group rounded-2xl bg-[#111217] border border-[rgba(255,255,255,0.06)] p-5 h-[140px] flex flex-col justify-between relative overflow-hidden transition-all duration-300 hover:border-[rgba(124,92,252,0.12)] hover:shadow-[0_4px_24px_rgba(0,0,0,0.3)]">
+    <div className="group rounded-2xl bg-[#111217] border border-[rgba(255,255,255,0.06)] p-5 h-[140px] flex flex-col justify-between relative overflow-hidden transition-all duration-300 hover:border-[var(--primary)]/20 hover:shadow-[0_4px_24px_rgba(0,0,0,0.3)]">
       {/* Subtle top accent line */}
       <div 
         className="absolute top-0 left-0 right-0 h-[1px] opacity-40 group-hover:opacity-70 transition-opacity"
-        style={{ background: `linear-gradient(90deg, transparent, ${accentColor}40, transparent)` }}
+        style={{ background: `linear-gradient(90deg, transparent, var(--primary), transparent)` }}
       />
       
       <div>
@@ -80,7 +80,7 @@ export function StatCard({
             {title}
           </span>
           {Icon && (
-            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-[#181A20] text-[#56585E] group-hover:text-[#7C5CFC] transition-colors">
+            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-[#181A20] text-[#56585E] group-hover:text-[var(--primary)] transition-colors">
               <Icon className="h-3.5 w-3.5" />
             </div>
           )}
