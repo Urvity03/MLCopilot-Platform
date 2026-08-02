@@ -10,6 +10,7 @@ export interface RegisterPayload {
 export interface LoginPayload {
   email: string;
   password: string;
+  remember_me?: boolean;
 }
 
 export const authService = {
@@ -23,6 +24,11 @@ export const authService = {
     return response.data;
   },
 
+  async me(): Promise<User> {
+    const response = await client.get<User>('/auth/me');
+    return response.data;
+  },
+
   async logout(): Promise<void> {
     await client.post('/auth/logout', {});
   },
@@ -30,5 +36,33 @@ export const authService = {
   async refresh(): Promise<TokenResponse> {
     const response = await client.post<TokenResponse>('/auth/refresh', {});
     return response.data;
+  },
+
+  async forgotPassword(email: string): Promise<{ message: string; reset_link?: string }> {
+    const response = await client.post<{ message: string; reset_link?: string }>('/auth/forgot-password', { email });
+    return response.data;
+  },
+
+  async resetPassword(token: string, new_password: string): Promise<void> {
+    await client.post('/auth/reset-password', { token, new_password });
+  },
+
+  async getConnectedAccounts(): Promise<Array<{ id: string; provider: string; provider_email?: string; provider_name?: string; provider_avatar?: string; created_at: string }>> {
+    const response = await client.get('/auth/oauth/accounts');
+    return response.data;
+  },
+
+  async disconnectAccount(provider: string): Promise<void> {
+    await client.delete(`/auth/oauth/accounts/${provider}`);
+  },
+
+  getGoogleAuthUrl(): string {
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1';
+    return `${apiUrl}/auth/oauth/google`;
+  },
+
+  getGithubAuthUrl(): string {
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1';
+    return `${apiUrl}/auth/oauth/github`;
   },
 };

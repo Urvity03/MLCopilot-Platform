@@ -30,20 +30,26 @@ export function useAuth() {
       const response = await authService.login(credentials);
       return { token: response.access_token, email: credentials.email };
     },
-    onSuccess: ({ token, email }) => {
-      const namePrefix = email.split('@')[0];
-      const displayName = namePrefix.charAt(0).toUpperCase() + namePrefix.slice(1);
-      const userId = parseUserIdFromToken(token) || 'user-session';
-
-      const loggedInUser = {
-        id: userId,
-        email,
-        full_name: displayName,
-        is_active: true,
-        is_superuser: false,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      };
+    onSuccess: async ({ token, email }) => {
+      let loggedInUser;
+      try {
+        // Temporarily store token so client can attach Bearer header
+        setSession({ id: '', email, full_name: '', is_active: true, is_superuser: false, created_at: '', updated_at: '' }, token);
+        loggedInUser = await authService.me();
+      } catch (e) {
+        const namePrefix = email.split('@')[0];
+        const displayName = namePrefix.charAt(0).toUpperCase() + namePrefix.slice(1);
+        const userId = parseUserIdFromToken(token) || 'user-session';
+        loggedInUser = {
+          id: userId,
+          email,
+          full_name: displayName,
+          is_active: true,
+          is_superuser: false,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        };
+      }
 
       setSession(loggedInUser, token);
       router.push('/dashboard');
@@ -56,7 +62,6 @@ export function useAuth() {
       return { user, password: userData.password };
     },
     onSuccess: async ({ user, password }) => {
-      // Auto-login after registration using registered profile details
       const response = await authService.login({ email: user.email, password });
       setSession(user, response.access_token);
       router.push('/dashboard');
@@ -73,15 +78,33 @@ export function useAuth() {
     },
   });
 
+  const forgotPasswordMutation = useMutation({
+    mutationFn: async (email: string) => authService.forgotPassword(email),
+  });
+
+  const resetPasswordMutation = useMutation({
+    mutationFn: async ({ token, new_password }: { token: string; new_password: string }) => {
+      await authService.resetPassword(token, new_password);
+    },
+    onSuccess: () => {
+      router.push('/login?reset=success');
+    },
+  });
+
   return {
     login: loginMutation.mutate,
     register: registerMutation.mutate,
     logout: logoutMutation.mutate,
+    forgotPassword: forgotPasswordMutation.mutateAsync,
+    resetPassword: resetPasswordMutation.mutateAsync,
     isLoggingIn: loginMutation.isPending,
     isRegistering: registerMutation.isPending,
     isLoggingOut: logoutMutation.isPending,
+    isSendingReset: forgotPasswordMutation.isPending,
+    isResettingPassword: resetPasswordMutation.isPending,
     loginError: loginMutation.error,
     registerError: registerMutation.error,
+    forgotPasswordError: forgotPasswordMutation.error,
+    resetPasswordError: resetPasswordMutation.error,
   };
 }
-

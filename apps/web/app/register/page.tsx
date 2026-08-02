@@ -10,6 +10,7 @@ import { useAuth } from '../../hooks/useAuth';
 import { useAuthStore } from '../../store/auth';
 import { ShieldAlert, Check, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { OAuthButtons } from '../../components/auth/OAuthButtons';
 
 const registerSchema = z.object({
   full_name: z.string().min(1, { message: 'Display name is required.' }),
@@ -57,8 +58,8 @@ export default function RegisterPage() {
   return (
     <div className="min-h-screen bg-[#09090B] flex items-center justify-center px-4 font-sans relative overflow-hidden">
       {/* Ambient background glows */}
-      <div className="absolute top-[-20%] left-[50%] translate-x-[-50%] w-[600px] h-[600px] rounded-full bg-[#7C5CFC]/[0.04] blur-[120px] pointer-events-none" />
-      <div className="absolute bottom-[-10%] right-[-5%] w-[400px] h-[400px] rounded-full bg-[#7C5CFC]/[0.03] blur-[100px] pointer-events-none" />
+      <div className="absolute top-[-20%] left-[50%] translate-x-[-50%] w-[600px] h-[600px] rounded-full bg-[var(--primary)]/[0.04] blur-[120px] pointer-events-none" />
+      <div className="absolute bottom-[-10%] right-[-5%] w-[400px] h-[400px] rounded-full bg-[var(--primary)]/[0.03] blur-[100px] pointer-events-none" />
 
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -69,10 +70,10 @@ export default function RegisterPage() {
         {/* Animated Logo */}
         <div className="flex flex-col items-center mb-8 select-none">
           <div className="relative mb-3">
-            <div className="h-12 w-12 rounded-2xl bg-[#7C5CFC]/10 border border-[#7C5CFC]/20 flex items-center justify-center text-[#7C5CFC] font-bold text-xl shadow-[0_0_30px_rgba(124,92,252,0.15)]">
+            <div className="h-12 w-12 rounded-2xl bg-[var(--primary)]/10 border border-[var(--primary)]/20 flex items-center justify-center text-[var(--primary)] font-bold text-xl shadow-[0_0_30px_rgba(124,92,252,0.15)]">
               M
             </div>
-            <div className="absolute inset-0 rounded-2xl border border-[#7C5CFC]/10 animate-ping opacity-20 pointer-events-none" />
+            <div className="absolute inset-0 rounded-2xl border border-[var(--primary)]/10 animate-ping opacity-20 pointer-events-none" />
           </div>
           <span className="text-[#F0F0F3] font-semibold text-base tracking-tight">MLCopilot</span>
           <span className="text-xs text-[#8B8D98] mt-0.5">AI Knowledge Operating System</span>
@@ -113,7 +114,7 @@ export default function RegisterPage() {
                 type="text"
                 {...register('full_name')}
                 placeholder="John Doe"
-                className="w-full bg-[#181A20] border border-[rgba(255,255,255,0.06)] rounded-xl px-4 py-3 text-sm text-[#F0F0F3] focus:border-[#7C5CFC]/40 focus:ring-1 focus:ring-[#7C5CFC]/20 transition-all placeholder:text-[#56585E] outline-none"
+                className="w-full bg-[#181A20] border border-[rgba(255,255,255,0.06)] rounded-xl px-4 py-3 text-sm text-[#F0F0F3] focus:border-[var(--primary)]/40 focus:ring-1 focus:ring-[var(--primary)]/20 transition-all placeholder:text-[#56585E] outline-none"
                 disabled={isRegistering}
               />
               {errors.full_name && (
@@ -130,7 +131,7 @@ export default function RegisterPage() {
                 type="email"
                 {...register('email')}
                 placeholder="name@example.com"
-                className="w-full bg-[#181A20] border border-[rgba(255,255,255,0.06)] rounded-xl px-4 py-3 text-sm text-[#F0F0F3] focus:border-[#7C5CFC]/40 focus:ring-1 focus:ring-[#7C5CFC]/20 transition-all placeholder:text-[#56585E] outline-none"
+                className="w-full bg-[#181A20] border border-[rgba(255,255,255,0.06)] rounded-xl px-4 py-3 text-sm text-[#F0F0F3] focus:border-[var(--primary)]/40 focus:ring-1 focus:ring-[var(--primary)]/20 transition-all placeholder:text-[#56585E] outline-none"
                 disabled={isRegistering}
               />
               {errors.email && (
@@ -147,7 +148,7 @@ export default function RegisterPage() {
                 type="password"
                 {...register('password')}
                 placeholder="••••••••"
-                className="w-full bg-[#181A20] border border-[rgba(255,255,255,0.06)] rounded-xl px-4 py-3 text-sm text-[#F0F0F3] focus:border-[#7C5CFC]/40 focus:ring-1 focus:ring-[#7C5CFC]/20 transition-all placeholder:text-[#56585E] outline-none"
+                className="w-full bg-[#181A20] border border-[rgba(255,255,255,0.06)] rounded-xl px-4 py-3 text-sm text-[#F0F0F3] focus:border-[var(--primary)]/40 focus:ring-1 focus:ring-[var(--primary)]/20 transition-all placeholder:text-[#56585E] outline-none"
                 disabled={isRegistering}
               />
               {errors.password && (
@@ -178,7 +179,7 @@ export default function RegisterPage() {
                           key={i}
                           className={`h-full flex-1 rounded-full transition-colors duration-300 ${
                             c.met
-                              ? 'bg-[#7C5CFC] shadow-[0_0_6px_rgba(124,92,252,0.3)]'
+                              ? 'bg-[var(--primary)] shadow-[0_0_6px_rgba(var(--primary-rgb, 124,92,252),0.3)]'
                               : 'bg-[#1E2028]'
                           }`}
                         />
@@ -206,7 +207,7 @@ export default function RegisterPage() {
             <button
               type="submit"
               disabled={isRegistering}
-              className="w-full bg-[#7C5CFC] hover:bg-[#6B4FE0] text-white rounded-xl py-3 font-medium active:scale-[0.97] transition-all mt-2 disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
+              className="w-full bg-[var(--primary)] hover:bg-[var(--primary)]/90 text-white rounded-xl py-3 font-medium active:scale-[0.97] transition-all mt-2 disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
             >
               {isRegistering ? (
                 <div className="flex items-center justify-center">
@@ -225,10 +226,14 @@ export default function RegisterPage() {
             <div className="flex-1 h-px bg-[rgba(255,255,255,0.06)]" />
           </div>
 
+          <OAuthButtons disabled={isRegistering} />
+
+          <div className="my-4" />
+
           {/* Login Link */}
           <p className="text-center text-sm text-[#8B8D98]">
             Already have an account?{' '}
-            <Link href="/login" className="font-medium text-[#7C5CFC] hover:text-[#9B82FC] transition-colors">
+            <Link href="/login" className="font-medium text-[var(--primary)] hover:text-[var(--primary)]/80 transition-colors">
               Sign in
             </Link>
           </p>
