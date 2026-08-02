@@ -21,7 +21,11 @@ import {
   RotateCcw,
   Database,
   AtSign,
-  Slash
+  Slash,
+  Pencil,
+  MoreVertical,
+  Search,
+  AlertTriangle
 } from 'lucide-react';
 import { Button } from '../../../../components/ui/button';
 import { Drawer } from '../../../../components/ui/drawer';
@@ -30,11 +34,13 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
+import { usePreferencesStore } from '../../../../store/preferences';
 
 export default function ChatPage() {
   const params = useParams();
   const projectId = params.projectId as string;
 
+  const preferences = usePreferencesStore();
   const { projects } = useProjects();
   const [activeConvId, setActiveConvId] = React.useState<string | undefined>(undefined);
   const messagesEndRef = React.useRef<HTMLDivElement>(null);
@@ -48,19 +54,28 @@ export default function ChatPage() {
     sendMessageStream,
     isSendingMessage,
     deleteConversation,
+    renameConversation,
     invalidateChatQueries,
   } = useChat(projectId, activeConvId);
 
   const { files } = useUploads(projectId);
 
+  // Input Focus & Local Conversation Management state
+  const inputRef = React.useRef<HTMLTextAreaElement>(null);
+  const [searchQuery, setSearchQuery] = React.useState('');
+  const [menuOpenConvId, setMenuOpenConvId] = React.useState<string | null>(null);
+  const [editingConvId, setEditingConvId] = React.useState<string | null>(null);
+  const [editingTitle, setEditingTitle] = React.useState('');
+  const [deleteConfirmConvId, setDeleteConfirmConvId] = React.useState<string | null>(null);
+
   // Active project context
   const activeProject = React.useMemo(() => {
-    return projects.find((p) => p.id === projectId);
+    return (projects || []).find((p) => p.id === projectId);
   }, [projects, projectId]);
 
   // Set the first conversation as active if none selected
   React.useEffect(() => {
-    if (conversations.length > 0 && !activeConvId) {
+    if ((conversations || []).length > 0 && !activeConvId) {
       setActiveConvId(conversations[0].id);
     }
   }, [conversations, activeConvId]);
@@ -103,12 +118,36 @@ export default function ChatPage() {
 
   // Auto-scroll smooth to bottom on new messages / streaming tokens
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    if (preferences.autoScroll) {
+      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }
   };
 
   React.useEffect(() => {
     scrollToBottom();
   }, [activeConversation?.messages, streamingContent, isStreaming]);
+
+  // Local Optimistic Titles Map
+  const [localTitles, setLocalTitles] = React.useState<Record<string, string>>({});
+
+  // Combined conversation list including optimistic active new chat and local titles
+  const displayConversations = React.useMemo(() => {
+    const list = (conversations || []).map((c) => ({
+      ...c,
+      title: localTitles[c.id] || c.title || 'New Chat',
+    }));
+
+    if (activeConvId && !list.some((c) => c.id === activeConvId)) {
+      list.unshift({
+        id: activeConvId,
+        project_id: projectId,
+        title: localTitles[activeConvId] || 'New Chat',
+        created_at: new Date().toISOString(),
+      });
+    }
+
+    return list;
+  }, [conversations, activeConvId, projectId, localTitles]);
 
   const handleSend = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -133,7 +172,15 @@ export default function ChatPage() {
         {
           onMetadata: (data) => {
             if (data.conversation_id) {
-              setActiveConvId(data.conversation_id);
+              const realConvId = data.conversation_id;
+              setActiveConvId(realConvId);
+
+              // Auto-generate title for new conversation on first turn
+              const targetConv = conversations.find((c) => c.id === activeConvId || c.id === realConvId);
+              if (!targetConv || targetConv.title === 'New Chat' || targetConv.title === 'New Conversation') {
+                const autoTitle = generateShortTitle(currentMsg);
+                renameConversation({ convId: realConvId, title: autoTitle });
+              }
             }
             if (data.citations) {
               setStreamingCitations(data.citations);
@@ -194,31 +241,58 @@ export default function ChatPage() {
     }
   };
 
+  const generateShortTitle = (text: string) => {
+    const clean = text.replace(/[@/]/g, '').trim();
+    if (!clean) return 'New Chat';
+    if (clean.length <= 25) return clean.charAt(0).toUpperCase() + clean.slice(1);
+    const words = clean.split(/\s+/).slice(0, 4).join(' ');
+    return words.charAt(0).toUpperCase() + words.slice(1);
+  };
+
   const handleCreateNewConversation = () => {
-    setActiveConvId(undefined);
+    const newId = crypto.randomUUID();
+    setActiveConvId(newId);
     setInput('');
     setShowMentions(false);
     setShowCommands(false);
-    toast.success('Ready to start a new chat session.');
+    setMenuOpenConvId(null);
+    setEditingConvId(null);
+    setTimeout(() => inputRef.current?.focus(), 50);
   };
 
-  const handleDeleteConversation = (targetConvId: string) => {
+  const confirmDeleteConversation = (targetConvId: string) => {
+    setDeleteConfirmConvId(null);
+    setMenuOpenConvId(null);
     const remaining = conversations.filter((c) => c.id !== targetConvId);
     const wasActive = activeConvId === targetConvId;
 
-    deleteConversation(targetConvId, {
-      onSuccess: () => {
-        toast.success('Conversation purged.');
-      },
-    });
+    deleteConversation(targetConvId);
 
     if (wasActive) {
       if (remaining.length > 0) {
         setActiveConvId(remaining[0].id);
       } else {
-        setActiveConvId(undefined);
+        handleCreateNewConversation();
       }
     }
+  };
+
+  const isSavingRenameRef = React.useRef(false);
+
+  const handleSaveRename = (convId: string, customTitle?: string) => {
+    if (isSavingRenameRef.current) return;
+    isSavingRenameRef.current = true;
+    const raw = customTitle !== undefined ? customTitle : editingTitle;
+    const trimmed = raw.trim();
+    if (trimmed) {
+      setLocalTitles((prev) => ({ ...prev, [convId]: trimmed }));
+      renameConversation({ convId, title: trimmed });
+    }
+    setEditingConvId(null);
+    setMenuOpenConvId(null);
+    setTimeout(() => {
+      isSavingRenameRef.current = false;
+    }, 200);
   };
 
   const handleCopyMessage = (msgId: string, content: string) => {
@@ -245,62 +319,159 @@ export default function ChatPage() {
   return (
     <div className="flex h-[calc(100vh-56px)] overflow-hidden font-sans relative bg-[#09090B] animate-fade-in">
       {/* 1. Conversations History Sidebar */}
-      <aside className="w-60 border-r border-[rgba(255,255,255,0.06)] bg-[#0D0D10] shrink-0 flex flex-col justify-between hidden md:flex select-none">
-        <div className="p-3 border-b border-[rgba(255,255,255,0.04)] shrink-0">
+      <aside className="w-64 border-r border-[rgba(255,255,255,0.06)] bg-[#0D0D10] shrink-0 flex flex-col justify-between hidden md:flex select-none">
+        <div className="p-3 border-b border-[rgba(255,255,255,0.04)] shrink-0 space-y-2">
           <Button
             onClick={handleCreateNewConversation}
             variant="outline"
             size="sm"
-            className="w-full justify-start gap-2 border-[rgba(255,255,255,0.06)] bg-[#111217] text-[#8B8D98] hover:text-[#F0F0F3] hover:border-[#7C5CFC]/20 transition-all active:scale-[0.98]"
+            className="w-full justify-start gap-2 border-[rgba(255,255,255,0.06)] bg-[#111217] text-[#8B8D98] hover:text-white hover:border-[#7C5CFC]/30 hover:bg-[#181A20] transition-all active:scale-[0.98] shadow-xs"
           >
-            <Plus className="h-3.5 w-3.5 text-[#7C5CFC]" />
-            <span className="text-xs font-medium">New conversation</span>
+            <Plus className="h-4 w-4 text-[#7C5CFC]" />
+            <span className="text-xs font-semibold">New conversation</span>
           </Button>
+
+          {/* Instant Client-Side Search */}
+          <div className="relative">
+            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-[#56585E]" />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Escape') setSearchQuery('');
+              }}
+              placeholder="Search chats..."
+              className="w-full bg-[#111217] border border-[rgba(255,255,255,0.06)] rounded-xl pl-8 pr-3 py-1.5 text-xs text-[#F0F0F3] placeholder-[#56585E] outline-none focus:border-[#7C5CFC]/40 transition-all font-sans"
+            />
+          </div>
         </div>
 
-        {/* Conversation list */}
-        <div className="flex-1 overflow-y-auto p-2 space-y-1">
+        {/* Conversation list with Optimistic Updates */}
+        <div className="flex-1 overflow-y-auto p-2 space-y-1 relative">
           {isLoadingConversations ? (
             <div className="space-y-2 p-1">
               {Array.from({ length: 4 }).map((_, i) => (
-                <div key={i} className="h-8 rounded-lg bg-[#111217] animate-pulse border border-[rgba(255,255,255,0.04)]" />
+                <div key={i} className="h-8 rounded-xl bg-[#111217] animate-pulse border border-[rgba(255,255,255,0.04)]" />
               ))}
             </div>
-          ) : conversations.length === 0 ? (
-            <p className="text-[10px] text-[#56585E] text-center py-6 font-medium">No active sessions found.</p>
-          ) : (
-            conversations.map((conv) => {
+          ) : (() => {
+            const filteredConvs = displayConversations.filter((c) =>
+              (c.title || 'New Chat').toLowerCase().includes(searchQuery.toLowerCase())
+            );
+
+            if (filteredConvs.length === 0) {
+              return (
+                <div className="flex flex-col items-center justify-center py-12 text-center px-4 space-y-3">
+                  <Sparkles className="h-5 w-5 text-[#7C5CFC] animate-pulse" />
+                  <p className="text-xs font-semibold text-white">✨ Start a new conversation</p>
+                  <p className="text-[10px] text-[#8B8D98]">Ask anything about your code or documents.</p>
+                  <button
+                    onClick={handleCreateNewConversation}
+                    className="px-3 py-1.5 rounded-xl bg-[#7C5CFC] hover:bg-[#6C47FF] text-white text-xs font-semibold transition-all active:scale-95 shadow-sm"
+                  >
+                    New Chat
+                  </button>
+                </div>
+              );
+            }
+
+            return filteredConvs.map((conv) => {
               const isActive = conv.id === activeConvId;
+              const isEditing = editingConvId === conv.id;
+              const isMenuOpen = menuOpenConvId === conv.id;
+
               return (
                 <div
                   key={conv.id}
                   className={cn(
-                    "group flex items-center justify-between rounded-xl px-3 py-2 text-xs font-medium cursor-pointer transition-all border border-transparent",
+                    "group relative flex items-center justify-between rounded-xl px-3 py-2 text-xs font-medium cursor-pointer transition-all border",
                     isActive
-                      ? "bg-[#7C5CFC]/10 text-[#F0F0F3] border-[#7C5CFC]/10"
-                      : "text-[#8B8D98] hover:bg-[#181A20] hover:text-[#F0F0F3]"
+                      ? "bg-[#7C5CFC]/15 text-white border-[#7C5CFC]/30 shadow-[0_0_15px_rgba(124,92,252,0.12)]"
+                      : "text-[#8B8D98] hover:bg-[#181A20] hover:text-[#F0F0F3] border-transparent"
                   )}
-                  onClick={() => setActiveConvId(conv.id)}
+                  onClick={() => {
+                    if (!isEditing) setActiveConvId(conv.id);
+                  }}
                 >
-                  <div className="flex items-center gap-2 truncate">
+                  <div className="flex items-center gap-2 truncate min-w-0 flex-1">
                     <MessageSquare className={cn("h-3.5 w-3.5 shrink-0", isActive ? "text-[#7C5CFC]" : "text-[#56585E]")} />
-                    <span className="truncate">{conv.title || 'New Conversation'}</span>
+                    {isEditing ? (
+                      <input
+                        type="text"
+                        autoFocus
+                        defaultValue={editingTitle}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') handleSaveRename(conv.id, (e.target as HTMLInputElement).value);
+                          if (e.key === 'Escape') setEditingConvId(null);
+                        }}
+                        onBlur={(e) => handleSaveRename(conv.id, e.target.value)}
+                        onClick={(e) => e.stopPropagation()}
+                        className="w-full bg-[#111217] border border-[#7C5CFC]/50 rounded px-1.5 py-0.5 text-xs text-white outline-none"
+                      />
+                    ) : (
+                      <span className="truncate">{conv.title || 'New Chat'}</span>
+                    )}
                   </div>
                   
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleDeleteConversation(conv.id);
-                    }}
-                    className="opacity-0 group-hover:opacity-100 p-1 rounded text-[#56585E] hover:text-[#FF5C74] hover:bg-[#111217] transition-all"
-                    title="Purge session"
-                  >
-                    <Trash2 className="h-3 w-3" />
-                  </button>
+                  {/* Context Menu Button */}
+                  {!isEditing && (
+                    <div className="relative shrink-0 flex items-center">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setMenuOpenConvId(isMenuOpen ? null : conv.id);
+                        }}
+                        className={cn(
+                          "p-1 rounded text-[#56585E] hover:text-[#F0F0F3] hover:bg-[#111217] transition-all",
+                          isMenuOpen ? "opacity-100" : "opacity-0 group-hover:opacity-100"
+                        )}
+                        title="Conversation options"
+                      >
+                        <MoreVertical className="h-3.5 w-3.5" />
+                      </button>
+
+                      {/* Dropdown Menu */}
+                      <AnimatePresence>
+                        {isMenuOpen && (
+                          <motion.div
+                            initial={{ opacity: 0, scale: 0.95, y: -4 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.95, y: -4 }}
+                            transition={{ duration: 0.12 }}
+                            onClick={(e) => e.stopPropagation()}
+                            className="absolute right-0 top-6 z-40 w-32 rounded-xl bg-[#111217] border border-[rgba(255,255,255,0.08)] py-1 shadow-2xl space-y-0.5"
+                          >
+                            <button
+                              onClick={() => {
+                                setMenuOpenConvId(null);
+                                setEditingConvId(conv.id);
+                                setEditingTitle(conv.title || 'New Chat');
+                              }}
+                              className="w-full flex items-center gap-2 px-3 py-1.5 text-[11px] font-medium text-[#8B8D98] hover:text-white hover:bg-[#181A20] transition-all"
+                            >
+                              <Pencil className="h-3 w-3 text-[#7C5CFC]" />
+                              <span>Rename</span>
+                            </button>
+                            <button
+                              onClick={() => {
+                                setMenuOpenConvId(null);
+                                setDeleteConfirmConvId(conv.id);
+                              }}
+                              className="w-full flex items-center gap-2 px-3 py-1.5 text-[11px] font-medium text-[#FF5C74] hover:bg-[#FF5C74]/10 transition-all"
+                            >
+                              <Trash2 className="h-3 w-3" />
+                              <span>Delete</span>
+                            </button>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </div>
+                  )}
                 </div>
               );
-            })
-          )}
+            });
+          })()}
         </div>
       </aside>
 
@@ -309,7 +480,7 @@ export default function ChatPage() {
         {/* Active conversation info header */}
         <div className="h-12 border-b border-[rgba(255,255,255,0.06)] px-6 flex items-center justify-between bg-[#111217]/40 backdrop-blur-xl shrink-0 select-none">
           <div className="flex items-center gap-2">
-            <Sparkles className="h-4 w-4 text-[#7C5CFC]" />
+            <Sparkles className="h-4 w-4 text-[var(--primary)]" />
             <span className="text-xs font-semibold text-[#8B8D98]">
               {activeProject ? `Copilot: ${activeProject.name}` : 'AI Chat Interface'}
             </span>
@@ -318,10 +489,10 @@ export default function ChatPage() {
           <div className="flex items-center gap-2">
             {/* Active LLM Model Provider Display */}
             <div className="flex items-center gap-1.5 rounded-lg bg-[#111217] border border-[rgba(255,255,255,0.06)] px-2.5 py-1 text-[11px] font-medium text-[#8B8D98]">
-              <Terminal className="h-3 w-3 text-[#7C5CFC]" />
+              <Terminal className="h-3 w-3 text-[var(--primary)]" />
               <span>{llmDisplay}</span>
             </div>
-            <span className="text-[9px] bg-[#7C5CFC]/10 border border-[#7C5CFC]/10 rounded-md px-2 py-0.5 text-[#7C5CFC] font-bold font-mono tracking-wider">
+            <span className="text-[9px] bg-[var(--primary)]/10 border border-[var(--primary)]/20 rounded-md px-2 py-0.5 text-[var(--primary)] font-bold font-mono tracking-wider">
               RAG PIPELINE
             </span>
           </div>
@@ -339,7 +510,7 @@ export default function ChatPage() {
           ) : (messages.length === 0 && !isStreaming) ? (
             <div className="h-full flex flex-col items-center justify-center text-center max-w-md mx-auto space-y-6 select-none animate-fade-in-up">
               <div className="flex flex-col items-center">
-                <div className="h-12 w-12 rounded-2xl bg-[#7C5CFC]/10 border border-[#7C5CFC]/15 flex items-center justify-center text-[#7C5CFC] mb-4 shadow-lg shadow-[#7C5CFC]/5">
+                <div className="h-12 w-12 rounded-2xl bg-[var(--primary)]/10 border border-[var(--primary)]/15 flex items-center justify-center text-[var(--primary)] mb-4 shadow-lg shadow-[var(--primary)]/5">
                   <Bot className="h-6 w-6" />
                 </div>
                 <h3 className="text-sm font-semibold text-[#F0F0F3]">Ask MLCopilot anything</h3>
@@ -383,7 +554,7 @@ export default function ChatPage() {
                   >
                     {/* Role Icon for Assistant */}
                     {isAssistant && (
-                      <div className="h-8 w-8 rounded-xl border flex items-center justify-center shrink-0 bg-[#7C5CFC]/10 border-[#7C5CFC]/20 text-[#7C5CFC] shadow-sm">
+                      <div className="h-8 w-8 rounded-xl border flex items-center justify-center shrink-0 bg-[var(--primary)]/10 border-[var(--primary)]/20 text-[var(--primary)] shadow-sm">
                         <Bot className="h-4 w-4" />
                       </div>
                     )}
@@ -397,9 +568,22 @@ export default function ChatPage() {
                         "flex items-center gap-2 select-none px-1",
                         isAssistant ? "justify-between" : "justify-end"
                       )}>
-                        <span className="text-[10px] font-bold text-[#56585E] uppercase tracking-wider">
-                          {isAssistant ? 'MLCopilot' : 'You'}
-                        </span>
+                        <div className="flex items-center gap-2">
+                          <span className="text-[10px] font-bold text-[#56585E] uppercase tracking-wider">
+                            {isAssistant ? 'MLCopilot' : 'You'}
+                          </span>
+                          {isAssistant && (
+                            msg.citations && msg.citations.length > 0 ? (
+                              <span className="inline-flex items-center px-1.5 py-0.5 rounded-md bg-[var(--primary)]/15 border border-[var(--primary)]/30 text-[var(--primary)] text-[9px] font-mono font-bold select-none">
+                                RAG • {msg.citations.length} chunk{msg.citations.length > 1 ? 's' : ''}
+                              </span>
+                            ) : (
+                              <span className="inline-flex items-center px-1.5 py-0.5 rounded-md bg-[#181A20] border border-[rgba(255,255,255,0.06)] text-[#8B8D98] text-[9px] font-mono font-bold select-none">
+                                AI
+                              </span>
+                            )
+                          )}
+                        </div>
                         
                         <div className="flex items-center gap-1">
                           <button
@@ -426,22 +610,26 @@ export default function ChatPage() {
                         "p-4 rounded-2xl border text-xs shadow-sm",
                         isAssistant
                           ? "bg-[#111217] border-[rgba(255,255,255,0.06)] text-[#F0F0F3]"
-                          : "bg-gradient-to-r from-[#7C5CFC] to-[#6C47FF] border-transparent text-white font-medium shadow-[0_4px_20px_rgba(124,92,252,0.2)]"
+                          : "bg-[var(--primary)] border-transparent text-white font-medium shadow-[0_4px_20px_rgba(124,92,252,0.2)]"
                       )}>
                         <div className={cn(
                           "prose prose-xs leading-relaxed font-sans max-w-none select-text",
                           isAssistant ? "prose-invert text-[#F0F0F3]/95" : "text-white"
                         )}>
-                          <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                            {msg.content}
-                          </ReactMarkdown>
+                          {preferences.markdownRendering ? (
+                            <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                              {msg.content}
+                            </ReactMarkdown>
+                          ) : (
+                            <pre className="whitespace-pre-wrap font-sans text-xs text-[#F0F0F3]/95">{msg.content}</pre>
+                          )}
                         </div>
 
-                        {/* Citations block - rendered ONLY when RAG citations exist */}
-                        {isAssistant && msg.citations && msg.citations.length > 0 && (
+                        {/* Citations block - rendered ONLY when RAG citations exist and showCitations is enabled */}
+                        {isAssistant && preferences.showCitations && msg.citations && msg.citations.length > 0 && (
                           <div className="pt-3 border-t border-[rgba(255,255,255,0.06)] mt-3 space-y-2">
                             <span className="text-[9px] font-bold text-[#56585E] uppercase tracking-wider flex items-center gap-1">
-                              <Quote className="h-3 w-3 text-[#7C5CFC]" />
+                              <Quote className="h-3 w-3 text-[var(--primary)]" />
                               <span>Context Citations</span>
                             </span>
                             <div className="flex flex-wrap gap-1.5">
@@ -449,9 +637,9 @@ export default function ChatPage() {
                                 <button
                                   key={cIdx}
                                   onClick={() => setSelectedCitation(cite)}
-                                  className="inline-flex items-center gap-1.5 rounded-lg bg-[#181A20] hover:bg-[#1E2028] border border-[rgba(255,255,255,0.06)] px-2.5 py-1 text-[10px] font-medium text-[#8B8D98] hover:text-[#7C5CFC] transition-all cursor-pointer select-none"
+                                  className="inline-flex items-center gap-1.5 rounded-lg bg-[#181A20] hover:bg-[#1E2028] border border-[rgba(255,255,255,0.06)] px-2.5 py-1 text-[10px] font-medium text-[#8B8D98] hover:text-[var(--primary)] transition-all cursor-pointer select-none"
                                 >
-                                  <span className="text-[#7C5CFC] font-semibold">[{cIdx + 1}]</span>
+                                  <span className="text-[var(--primary)] font-semibold">[{cIdx + 1}]</span>
                                   <span className="truncate max-w-[120px]">{cite.filename}</span>
                                 </button>
                               ))}
@@ -504,7 +692,18 @@ export default function ChatPage() {
                     </div>
                     <div className="space-y-2 min-w-0 max-w-[85%] w-full">
                       <div className="flex items-center justify-between select-none px-1">
-                        <span className="text-[10px] font-bold text-[#56585E] uppercase tracking-wider">MLCopilot</span>
+                        <div className="flex items-center gap-2">
+                          <span className="text-[10px] font-bold text-[#56585E] uppercase tracking-wider">MLCopilot</span>
+                          {streamingCitations.length > 0 ? (
+                            <span className="inline-flex items-center px-1.5 py-0.5 rounded-md bg-[#7C5CFC]/15 border border-[#7C5CFC]/30 text-[#7C5CFC] text-[9px] font-mono font-bold select-none">
+                              RAG • {streamingCitations.length} chunk{streamingCitations.length > 1 ? 's' : ''}
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center px-1.5 py-0.5 rounded-md bg-[#181A20] border border-[rgba(255,255,255,0.06)] text-[#8B8D98] text-[9px] font-mono font-bold select-none">
+                              AI
+                            </span>
+                          )}
+                        </div>
                       </div>
                       <div className="p-4 rounded-2xl bg-[#111217] border border-[rgba(255,255,255,0.06)] text-[#F0F0F3] shadow-sm">
                         {streamingContent ? (
@@ -608,6 +807,7 @@ export default function ChatPage() {
             {/* Top Textarea Input Row */}
             <form onSubmit={handleSend} className="w-full">
               <textarea
+                ref={inputRef}
                 value={input}
                 onChange={handleInputChange}
                 onKeyDown={(e) => {
@@ -634,7 +834,7 @@ export default function ChatPage() {
                     className="flex items-center gap-1 rounded-full bg-[#181A20] hover:bg-[#1E2028] border border-[rgba(255,255,255,0.06)] px-2.5 py-1 text-[10px] font-medium text-[#8B8D98] hover:text-[#F0F0F3] transition-all cursor-pointer"
                     title="Scope context to document (@)"
                   >
-                    <AtSign className="h-3 w-3 text-[#7C5CFC]" />
+                    <AtSign className="h-3 w-3 text-[var(--primary)]" />
                     <span>Doc Context</span>
                   </button>
 
@@ -647,7 +847,7 @@ export default function ChatPage() {
                     className="flex items-center gap-1 rounded-full bg-[#181A20] hover:bg-[#1E2028] border border-[rgba(255,255,255,0.06)] px-2.5 py-1 text-[10px] font-medium text-[#8B8D98] hover:text-[#F0F0F3] transition-all cursor-pointer"
                     title="Slash commands (/)"
                   >
-                    <Slash className="h-3 w-3 text-[#7C5CFC]" />
+                    <Slash className="h-3 w-3 text-[var(--primary)]" />
                     <span>Commands</span>
                   </button>
 
@@ -662,7 +862,7 @@ export default function ChatPage() {
                   className={cn(
                     "h-8 w-8 rounded-full flex items-center justify-center transition-all cursor-pointer active:scale-95 shrink-0",
                     input.trim() && !isSendingMessage && !isStreaming
-                      ? "bg-[#7C5CFC] hover:bg-[#6B4FE0] text-white shadow-md shadow-[#7C5CFC]/20"
+                      ? "bg-[var(--primary)] hover:bg-[var(--primary)]/90 text-white shadow-md shadow-[var(--primary)]/20"
                       : "bg-[#1E2028] text-[#56585E] cursor-not-allowed"
                   )}
                 >
@@ -770,6 +970,45 @@ export default function ChatPage() {
           )}
         </Drawer>
       </div>
+
+      {/* 5. Delete Conversation Confirmation Modal */}
+      <AnimatePresence>
+        {deleteConfirmConvId && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              transition={{ duration: 0.15 }}
+              className="bg-[#111217] border border-[rgba(255,255,255,0.08)] rounded-2xl p-6 max-w-sm w-full space-y-4 shadow-2xl select-none"
+            >
+              <div className="flex items-center gap-3">
+                <div className="h-10 w-10 rounded-xl bg-[#FF5C74]/10 border border-[#FF5C74]/20 flex items-center justify-center text-[#FF5C74] shrink-0">
+                  <AlertTriangle className="h-5 w-5" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-semibold text-white">Delete Conversation?</h3>
+                  <p className="text-xs text-[#8B8D98] mt-0.5">This action cannot be undone.</p>
+                </div>
+              </div>
+              <div className="flex items-center justify-end gap-2 pt-2">
+                <button
+                  onClick={() => setDeleteConfirmConvId(null)}
+                  className="px-3.5 py-1.5 rounded-xl bg-[#181A20] hover:bg-[#1E2028] text-xs font-medium text-[#8B8D98] hover:text-white transition-all cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={() => confirmDeleteConversation(deleteConfirmConvId)}
+                  className="px-3.5 py-1.5 rounded-xl bg-[#FF5C74] hover:bg-[#E04B62] text-xs font-semibold text-white transition-all shadow-sm cursor-pointer active:scale-95"
+                >
+                  Delete
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

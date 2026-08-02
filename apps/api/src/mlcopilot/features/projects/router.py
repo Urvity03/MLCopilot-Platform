@@ -62,7 +62,7 @@ async def list_projects(
 
 
 @router.get(
-    "/{project_id}",
+    "/{project_id:uuid}",
     response_model=ProjectResponse,
 )
 async def get_project(
@@ -77,7 +77,7 @@ async def get_project(
 
 
 @router.delete(
-    "/{project_id}",
+    "/{project_id:uuid}",
     status_code=status.HTTP_204_NO_CONTENT,
 )
 async def delete_project(

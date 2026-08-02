@@ -10,6 +10,7 @@ Errors are logged exactly once, here at the boundary that handles them.
 
 from __future__ import annotations
 
+import traceback
 from typing import TYPE_CHECKING, Any
 
 from fastapi import status
@@ -131,10 +132,18 @@ async def _handle_http_exception(request: Request, exc: Exception) -> JSONRespon
 
 
 async def _handle_unexpected_error(request: Request, exc: Exception) -> JSONResponse:
+    import sys
+    traceback_text = "".join(
+        traceback.format_exception(type(exc), exc, exc.__traceback__)
+    )
+
     logger.error(
         "unhandled_exception",
         path=request.url.path,
-        exc_info=exc,
+        exception_type=type(exc).__name__,
+        exception_message=str(exc),
+        traceback=traceback_text,
+        exc_info=True,
     )
     return error_response(
         status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -145,7 +154,7 @@ async def _handle_unexpected_error(request: Request, exc: Exception) -> JSONResp
 
 
 def register_exception_handlers(app: FastAPI) -> None:
-    """Attach all boundary error handlers to the application."""
+    """Attach error handlers to the FastAPI app instance."""
     app.add_exception_handler(DomainError, _handle_domain_error)
     app.add_exception_handler(RequestValidationError, _handle_validation_error)
     app.add_exception_handler(StarletteHTTPException, _handle_http_exception)

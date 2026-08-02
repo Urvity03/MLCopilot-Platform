@@ -16,6 +16,12 @@ class ChatRequest(BaseModel):
     stream: bool = True
 
 
+class RenameConversationRequest(BaseModel):
+    """Schema representing conversation rename requests."""
+
+    title: str = Field(..., min_length=1, max_length=100)
+
+
 class CitationResponse(BaseModel):
     """Schema representing structured search reference citations."""
 

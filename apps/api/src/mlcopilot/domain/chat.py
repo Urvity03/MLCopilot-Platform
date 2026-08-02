@@ -102,6 +102,10 @@ class ConversationRepository(Protocol):
         """Delete a conversation session and all its messages."""
         ...
 
+    async def update_title(self, conversation_id: uuid.UUID, title: str) -> None:
+        """Update a conversation title."""
+        ...
+
     async def add_message(self, message: ChatMessage) -> None:
         """Persist a single chat message turn."""
         ...

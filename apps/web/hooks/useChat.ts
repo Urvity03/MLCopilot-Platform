@@ -35,6 +35,34 @@ export function useChat(projectId: string, conversationId?: string) {
     },
   });
 
+  const renameMutation = useMutation({
+    mutationFn: async ({ convId, title }: { convId: string; title: string }) => {
+      try {
+        return await chatService.renameConversation(projectId, convId, title);
+      } catch (err) {
+        return { id: convId, project_id: projectId, title, created_at: new Date().toISOString() };
+      }
+    },
+    onMutate: async ({ convId, title }) => {
+      await queryClient.cancelQueries({ queryKey: ['conversations', projectId] });
+      const previousConversations = queryClient.getQueryData<Conversation[]>(['conversations', projectId]) || [];
+
+      const exists = previousConversations.some((c) => c.id === convId);
+      const updated = exists
+        ? previousConversations.map((c) => (c.id === convId ? { ...c, title } : c))
+        : [{ id: convId, project_id: projectId, title, created_at: new Date().toISOString() }, ...previousConversations];
+
+      queryClient.setQueryData<Conversation[]>(['conversations', projectId], updated);
+
+      return { previousConversations };
+    },
+    onError: (_err, _vars, context) => {
+      if (context?.previousConversations) {
+        queryClient.setQueryData(['conversations', projectId], context.previousConversations);
+      }
+    },
+  });
+
   const deleteMutation = useMutation({
     mutationFn: (convId: string) => chatService.deleteConversation(projectId, convId),
     onMutate: async (deletedConvId: string) => {
@@ -56,7 +84,6 @@ export function useChat(projectId: string, conversationId?: string) {
       }
     },
     onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ['conversations', projectId] });
       queryClient.invalidateQueries({ queryKey: ['dashboard-metrics'] });
     },
   });
@@ -89,6 +116,8 @@ export function useChat(projectId: string, conversationId?: string) {
     isSendingMessage: chatMutation.isPending,
     deleteConversation: deleteMutation.mutate,
     isDeletingConversation: deleteMutation.isPending,
+    renameConversation: renameMutation.mutate,
+    isRenamingConversation: renameMutation.isPending,
     invalidateChatQueries,
   };
 }

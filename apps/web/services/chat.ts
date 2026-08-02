@@ -34,6 +34,11 @@ export const chatService = {
     await client.delete(`/projects/${projectId}/conversations/${conversationId}`);
   },
 
+  async renameConversation(projectId: string, conversationId: string, title: string): Promise<Conversation> {
+    const response = await client.patch<Conversation>(`/projects/${projectId}/conversations/${conversationId}`, { title });
+    return response.data;
+  },
+
   async chat(projectId: string, payload: ChatPayload): Promise<{ content: string; citations: any[] }> {
     const response = await client.post(`/projects/${projectId}/chat`, {
       ...payload,

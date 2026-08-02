@@ -6,6 +6,7 @@ export interface User {
   is_superuser: boolean;
   created_at: string;
   updated_at: string;
+  avatar_url?: string | null;
 }
 
 export type RoleType = 'owner' | 'admin' | 'member' | 'viewer';

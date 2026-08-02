@@ -9,8 +9,6 @@ from __future__ import annotations
 
 import sqlalchemy as sa
 from alembic import op
-
-
 from pgvector.sqlalchemy import Vector
 
 revision: str = '30a5f0243126'

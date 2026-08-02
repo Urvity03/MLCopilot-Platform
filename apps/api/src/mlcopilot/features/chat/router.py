@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import uuid
+from datetime import UTC
 from typing import Annotated, Any
 
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -19,6 +20,7 @@ from mlcopilot.features.chat.schemas import (
     CitationResponse,
     ConversationDetailResponse,
     ConversationResponse,
+    RenameConversationRequest,
 )
 from mlcopilot.features.chat.service import RAGService
 from mlcopilot.features.projects.deps import get_project_repository, require_project_role
@@ -42,11 +44,12 @@ async def chat_with_project(
     if not project:
         raise NotFoundError("Project not found")
 
-    from datetime import datetime, timezone
+    from datetime import datetime
+
     from mlcopilot.core.logging import get_logger
     logger = get_logger("mlcopilot.features.chat.router")
 
-    now_iso = datetime.now(timezone.utc).isoformat()
+    now_iso = datetime.now(UTC).isoformat()
     logger.info("[TRACE-2-FASTAPI-REQUEST]", timestamp=now_iso, project_id=str(project_id), question=payload.question, stream=payload.stream)
 
     if payload.stream:
@@ -58,7 +61,7 @@ async def chat_with_project(
                 question=payload.question,
                 conversation_id=payload.conversation_id,
             ):
-                logger.info("[TRACE-6-FASTAPI-RESPONSE-YIELD]", timestamp=datetime.now(timezone.utc).isoformat(), item=item)
+                logger.info("[TRACE-6-FASTAPI-RESPONSE-YIELD]", timestamp=datetime.now(UTC).isoformat(), item=item)
                 yield item
 
         return StreamingResponse(traced_generator(), media_type="text/event-stream")
@@ -188,3 +191,40 @@ async def delete_conversation(
 
     await conversation_repo.delete(conversation_id)
     await conversation_repo.commit()
+
+
+@router.patch(
+    "/{project_id:uuid}/conversations/{conversation_id:uuid}",
+    response_model=ConversationResponse,
+)
+@router.put(
+    "/{project_id:uuid}/conversations/{conversation_id:uuid}",
+    response_model=ConversationResponse,
+)
+async def update_conversation_title(
+    project_id: uuid.UUID,
+    conversation_id: uuid.UUID,
+    payload: RenameConversationRequest,
+    context: Annotated[ProjectContext, Depends(require_project_role(Role.MEMBER))],
+    conversation_repo: Annotated[ConversationRepository, Depends(get_conversation_repository)],
+) -> ConversationResponse:
+    """Update a conversation title."""
+    conv = await conversation_repo.get_by_id(conversation_id)
+    if not conv or conv.project_id != context.project_id:
+        raise NotFoundError("Conversation not found")
+
+    if conv.created_by != context.user.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You do not have permission to update this conversation",
+        )
+
+    await conversation_repo.update_title(conversation_id, payload.title)
+    await conversation_repo.commit()
+
+    return ConversationResponse(
+        id=conv.id,
+        project_id=conv.project_id,
+        title=payload.title,
+        created_at=conv.created_at,
+    )

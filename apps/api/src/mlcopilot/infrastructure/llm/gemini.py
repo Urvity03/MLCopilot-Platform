@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import os
+from datetime import UTC
 from typing import TYPE_CHECKING, Any
 
 import httpx
@@ -176,8 +177,8 @@ class GeminiProvider(BaseLLMProvider):
                         if not line:
                             continue
 
-                        from datetime import datetime, timezone
-                        now_iso = datetime.now(timezone.utc).isoformat()
+                        from datetime import datetime
+                        now_iso = datetime.now(UTC).isoformat()
                         logger.info("[TRACE-5-RAW-GOOGLE-SSE-LINE]", timestamp=now_iso, raw_line=line)
 
                         if not line.startswith("data:"):

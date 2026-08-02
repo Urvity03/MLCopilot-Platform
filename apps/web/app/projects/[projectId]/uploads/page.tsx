@@ -230,17 +230,17 @@ export default function UploadsPage() {
                         <span>499 TOKENS</span>
                       </div>
                       <p className="text-[#8B8D98] leading-relaxed font-medium select-text">
-                        &ldquo;Document analysis: {activeUploadDetails.filename} parsed successfully. Extracting textual nodes from primary schemas. In this repository dataset, we aggregate clean RAG parameters to explore context boundaries under strict token limits. Model performance is optimized by <span className="bg-[#7C5CFC]/10 border border-[#7C5CFC]/20 text-[#7C5CFC] px-1 py-0.5 rounded text-[10px] select-text">configuring 384-dimensional dense vectors mapped directly to pgvector tables...</span>&rdquo;
+                        &ldquo;Document analysis: {activeUploadDetails.filename} parsed successfully. Extracting textual nodes from primary schemas. In this repository dataset, we aggregate clean RAG parameters to explore context boundaries under strict token limits. Model performance is optimized by <span className="bg-[var(--primary)]/10 border border-[var(--primary)]/20 text-[var(--primary)] px-1 py-0.5 rounded text-[10px] select-text">configuring 384-dimensional dense vectors mapped directly to pgvector tables...</span>&rdquo;
                       </p>
                     </div>
 
                     <div className="p-3 rounded-xl bg-[#111217] border border-[rgba(255,255,255,0.06)] text-xs">
-                      <div className="flex justify-between items-center text-[9px] font-mono font-bold text-[#7C5CFC] mb-2">
+                      <div className="flex justify-between items-center text-[9px] font-mono font-bold text-[var(--primary)] mb-2">
                         <span>CHUNK #0002 (TOKENS 450 - 950)</span>
                         <span>480 TOKENS</span>
                       </div>
                       <p className="text-[#8B8D98] leading-relaxed font-medium select-text">
-                        &ldquo;<span className="bg-[#7C5CFC]/10 border border-[#7C5CFC]/20 text-[#7C5CFC] px-1 py-0.5 rounded text-[10px] select-text">...configuring 384-dimensional dense vectors mapped directly to pgvector tables.</span> Under high concurrency workloads, queries execution times are minimized via index caches. We partition the index scope per workspace project to isolate data access logs.&rdquo;
+                        &ldquo;<span className="bg-[var(--primary)]/10 border border-[var(--primary)]/20 text-[var(--primary)] px-1 py-0.5 rounded text-[10px] select-text">...configuring 384-dimensional dense vectors mapped directly to pgvector tables.</span> Under high concurrency workloads, queries execution times are minimized via index caches. We partition the index scope per workspace project to isolate data access logs.&rdquo;
                       </p>
                     </div>
                   </div>

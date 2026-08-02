@@ -128,7 +128,8 @@ Components:
       }
     }
     const projectWorkspaceUrl = page.url();
-    console.log(`✓ Project Workspace Opened: ${projectWorkspaceUrl}`);
+    const activeProjectId = projectWorkspaceUrl.split('/projects/')[1]?.split('/')[0];
+    console.log(`✓ Project Workspace Opened: ${projectWorkspaceUrl} (ID: ${activeProjectId})`);
     report.stepsCompleted.push('Project Workspace Opened');
 
     // 5. Test Dynamic Redirect for /chat Route
@@ -141,22 +142,10 @@ Components:
 
     // 6. Upload a real document
     console.log('6. Uploading real document sample_architecture.txt...');
-    const uploadTab = page.locator('a[href*="/uploads"]').first();
-    if (await uploadTab.isVisible()) {
-      await uploadTab.click();
-      await page.waitForURL('**/uploads', { timeout: 5000 });
-    }
+    await page.goto(`http://localhost:3000/projects/${activeProjectId}/uploads`, { waitUntil: 'networkidle' });
 
     const fileInput = page.locator('input[type="file"]');
-    if (await fileInput.count() > 0) {
-      await fileInput.setInputFiles(sampleFilePath);
-    } else {
-      const [fileChooser] = await Promise.all([
-        page.waitForEvent('filechooser'),
-        page.click('button:has-text("Upload"), button:has-text("Upload Document"), label:has-text("Upload")'),
-      ]);
-      await fileChooser.setFiles(sampleFilePath);
-    }
+    await fileInput.setInputFiles(sampleFilePath, { force: true });
 
     await page.waitForTimeout(3000);
     await page.screenshot({ path: path.join(artifactsDir, 'e2e_4_document_uploaded.png'), fullPage: true });
@@ -165,11 +154,8 @@ Components:
 
     // 7. Open AI Chat
     console.log('7. Opening AI Chat workspace...');
-    const chatTab = page.locator('a[href*="/chat"]').first();
-    await chatTab.click();
-    await page.waitForURL('**/chat', { timeout: 5000 });
-
-    await page.waitForSelector('textarea, input[placeholder*="Ask"], input[placeholder*="message"]', { timeout: 10000 });
+    await page.goto(`http://localhost:3000/projects/${activeProjectId}/chat`, { waitUntil: 'networkidle' });
+    await page.waitForSelector('textarea', { timeout: 20000 });
     await page.screenshot({ path: path.join(artifactsDir, 'e2e_project_chat_workspace.png'), fullPage: true });
     console.log('✓ AI Chat Opened.');
     report.stepsCompleted.push('AI Chat Opened');

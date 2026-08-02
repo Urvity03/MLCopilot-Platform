@@ -103,16 +103,14 @@ class RAGService:
                 for c in relevant_chunks
             ]
             system_prompt = PromptBuilder.build_system_prompt(project_name)
-            history = await self._conversation_repo.get_messages(conv.id)
             user_prompt = PromptBuilder.build_user_prompt(
-                question, relevant_chunks, history[:-1], is_rag_mode=True
+                question, relevant_chunks, [], is_rag_mode=True
             )
         else:
             citations = []
             system_prompt = PromptBuilder.build_conversational_system_prompt(project_name)
-            history = await self._conversation_repo.get_messages(conv.id)
             user_prompt = PromptBuilder.build_user_prompt(
-                question, [], history[:-1], is_rag_mode=False
+                question, [], [], is_rag_mode=False
             )
 
         answer = await self._generation_service.generate_response(
@@ -159,12 +157,20 @@ class RAGService:
         settings = get_settings()
         start_time = datetime.now(UTC)
 
-        # 1. Retrieval
-        t_retrieval_start = datetime.now(UTC)
-        raw_chunks = await self._retrieval_service.retrieve_relevant_chunks(
-            project_id, question, top_k=settings.rag_max_chunks
-        )
-        retrieval_ms = round((datetime.now(UTC) - t_retrieval_start).total_seconds() * 1000, 2)
+        # 1. AI Intent Classification (GENERAL vs DOCUMENT)
+        from mlcopilot.features.chat.intent import IntentRouter
+        intent_router = IntentRouter(self._generation_service._llm_provider)
+        intent = await intent_router.classify_intent(question, has_documents=True)
+
+        raw_chunks = []
+        retrieval_ms = 0.0
+
+        if intent == "DOCUMENT":
+            t_retrieval_start = datetime.now(UTC)
+            raw_chunks = await self._retrieval_service.retrieve_relevant_chunks(
+                project_id, question, top_k=settings.rag_max_chunks
+            )
+            retrieval_ms = round((datetime.now(UTC) - t_retrieval_start).total_seconds() * 1000, 2)
 
         # 2. Confidence Routing (threshold check)
         threshold = settings.rag_similarity_threshold
@@ -173,7 +179,7 @@ class RAGService:
         t_prompt_start = datetime.now(UTC)
         history = await self._conversation_repo.get_messages(conv.id)
 
-        if relevant_chunks:
+        if intent == "DOCUMENT" and relevant_chunks:
             is_rag_mode = True
             citations = [
                 Citation(
@@ -191,6 +197,7 @@ class RAGService:
                 question, relevant_chunks, history[:-1], is_rag_mode=True
             )
         else:
+            # Fallback to General AI Mode
             is_rag_mode = False
             citations = []
             system_prompt = PromptBuilder.build_conversational_system_prompt(project_name)

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from datetime import UTC, datetime
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -12,10 +13,17 @@ class PromptBuilder:
     """Prompt assembler and formatter for RAG & conversational LLM queries."""
 
     @staticmethod
-    def build_system_prompt(project_name: str) -> str:
+    def get_current_date_str() -> str:
+        """Get formatted current date string server-side (e.g., 'Thursday, 30 July 2026')."""
+        return datetime.now(UTC).strftime("%A, %d %B %Y")
+
+    @classmethod
+    def build_system_prompt(cls, project_name: str) -> str:
         """Construct the system instruction prompt for grounded RAG queries."""
+        current_date = cls.get_current_date_str()
         return (
             f"You are MLCopilot, an advanced AI copilot for the project '{project_name}'. "
+            f"Today's date is {current_date}.\n\n"
             "You will be given a user question, a conversational history, and a list of "
             "context snippets retrieved from the project's workspace documents.\n\n"
             "Operating Rules:\n"
@@ -33,14 +41,16 @@ class PromptBuilder:
             "6. Maintain a concise, professional, and helpful tone."
         )
 
-    @staticmethod
-    def build_conversational_system_prompt(project_name: str) -> str:
+    @classmethod
+    def build_conversational_system_prompt(cls, project_name: str) -> str:
         """Construct system prompt for general questions when no document RAG context is used."""
+        current_date = cls.get_current_date_str()
         return (
             f"You are MLCopilot, an advanced AI copilot for the project '{project_name}'. "
-            "You are a helpful, intelligent, and knowledgeable assistant.\n\n"
+            f"Today's date is {current_date}.\n\n"
+            "You are a helpful, intelligent, and knowledgeable AI assistant.\n\n"
             "Operating Rules:\n"
-            "1. Answer normally using general knowledge.\n"
+            "1. Answer general knowledge questions, programming queries, and conversational prompts accurately and naturally.\n"
             "2. Do not fabricate citations.\n"
             "3. If the user asks a workspace-specific question that requires documents not present in context, state clearly that the information is not available in the workspace documents.\n"
             "4. Maintain a concise, professional, and helpful tone."
