@@ -54,7 +54,7 @@ jobs:
           POSTGRES_HOST: localhost
           POSTGRES_PORT: 5432
           JWT_SECRET_KEY: ci_test_secret_key_minimum_64_characters_length_for_valid_security_assurance_hash
-          ENVIRONMENT: testing
+          ENVIRONMENT: test
         run: |
           cd apps/api
           python -m uv run pytest tests/ -o asyncio_mode=auto -v --tb=short
@@ -67,6 +67,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: '9.15.0'
+
       - name: Set up Node.js 20
         uses: actions/setup-node@v4
         with:
@@ -74,15 +79,9 @@ jobs:
           cache: 'pnpm'
           cache-dependency-path: 'apps/web/pnpm-lock.yaml'
 
-      - name: Set up pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: '9.15.0'
-
       - name: Install Frontend Dependencies
         run: |
           cd apps/web
-          corepack enable
           pnpm install --frozen-lockfile
 
       - name: Build Next.js Web App
@@ -90,7 +89,7 @@ jobs:
           NEXT_PUBLIC_API_URL: http://localhost:8000/api/v1
         run: |
           cd apps/web
-          npm run build
+          pnpm build
 
   docker-build:
     name: Verify Docker Container Builds
