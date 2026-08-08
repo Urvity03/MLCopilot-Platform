@@ -93,8 +93,8 @@ export function UploadZone({
         onDrop={handleDrop}
         onClick={onButtonClick}
         animate={{
-          borderColor: isDragActive ? 'var(--primary)' : 'rgba(255, 255, 255, 0.06)',
-          backgroundColor: isDragActive ? 'rgba(124, 92, 252, 0.03)' : '#111217',
+          borderColor: isDragActive ? 'var(--primary)' : 'var(--border)',
+          backgroundColor: isDragActive ? 'rgba(124, 92, 252, 0.05)' : 'var(--card)',
         }}
         transition={{ duration: 0.2 }}
         className={cn(

@@ -517,57 +517,142 @@ html[data-density="comfortable"] .space-y-4 > * + * {
 
 /* ═══════════════════════════════════════════════════════════════════════════
    Light Mode Override System
-   Maps hardcoded dark-mode hex colors to light-mode equivalents.
-   Applied when <html> does NOT have the "dark" class (i.e. light mode).
-   This avoids modifying any component files.
+   Maps hardcoded dark-mode classes & hex colors to clean, high-contrast light-mode values.
+   Applied ONLY when <html> does NOT have the "dark" class.
+   Preserves dark mode 100%.
    ═══════════════════════════════════════════════════════════════════════════ */
 
-/* ── Surface / Background Overrides ──────────────────────────────────────── */
+/* ── Surfaces & Backgrounds ──────────────────────────────────────────────── */
 html:not(.dark) .bg-\[\#09090B\] { background-color: var(--background) !important; }
-html:not(.dark) .bg-\[\#0D0D10\] { background-color: #F1F5F9 !important; }
-html:not(.dark) .bg-\[\#0D0D10\]\/50 { background-color: rgba(241, 245, 249, 0.5) !important; }
-html:not(.dark) .bg-\[\#111217\] { background-color: var(--card) !important; }
-html:not(.dark) .bg-\[\#111217\]\/60 { background-color: rgba(255, 255, 255, 0.6) !important; }
+html:not(.dark) .bg-\[\#09090B\]\/80 { background-color: rgba(248, 250, 252, 0.85) !important; }
+html:not(.dark) .bg-\[\#09090B\]\/60 { background-color: rgba(248, 250, 252, 0.75) !important; }
+html:not(.dark) .bg-\[\#0D0D10\] { background-color: #FFFFFF !important; }
+html:not(.dark) .bg-\[\#0D0D10\]\/50 { background-color: #F8FAFC !important; }
+html:not(.dark) .bg-\[\#0D0D10\]\/80 { background-color: #F8FAFC !important; }
+html:not(.dark) .bg-\[\#0D0D10\]\/90 { background-color: #F1F5F9 !important; }
+html:not(.dark) .bg-\[\#111217\] { background-color: #FFFFFF !important; }
+html:not(.dark) .bg-\[\#111217\]\/40 { background-color: rgba(248, 250, 252, 0.85) !important; }
+html:not(.dark) .bg-\[\#111217\]\/60 { background-color: #FFFFFF !important; }
+html:not(.dark) .bg-\[\#111217\]\/80 { background-color: #FFFFFF !important; }
+html:not(.dark) .bg-\[\#111217\]\/95 { background-color: #FFFFFF !important; }
+html:not(.dark) .bg-\[\#13141B\] { background-color: #FFFFFF !important; }
+html:not(.dark) .bg-\[\#13141B\]\/85 { background-color: rgba(255, 255, 255, 0.95) !important; border-color: #E2E8F0 !important; box-shadow: 0 8px 30px rgba(0,0,0,0.08) !important; }
 html:not(.dark) .bg-\[\#141418\] { background-color: #F8FAFC !important; }
 html:not(.dark) .bg-\[\#181A20\] { background-color: #F1F5F9 !important; }
-html:not(.dark) .bg-\[\#1E2028\] { background-color: #E2E8F0 !important; }
-html:not(.dark) .bg-\[\#0D0E12\] { background-color: #F1F5F9 !important; }
+html:not(.dark) .bg-\[\#181A20\]\/30 { background-color: rgba(241, 245, 249, 0.6) !important; }
+html:not(.dark) .bg-\[\#181A20\]\/40 { background-color: #F8FAFC !important; }
+html:not(.dark) .bg-\[\#181A20\]\/50 { background-color: #F8FAFC !important; }
+html:not(.dark) .bg-\[\#1E2028\] { background-color: #FFFFFF !important; }
+html:not(.dark) .bg-\[\#0D0E12\] { background-color: #F8FAFC !important; }
 html:not(.dark) .bg-\[\#2A2B33\] { background-color: #CBD5E1 !important; }
+html:not(.dark) .bg-\[\#7C5CFC\]\/\[0\.02\] { background-color: rgba(124, 92, 252, 0.04) !important; }
 
-/* ── Text Color Overrides ────────────────────────────────────────────────── */
-html:not(.dark) .text-\[\#F0F0F3\] { color: var(--foreground) !important; }
-html:not(.dark) .text-\[\#8B8D98\] { color: #64748B !important; }
-html:not(.dark) .text-\[\#56585E\] { color: #94A3B8 !important; }
-html:not(.dark) .text-white { color: white !important; }
+/* ── Typography & Text Colors ────────────────────────────────────────────── */
+html:not(.dark) .text-\[\#F0F0F3\] { color: #0F172A !important; }
+html:not(.dark) .text-\[\#F0F0F3\]\/90 { color: #0F172A !important; }
+html:not(.dark) .text-\[\#F0F0F3\]\/95 { color: #0F172A !important; }
+html:not(.dark) .text-\[\#F0F0F3\]\/80 { color: #1E293B !important; }
+html:not(.dark) .text-\[\#8B8D98\] { color: #475569 !important; }
+html:not(.dark) .text-\[\#56585E\] { color: #64748B !important; }
+html:not(.dark) .text-\[\#56585E\]\/60 { color: #94A3B8 !important; }
+html:not(.dark) .text-\[\#56585E\]\/50 { color: #94A3B8 !important; }
 
-/* ── Border Overrides ────────────────────────────────────────────────────── */
-html:not(.dark) .border-\[rgba\(255\,255\,255\,0\.06\)\] { border-color: var(--border) !important; }
-html:not(.dark) .border-\[rgba\(255\,255\,255\,0\.04\)\] { border-color: var(--border) !important; }
-html:not(.dark) .border-\[rgba\(255\,255\,255\,0\.08\)\] { border-color: var(--border) !important; }
+/* Text Gradients in Light Mode */
+html:not(.dark) .text-gradient-hero {
+  background: linear-gradient(135deg, #0F172A 0%, #7C5CFC 50%, #3B82F6 100%) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  background-clip: text !important;
+}
+
+html:not(.dark) .text-gradient-primary {
+  background: linear-gradient(135deg, #7C5CFC 0%, #3B82F6 100%) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  background-clip: text !important;
+}
+
+html:not(.dark) .text-gradient-subtle {
+  background: linear-gradient(135deg, #0F172A 30%, #475569 100%) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  background-clip: text !important;
+}
+
+/* Status Badges & Contrast Colors in Light Mode */
+html:not(.dark) .text-\[\#3DD68C\] { color: #059669 !important; }
+html:not(.dark) .bg-\[\#3DD68C\] { background-color: #059669 !important; }
+html:not(.dark) .bg-\[\#3DD68C\]\/10 { background-color: rgba(5, 150, 105, 0.1) !important; }
+html:not(.dark) .border-\[\#3DD68C\]\/15 { border-color: rgba(5, 150, 105, 0.2) !important; }
+
+html:not(.dark) .text-\[\#F5B83D\] { color: #D97706 !important; }
+html:not(.dark) .bg-\[\#F5B83D\]\/10 { background-color: rgba(217, 119, 6, 0.1) !important; }
+html:not(.dark) .border-\[\#F5B83D\]\/15 { border-color: rgba(217, 119, 6, 0.2) !important; }
+
+html:not(.dark) .text-\[\#4F8CFF\] { color: #2563EB !important; }
+html:not(.dark) .bg-\[\#4F8CFF\]\/10 { background-color: rgba(37, 99, 235, 0.1) !important; }
+html:not(.dark) .border-\[\#4F8CFF\]\/15 { border-color: rgba(37, 99, 235, 0.2) !important; }
+
+/* ── Borders & Dividers ──────────────────────────────────────────────────── */
+html:not(.dark) .border-\[rgba\(255\,255\,255\,0\.06\)\] { border-color: #E2E8F0 !important; }
+html:not(.dark) .border-\[rgba\(255\,255\,255\,0\.04\)\] { border-color: #E2E8F0 !important; }
+html:not(.dark) .border-\[rgba\(255\,255\,255\,0\.08\)\] { border-color: #E2E8F0 !important; }
 html:not(.dark) .border-\[rgba\(255\,255\,255\,0\.1\)\] { border-color: #CBD5E1 !important; }
+html:not(.dark) .border-\[rgba\(124\,92\,252\,0\.15\)\] { border-color: rgba(124, 92, 252, 0.25) !important; }
 
-/* ── Placeholder Overrides ───────────────────────────────────────────────── */
+/* ── Tables in Light Mode ────────────────────────────────────────────────── */
+html:not(.dark) table th {
+  background-color: #F8FAFC !important;
+  color: #475569 !important;
+  border-color: #E2E8F0 !important;
+}
+html:not(.dark) table tr:hover {
+  background-color: #F1F5F9 !important;
+}
+html:not(.dark) table td {
+  border-color: #E2E8F0 !important;
+}
+
+/* ── Placeholders ────────────────────────────────────────────────────────── */
 html:not(.dark) .placeholder-\[\#56585E\]::placeholder { color: #94A3B8 !important; }
 html:not(.dark) .placeholder\:text-\[\#56585E\]::placeholder { color: #94A3B8 !important; }
 
-/* ── Hover State Overrides ───────────────────────────────────────────────── */
-html:not(.dark) .hover\:bg-\[\#181A20\]:hover { background-color: #E2E8F0 !important; }
-html:not(.dark) .hover\:bg-\[\#1E2028\]:hover { background-color: #CBD5E1 !important; }
-html:not(.dark) .hover\:text-\[\#F0F0F3\]:hover { color: var(--foreground) !important; }
-html:not(.dark) .hover\:text-white:hover { color: var(--foreground) !important; }
+/* ── Hover States ────────────────────────────────────────────────────────── */
+html:not(.dark) .hover\:bg-\[\#181A20\]:hover { background-color: #F1F5F9 !important; }
+html:not(.dark) .hover\:bg-\[\#1E2028\]:hover { background-color: #E2E8F0 !important; }
+html:not(.dark) .hover\:bg-\[\#111217\]:hover { background-color: #F8FAFC !important; }
+html:not(.dark) .hover\:text-\[\#F0F0F3\]:hover { color: #0F172A !important; }
+html:not(.dark) .hover\:text-white:hover { color: #0F172A !important; }
+html:not(.dark) .group-hover\:text-white { color: #0F172A !important; }
 html:not(.dark) .hover\:border-\[rgba\(255\,255\,255\,0\.1\)\]:hover { border-color: #CBD5E1 !important; }
 
-/* ── Sidebar Specific ────────────────────────────────────────────────────── */
+/* ── Layout Elements ─────────────────────────────────────────────────────── */
 html:not(.dark) aside { 
   background-color: #FFFFFF !important;
-  border-color: var(--border) !important;
+  border-color: #E2E8F0 !important;
 }
 
-/* ── Glass Card Light Mode ───────────────────────────────────────────────── */
+html:not(.dark) header {
+  background-color: rgba(248, 250, 252, 0.85) !important;
+  border-color: #E2E8F0 !important;
+}
+
+/* ── Glass & Cards in Light Mode ─────────────────────────────────────────── */
+html:not(.dark) .glass {
+  background: rgba(255, 255, 255, 0.85) !important;
+  border-color: #E2E8F0 !important;
+}
+
+html:not(.dark) .glass-card {
+  background: #FFFFFF !important;
+  border-color: #E2E8F0 !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.02) !important;
+}
+
 html:not(.dark) .border-glow {
-  background: rgba(255, 255, 255, 0.8) !important;
-  border-color: var(--border) !important;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.04) !important;
+  background: #FFFFFF !important;
+  border-color: #E2E8F0 !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04) !important;
 }
 
 /* ── Scrollbar Light Mode ────────────────────────────────────────────────── */
@@ -575,35 +660,42 @@ html:not(.dark) ::-webkit-scrollbar-thumb {
   background: rgba(0, 0, 0, 0.12) !important;
 }
 html:not(.dark) ::-webkit-scrollbar-thumb:hover {
-  background: rgba(0, 0, 0, 0.2) !important;
+  background: rgba(0, 0, 0, 0.25) !important;
 }
 
-/* ── Ambient Grid Light Mode ─────────────────────────────────────────────── */
+/* ── Ambient Background Light Mode ───────────────────────────────────────── */
 html:not(.dark) .ambient-grid {
-  opacity: 0.1 !important;
+  background-image:
+    linear-gradient(to right, rgba(0,0,0,0.03) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(0,0,0,0.03) 1px, transparent 1px) !important;
 }
 
-/* ── Dialog / Modal Light Mode ───────────────────────────────────────────── */
+html:not(.dark) .ambient-dots {
+  background-image: radial-gradient(circle, rgba(0,0,0,0.05) 1px, transparent 1px) !important;
+}
+
+/* ── Modals & Dialogs ────────────────────────────────────────────────────── */
 html:not(.dark) [role="dialog"] {
   background-color: #FFFFFF !important;
-  border-color: var(--border) !important;
+  border-color: #E2E8F0 !important;
+  color: #0F172A !important;
 }
 
-/* ── Input Light Mode ────────────────────────────────────────────────────── */
+/* ── Inputs & Controls ───────────────────────────────────────────────────── */
 html:not(.dark) input,
 html:not(.dark) textarea,
 html:not(.dark) select {
   background-color: #FFFFFF !important;
-  border-color: var(--border) !important;
-  color: var(--foreground) !important;
+  border-color: #E2E8F0 !important;
+  color: #0F172A !important;
 }
 html:not(.dark) input::placeholder,
 html:not(.dark) textarea::placeholder {
   color: #94A3B8 !important;
 }
 
-/* ── Shadow Overrides for Light Mode ─────────────────────────────────────── */
+/* ── Shadows for Light Mode ──────────────────────────────────────────────── */
 html:not(.dark) .shadow-2xl {
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08), 0 1px 4px rgba(0, 0, 0, 0.04) !important;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.04) !important;
 }
 

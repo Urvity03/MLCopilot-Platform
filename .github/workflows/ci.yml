@@ -58,6 +58,7 @@ jobs:
           ENVIRONMENT: test
         run: |
           cd apps/api
+          python -m uv run python -m mlcopilot.tools.migrate
           python -m uv run pytest tests/ -o asyncio_mode=auto -v --tb=short
 
   frontend-check:
@@ -115,7 +116,7 @@ jobs:
       - name: Build Web Docker Image
         uses: docker/build-push-action@v5
         with:
-          context: ./apps/web
+          context: .
           file: ./apps/web/Dockerfile
           push: false
           tags: mlcopilot-web:ci
