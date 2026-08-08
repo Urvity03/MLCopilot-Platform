@@ -3,23 +3,27 @@
 import * as React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  User, Palette, Bell, Keyboard, Bot, Shield, LogOut,
-  ChevronDown, Sliders
+  User, Palette, Bell, Keyboard, Bot, Shield, LogOut
 } from 'lucide-react';
 import { useAuthStore } from '../../store/auth';
 import { useAuth } from '../../hooks/useAuth';
 import { PreferenceTab } from '../ui/UserPreferencesModal';
+import { cn } from '../../lib/utils';
 
 interface UserProfileDropdownProps {
   isOpen: boolean;
   onClose: () => void;
   onOpenPreferences: (tab: PreferenceTab) => void;
+  triggerRef?: React.RefObject<HTMLElement | null>;
+  className?: string;
 }
 
 export function UserProfileDropdown({
   isOpen,
   onClose,
   onOpenPreferences,
+  triggerRef,
+  className,
 }: UserProfileDropdownProps) {
   const { user } = useAuthStore();
   const { logout } = useAuth();
@@ -30,7 +34,12 @@ export function UserProfileDropdown({
     if (!isOpen) return;
 
     const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+      const target = event.target as Node;
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(target) &&
+        (!triggerRef?.current || !triggerRef.current.contains(target))
+      ) {
         onClose();
       }
     };
@@ -48,7 +57,7 @@ export function UserProfileDropdown({
       document.removeEventListener('mousedown', handleClickOutside);
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, [isOpen, onClose]);
+  }, [isOpen, onClose, triggerRef]);
 
   const userInitials = user?.full_name
     ? user.full_name
@@ -57,7 +66,7 @@ export function UserProfileDropdown({
         .slice(0, 2)
         .join('')
         .toUpperCase()
-    : 'U';
+    : 'UT';
 
   const menuItems: { id: PreferenceTab; label: string; icon: React.ElementType }[] = [
     { id: 'profile', label: 'Profile', icon: User },
@@ -73,11 +82,14 @@ export function UserProfileDropdown({
       {isOpen && (
         <motion.div
           ref={dropdownRef}
-          initial={{ opacity: 0, y: -6, scale: 0.98 }}
+          initial={{ opacity: 0, y: 6, scale: 0.98 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
-          exit={{ opacity: 0, y: -6, scale: 0.98 }}
+          exit={{ opacity: 0, y: 6, scale: 0.98 }}
           transition={{ duration: 0.15, ease: 'easeOut' }}
-          className="absolute right-0 top-full mt-2 w-64 bg-[#111217] border border-[rgba(255,255,255,0.08)] rounded-2xl shadow-2xl shadow-black/80 z-50 py-1.5 overflow-hidden"
+          className={cn(
+            "absolute bottom-full mb-2 left-0 w-64 bg-[#111217] border border-[rgba(255,255,255,0.08)] rounded-2xl shadow-2xl shadow-black/80 z-50 py-1.5 overflow-hidden",
+            className
+          )}
           role="menu"
           aria-label="User Menu"
         >

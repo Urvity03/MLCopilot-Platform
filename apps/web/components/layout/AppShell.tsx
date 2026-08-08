@@ -82,6 +82,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const [preferencesTab, setPreferencesTab] = React.useState<PreferenceTab>('appearance');
 
   const projectRef = React.useRef<HTMLDivElement>(null);
+  const desktopProfileTriggerRef = React.useRef<HTMLButtonElement>(null);
+  const mobileProfileTriggerRef = React.useRef<HTMLButtonElement>(null);
 
   // Extract active project from URL params
   const projectId = params?.projectId as string | undefined;
@@ -314,9 +316,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 <Search className="h-3.5 w-3.5 text-[#56585E] group-hover:text-[#8B8D98] transition-colors" />
                 <span>Search...</span>
               </div>
-              <span className="text-[10px] bg-[#0D0D10] border border-[rgba(255,255,255,0.06)] rounded-md px-1.5 py-0.5 font-mono text-[#56585E] select-none">
-                Ctrl+K
-              </span>
             </button>
           </div>
 
@@ -386,14 +385,32 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           {/* ── Bottom Section ──────────────────────────────────────────── */}
           <div className="shrink-0 border-t border-[rgba(255,255,255,0.04)] p-3 space-y-1">
             {/* User Profile */}
-            <div className="flex items-center gap-2.5 px-2 py-2 rounded-xl hover:bg-[#181A20] transition-all duration-200 cursor-default">
-              <div className="h-8 w-8 rounded-full bg-gradient-to-br from-[#7C5CFC] to-[#5B3FD9] flex items-center justify-center text-[11px] text-white font-bold font-mono shrink-0">
-                {userInitials}
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-[13px] font-medium text-[#F0F0F3] truncate">{user?.full_name}</p>
-                <p className="text-[11px] text-[#56585E] truncate">{user?.email}</p>
-              </div>
+            <div className="relative">
+              <button
+                ref={desktopProfileTriggerRef}
+                onClick={() => setUserDropdownOpen((prev) => !prev)}
+                className="w-full flex items-center gap-2.5 px-2 py-2 rounded-xl hover:bg-[#181A20] transition-all duration-200 cursor-pointer text-left group"
+                aria-label="User Profile Menu"
+                aria-expanded={!mobileMenuOpen && userDropdownOpen}
+              >
+                <div className="h-8 w-8 rounded-full bg-gradient-to-br from-[#7C5CFC] to-[#5B3FD9] flex items-center justify-center text-[11px] text-white font-bold font-mono shrink-0">
+                  {userInitials}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-[13px] font-medium text-[#F0F0F3] truncate">{user?.full_name}</p>
+                  <p className="text-[11px] text-[#56585E] truncate">{user?.email}</p>
+                </div>
+              </button>
+
+              <UserProfileDropdown
+                isOpen={!mobileMenuOpen && userDropdownOpen}
+                onClose={() => setUserDropdownOpen(false)}
+                onOpenPreferences={(tab) => {
+                  setPreferencesTab(tab);
+                  setPreferencesModalOpen(true);
+                }}
+                triggerRef={desktopProfileTriggerRef}
+              />
             </div>
 
             {/* Help Link */}
@@ -477,17 +494,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 />
               </div>
 
-              {/* Command Palette Trigger */}
-              <button
-                onClick={() => setCommandCenterOpen(true)}
-                className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[#111217] border border-[rgba(255,255,255,0.06)] hover:border-[rgba(255,255,255,0.1)] text-[#56585E] hover:text-[#8B8D98] transition-all text-xs font-medium cursor-pointer"
-              >
-                <Command className="h-3 w-3" />
-                <span className="text-[10px] bg-[#0D0D10] border border-[rgba(255,255,255,0.06)] rounded px-1.5 py-0.5 font-mono select-none">
-                  Ctrl+K
-                </span>
-              </button>
-
               {/* Quick Ingest */}
               <button
                 onClick={() => setNewProjectOpen(true)}
@@ -496,27 +502,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 <FolderPlus className="h-3.5 w-3.5" />
                 <span>New Project</span>
               </button>
-
-              {/* Top Right Avatar Profile Dropdown */}
-              <div className="relative">
-                <button
-                  onClick={() => setUserDropdownOpen(!userDropdownOpen)}
-                  className="h-8 w-8 rounded-full bg-[var(--primary)] flex items-center justify-center text-[11px] text-white font-bold font-mono shrink-0 cursor-pointer ring-2 ring-transparent hover:ring-[var(--primary)]/50 transition-all shadow-md active:scale-95"
-                  aria-label="User Profile Menu"
-                  aria-expanded={userDropdownOpen}
-                >
-                  {userInitials}
-                </button>
-
-                <UserProfileDropdown
-                  isOpen={userDropdownOpen}
-                  onClose={() => setUserDropdownOpen(false)}
-                  onOpenPreferences={(tab) => {
-                    setPreferencesTab(tab);
-                    setPreferencesModalOpen(true);
-                  }}
-                />
-              </div>
             </div>
           </header>
 
@@ -621,14 +606,32 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
                 {/* Mobile Footer */}
                 <div className="shrink-0 border-t border-[rgba(255,255,255,0.04)] p-3 space-y-1">
-                  <div className="flex items-center gap-2.5 px-2 py-2">
-                    <div className="h-8 w-8 rounded-full bg-gradient-to-br from-[#7C5CFC] to-[#5B3FD9] flex items-center justify-center text-[11px] text-white font-bold font-mono shrink-0">
-                      {userInitials}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-[13px] font-medium text-[#F0F0F3] truncate">{user?.full_name}</p>
-                      <p className="text-[11px] text-[#56585E] truncate">{user?.email}</p>
-                    </div>
+                  <div className="relative">
+                    <button
+                      ref={mobileProfileTriggerRef}
+                      onClick={() => setUserDropdownOpen((prev) => !prev)}
+                      className="w-full flex items-center gap-2.5 px-2 py-2 rounded-xl hover:bg-[#181A20] transition-all duration-200 cursor-pointer text-left group"
+                      aria-label="User Profile Menu"
+                      aria-expanded={mobileMenuOpen && userDropdownOpen}
+                    >
+                      <div className="h-8 w-8 rounded-full bg-gradient-to-br from-[#7C5CFC] to-[#5B3FD9] flex items-center justify-center text-[11px] text-white font-bold font-mono shrink-0">
+                        {userInitials}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-[13px] font-medium text-[#F0F0F3] truncate">{user?.full_name}</p>
+                        <p className="text-[11px] text-[#56585E] truncate">{user?.email}</p>
+                      </div>
+                    </button>
+
+                    <UserProfileDropdown
+                      isOpen={mobileMenuOpen && userDropdownOpen}
+                      onClose={() => setUserDropdownOpen(false)}
+                      onOpenPreferences={(tab) => {
+                        setPreferencesTab(tab);
+                        setPreferencesModalOpen(true);
+                      }}
+                      triggerRef={mobileProfileTriggerRef}
+                    />
                   </div>
                   <button
                     onClick={() => logout()}
