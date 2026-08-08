@@ -116,7 +116,7 @@ jobs:
       - name: Build Web Docker Image
         uses: docker/build-push-action@v5
         with:
-          context: ./apps/web
+          context: .
           file: ./apps/web/Dockerfile
           push: false
           tags: mlcopilot-web:ci
