@@ -273,7 +273,7 @@ async def forgot_password(
     """Request a password reset link for an email address."""
     raw_token = await auth_service.request_password_reset(email=str(payload.email))
     reset_link = None
-    if raw_token and settings.environment == "development":
+    if raw_token and settings.environment in ("development", "test"):
         reset_link = f"{settings.frontend_url}/reset-password?token={raw_token}"
     return ForgotPasswordResponse(
         message="If an account with that email exists, a password reset link has been sent.",

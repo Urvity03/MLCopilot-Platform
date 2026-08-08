@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import uuid
+
 import pytest
 from fastapi import status
 from fastapi.testclient import TestClient
@@ -11,7 +13,9 @@ from mlcopilot.main import app
 def mock_oauth_credentials(monkeypatch):
     from mlcopilot.core.config import get_settings
     settings = get_settings()
-    monkeypatch.setattr(settings, "google_client_id", "test-google-client-id-12345.apps.googleusercontent.com")
+    monkeypatch.setattr(
+        settings, "google_client_id", "test-google-client-id-12345.apps.googleusercontent.com"
+    )
     monkeypatch.setattr(settings, "github_client_id", "test-github-client-id-abc123")
 
 
@@ -20,7 +24,10 @@ def test_google_oauth_redirect():
         response = client.get("/api/v1/auth/oauth/google", follow_redirects=False)
         assert response.status_code == status.HTTP_302_FOUND
         assert "accounts.google.com" in response.headers["location"]
-        assert "client_id=test-google-client-id-12345.apps.googleusercontent.com" in response.headers["location"]
+        assert (
+            "client_id=test-google-client-id-12345.apps.googleusercontent.com"
+            in response.headers["location"]
+        )
 
 
 def test_github_oauth_redirect():
@@ -34,7 +41,7 @@ def test_github_oauth_redirect():
 def test_forgot_password_and_reset_flow():
     with TestClient(app) as client:
         # 1. Register a test user
-        email = "forgot_test@example.com"
+        email = f"forgot_{uuid.uuid4().hex[:6]}@example.com"
         reg_resp = client.post(
             "/api/v1/auth/register",
             json={"email": email, "password": "OldPassword123", "full_name": "Reset Test User"},
