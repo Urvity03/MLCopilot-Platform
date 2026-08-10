@@ -357,3 +357,40 @@ async def test_create_api_key_returns_full_key(auth_service: AuthService) -> Non
     assert api_key.revoked_at is None
     # The stored hash must match the full key.
     assert ApiKeyManager.verify_key(full_key, api_key.key_hash)
+
+
+# ── OAuth User Linking & Creation ─────────────────────────────────────
+
+
+async def test_find_or_create_oauth_user_creates_new(auth_service: AuthService) -> None:
+    user = await auth_service.find_or_create_oauth_user(
+        email="oauth_new@example.com",
+        full_name="OAuth New",
+        avatar_url="https://example.com/avatar.png",
+        provider="google",
+        provider_account_id="123456",
+    )
+
+    assert user.email == "oauth_new@example.com"
+    assert user.full_name == "OAuth New"
+    assert user.avatar_url == "https://example.com/avatar.png"
+    assert user.is_active is True
+
+
+async def test_find_or_create_oauth_user_links_existing(auth_service: AuthService) -> None:
+    existing = await auth_service.register(
+        email="oauth_existing@example.com",
+        password="password123",
+        full_name="Existing User",
+    )
+
+    user = await auth_service.find_or_create_oauth_user(
+        email="oauth_existing@example.com",
+        full_name="Existing User",
+        avatar_url="https://example.com/avatar2.png",
+        provider="github",
+        provider_account_id="789012",
+    )
+
+    assert user.id == existing.id
+    assert user.avatar_url == "https://example.com/avatar2.png"
