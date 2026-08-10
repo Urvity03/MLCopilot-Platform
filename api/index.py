@@ -12,13 +12,23 @@ from mlcopilot.infrastructure.cache import create_redis_client  # noqa: E402
 
 
 def ensure_serverless_state():
-    """Ensure app.state has db_engine, db_session_factory, and redis initialized in serverless runtime."""
+    """Ensure app.state attributes exist safely in Vercel Serverless Function runtime."""
     if not hasattr(app.state, "db_engine") or app.state.db_engine is None:
-        settings = app.state.settings
-        engine = create_engine(settings)
-        app.state.db_engine = engine
-        app.state.db_session_factory = create_session_factory(engine)
-        app.state.redis = create_redis_client(settings)
+        try:
+            settings = app.state.settings
+            engine = create_engine(settings)
+            app.state.db_engine = engine
+            app.state.db_session_factory = create_session_factory(engine)
+        except Exception:
+            app.state.db_engine = None
+            app.state.db_session_factory = None
+
+    if not hasattr(app.state, "redis") or app.state.redis is None:
+        try:
+            settings = app.state.settings
+            app.state.redis = create_redis_client(settings)
+        except Exception:
+            app.state.redis = None
 
 
 class VercelPathMiddleware:
@@ -29,7 +39,10 @@ class VercelPathMiddleware:
 
     async def __call__(self, scope, receive, send):
         if scope["type"] == "http":
-            ensure_serverless_state()
+            try:
+                ensure_serverless_state()
+            except Exception:
+                pass
             path = scope.get("path", "")
             if path and not path.startswith("/api/v1"):
                 if path.startswith("/api"):
