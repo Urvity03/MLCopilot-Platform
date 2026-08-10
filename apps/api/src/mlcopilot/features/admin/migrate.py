@@ -18,7 +18,8 @@ SECURITY:
 from __future__ import annotations
 
 import asyncio
-import shlex
+import os
+import shutil
 import sys
 
 from fastapi import APIRouter, Header, HTTPException, status
@@ -26,28 +27,52 @@ from fastapi import APIRouter, Header, HTTPException, status
 router = APIRouter(prefix="/_admin", tags=["_admin"])
 
 
-@router.post("/migrate")
-async def run_migrations(x_migration_token: str = Header(...)) -> dict:
-    """Run ``alembic upgrade head`` and return the output.
-
-    Protected by the MIGRATION_TOKEN environment variable.  This endpoint
-    only exists while that variable is set in Vercel.
-    """
-    import os
-
+def _check_token(x_migration_token: str) -> None:
     expected = os.environ.get("MIGRATION_TOKEN", "")
     if not expected or x_migration_token != expected:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Invalid migration token")
 
+
+@router.get("/info")
+async def migration_info(x_migration_token: str = Header(...)) -> dict:
+    """Return runtime path info to help diagnose migration setup."""
+    _check_token(x_migration_token)
+    alembic_path = shutil.which("alembic")
+    return {
+        "python": sys.executable,
+        "sys_path": sys.path,
+        "cwd": os.getcwd(),
+        "alembic_which": alembic_path,
+        "api_dir_exists": os.path.isdir("/var/task/apps/api"),
+        "alembic_ini_exists": os.path.isfile("/var/task/apps/api/alembic.ini"),
+        "site_packages": [p for p in sys.path if "site-packages" in p],
+    }
+
+
+@router.post("/migrate")
+async def run_migrations(x_migration_token: str = Header(...)) -> dict:
+    """Run ``alembic upgrade head`` and return the output."""
+    _check_token(x_migration_token)
+
+    # Find alembic executable — try shutil.which first, then known locations
+    alembic_exe = shutil.which("alembic")
+    if not alembic_exe:
+        # Vercel Python lambda puts executables next to the interpreter
+        python_dir = os.path.dirname(sys.executable)
+        candidate = os.path.join(python_dir, "alembic")
+        if os.path.isfile(candidate):
+            alembic_exe = candidate
+
+    # Fall back to running as a module from the correct interpreter
+    if alembic_exe:
+        cmd = [alembic_exe, "upgrade", "head"]
+    else:
+        cmd = [sys.executable, "-c",
+               "from alembic.config import main; main(argv=['upgrade', 'head'])"]
+
     try:
-        # Run alembic from the api directory where alembic.ini lives.
-        # sys.executable ensures we use the same Python as the FastAPI app.
         proc = await asyncio.create_subprocess_exec(
-            sys.executable,
-            "-m",
-            "alembic",
-            "upgrade",
-            "head",
+            *cmd,
             stdout=asyncio.subprocess.PIPE,
             stderr=asyncio.subprocess.STDOUT,
             cwd="/var/task/apps/api",  # directory containing alembic.ini
@@ -57,9 +82,11 @@ async def run_migrations(x_migration_token: str = Header(...)) -> dict:
         return {
             "exit_code": proc.returncode,
             "success": proc.returncode == 0,
+            "cmd": cmd[0],
             "output": output,
         }
     except asyncio.TimeoutError:
-        return {"exit_code": -1, "success": False, "output": "Migration timed out after 120 seconds"}
+        return {"exit_code": -1, "success": False, "output": "Migration timed out after 120s"}
     except Exception as exc:  # noqa: BLE001
         return {"exit_code": -1, "success": False, "output": str(exc)}
+
