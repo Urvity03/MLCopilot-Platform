@@ -51,42 +51,48 @@ async def migration_info(x_migration_token: str = Header(...)) -> dict:
 
 @router.post("/migrate")
 async def run_migrations(x_migration_token: str = Header(...)) -> dict:
-    """Run ``alembic upgrade head`` and return the output."""
+    """Run ``alembic upgrade head`` in-process and return the output.
+
+    Runs alembic directly via its Python API so it inherits the same import
+    context and sys.path as the running FastAPI app — no subprocess PATH issues.
+    """
     _check_token(x_migration_token)
 
-    # Find alembic executable — try shutil.which first, then known locations
-    alembic_exe = shutil.which("alembic")
-    if not alembic_exe:
-        # Vercel Python lambda puts executables next to the interpreter
-        python_dir = os.path.dirname(sys.executable)
-        candidate = os.path.join(python_dir, "alembic")
-        if os.path.isfile(candidate):
-            alembic_exe = candidate
+    import io
+    import logging
+    import traceback
 
-    # Fall back to running as a module from the correct interpreter
-    if alembic_exe:
-        cmd = [alembic_exe, "upgrade", "head"]
-    else:
-        cmd = [sys.executable, "-c",
-               "from alembic.config import main; main(argv=['upgrade', 'head'])"]
+    log_stream = io.StringIO()
+    handler = logging.StreamHandler(log_stream)
+    handler.setLevel(logging.DEBUG)
+    alembic_logger = logging.getLogger("alembic")
+    alembic_logger.addHandler(handler)
+    alembic_logger.setLevel(logging.DEBUG)
 
     try:
-        proc = await asyncio.create_subprocess_exec(
-            *cmd,
-            stdout=asyncio.subprocess.PIPE,
-            stderr=asyncio.subprocess.STDOUT,
-            cwd="/var/task/apps/api",  # directory containing alembic.ini
-        )
-        stdout, _ = await asyncio.wait_for(proc.communicate(), timeout=120)
-        output = stdout.decode("utf-8", errors="replace")
+        from alembic.config import Config
+        from alembic import command as alembic_command
+
+        alembic_cfg = Config("/var/task/apps/api/alembic.ini")
+        # Ensure alembic can find our source modules
+        alembic_cfg.set_main_option("prepend_sys_path", "/var/task/apps/api/src")
+
+        # Run in a thread executor to avoid blocking the event loop
+        loop = __import__("asyncio").get_event_loop()
+        await loop.run_in_executor(None, alembic_command.upgrade, alembic_cfg, "head")
+
         return {
-            "exit_code": proc.returncode,
-            "success": proc.returncode == 0,
-            "cmd": cmd[0],
-            "output": output,
+            "exit_code": 0,
+            "success": True,
+            "output": log_stream.getvalue() or "Migration completed successfully",
         }
-    except asyncio.TimeoutError:
-        return {"exit_code": -1, "success": False, "output": "Migration timed out after 120s"}
-    except Exception as exc:  # noqa: BLE001
-        return {"exit_code": -1, "success": False, "output": str(exc)}
+    except Exception:  # noqa: BLE001
+        return {
+            "exit_code": 1,
+            "success": False,
+            "output": traceback.format_exc() + "\n\nAlembic log:\n" + log_stream.getvalue(),
+        }
+    finally:
+        alembic_logger.removeHandler(handler)
+
 
