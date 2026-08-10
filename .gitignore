@@ -45,3 +45,5 @@ apps/api/openapi.json
 apps/api/scripts/
 rag_verification_report.json
 test_gemini.py
+.vercel
+.env*

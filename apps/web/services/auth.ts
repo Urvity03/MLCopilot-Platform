@@ -1,5 +1,6 @@
 import { client } from './client';
 import { User, TokenResponse } from '../types';
+import { getApiBaseUrl } from '../lib/config';
 
 export interface RegisterPayload {
   email: string;
@@ -57,12 +58,10 @@ export const authService = {
   },
 
   getGoogleAuthUrl(): string {
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1';
-    return `${apiUrl}/auth/oauth/google`;
+    return `${getApiBaseUrl()}/auth/oauth/google`;
   },
 
   getGithubAuthUrl(): string {
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1';
-    return `${apiUrl}/auth/oauth/github`;
+    return `${getApiBaseUrl()}/auth/oauth/github`;
   },
 };

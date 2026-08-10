@@ -4,6 +4,7 @@ import * as React from 'react';
 import { useParams } from 'next/navigation';
 import { useProjects } from '../../../../hooks/useProjects';
 import { useChat } from '../../../../hooks/useChat';
+import { getApiBaseUrl } from '../../../../lib/config';
 import { useUploads } from '../../../../hooks/useUploads';
 import { 
   Plus, 
@@ -90,8 +91,7 @@ export default function ChatPage() {
   React.useEffect(() => {
     async function fetchLLMConfig() {
       try {
-        const rawBase = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1';
-        const baseUrl = rawBase.endsWith('/api/v1') ? rawBase : `${rawBase.replace(/\/+$/, '')}/api/v1`;
+        const baseUrl = getApiBaseUrl();
         const res = await fetch(`${baseUrl}/health/llm`);
         if (res.ok) {
           const data = await res.json();

@@ -1,6 +1,7 @@
 import { client } from './client';
 import { Conversation, ChatMessage } from '../types';
 import { useAuthStore } from '../store/auth';
+import { getApiBaseUrl } from '../lib/config';
 
 export interface ConversationDetail extends Conversation {
   messages: ChatMessage[];
@@ -52,8 +53,7 @@ export const chatService = {
     payload: ChatPayload,
     callbacks: ChatStreamCallbacks
   ): Promise<void> {
-    const rawBaseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000/api/v1';
-    const baseUrl = rawBaseUrl.endsWith('/api/v1') ? rawBaseUrl : `${rawBaseUrl.replace(/\/+$/, '')}/api/v1`;
+    const baseUrl = getApiBaseUrl();
     const token = useAuthStore.getState().accessToken;
 
     const response = await fetch(`${baseUrl}/projects/${projectId}/chat`, {
