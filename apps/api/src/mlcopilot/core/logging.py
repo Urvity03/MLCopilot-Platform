@@ -58,12 +58,17 @@ def configure_logging(settings: Settings) -> None:
         structlog.processors.UnicodeDecoder(),
     ]
 
+    try:
+        is_atty = bool(hasattr(sys.stderr, "isatty") and sys.stderr.isatty())
+    except Exception:
+        is_atty = False
+
     renderer: Processor
     if settings.log_format == "json":
         shared_processors.append(structlog.processors.format_exc_info)
         renderer = structlog.processors.JSONRenderer()
     else:
-        renderer = structlog.dev.ConsoleRenderer(colors=sys.stderr.isatty())
+        renderer = structlog.dev.ConsoleRenderer(colors=is_atty)
 
     structlog.configure(
         processors=[
