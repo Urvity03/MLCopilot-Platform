@@ -148,7 +148,7 @@ async def _handle_unexpected_error(request: Request, exc: Exception) -> JSONResp
     return error_response(
         status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
         code="internal_error",
-        message="An unexpected error occurred.",
+        message=f"An unexpected error occurred: {type(exc).__name__}: {exc}",
         request_id=_request_id(request),
     )
 
