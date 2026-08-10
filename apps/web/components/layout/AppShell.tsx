@@ -19,6 +19,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { NotificationDropdown } from './NotificationDropdown';
 import { UserProfileDropdown } from './UserProfileDropdown';
 import { UserPreferencesModal, PreferenceTab } from '../ui/UserPreferencesModal';
+import { MLCopilotLogo } from '../branding/MLCopilotLogo';
 import { cn } from '@/lib/utils';
 
 // ─── Sidebar Nav Item ──────────────────────────────────────────────────────────
@@ -244,9 +245,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 aria-haspopup="listbox"
                 aria-expanded={projectDropdownOpen}
               >
-                <span className="h-7 w-7 rounded-lg bg-[var(--primary)] flex items-center justify-center text-white font-mono text-xs font-bold shadow-[0_0_20px_rgba(124,92,252,0.15)] shrink-0">
-                  M
-                </span>
+                <MLCopilotLogo size={26} />
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-semibold text-[#F0F0F3] truncate">MLCopilot</p>
                   {activeProject && (

@@ -1,7 +1,12 @@
 <svg width="180" height="180" viewBox="0 0 180 180" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <rect width="180" height="180" rx="36" fill="#09090B"/>
-  <rect width="180" height="180" rx="36" stroke="#27272A" stroke-width="2"/>
-  <path d="M45 120V60L75 90L105 60V120" stroke="#10B981" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
-  <path d="M125 120H145" stroke="#10B981" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
-  <path d="M125 60V120" stroke="#10B981" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+  <defs>
+    <linearGradient id="ml-icon-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#A855F7"/>
+      <stop offset="45%" stop-color="#7C5CFC"/>
+      <stop offset="100%" stop-color="#3B82F6"/>
+    </linearGradient>
+  </defs>
+  <rect width="180" height="180" rx="40" fill="#09090B"/>
+  <rect width="180" height="180" rx="40" stroke="rgba(255,255,255,0.08)" stroke-width="2"/>
+  <path d="M 40 140 V 46 L 85 95 L 115 46 V 111 C 115 127 127 140 143 140 H 165" stroke="url(#ml-icon-grad)" stroke-width="20" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>
