@@ -31,7 +31,12 @@ def test_production_accepts_strong_jwt_secret() -> None:
 
 def test_rejects_sync_database_driver() -> None:
     with pytest.raises(ValidationError, match="asyncpg"):
-        Settings(database_url="postgresql://user:pass@localhost/db")
+        Settings(database_url="sqlite:///test.db")
+
+
+def test_autoconverts_standard_postgres_url() -> None:
+    s = Settings(database_url="postgresql://user:pass@localhost/db")
+    assert s.database_url.startswith("postgresql+asyncpg://")
 
 
 def test_rejects_non_redis_url() -> None:
