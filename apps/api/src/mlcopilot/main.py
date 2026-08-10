@@ -34,8 +34,6 @@ from mlcopilot.infrastructure.db import create_engine, create_session_factory
 if TYPE_CHECKING:
     from collections.abc import AsyncIterator
 
-import os as _os
-
 logger = get_logger("mlcopilot.main")
 
 
@@ -149,14 +147,6 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         app.include_router(r, prefix=settings.api_v1_prefix)
         if settings.api_v1_prefix:
             app.include_router(r, prefix="")
-
-    # Temporary migration endpoint — only mounted when MIGRATION_TOKEN is set.
-    # Remove this env var from Vercel immediately after running migrations.
-    if _os.environ.get("MIGRATION_TOKEN"):
-        from mlcopilot.features.admin.migrate import router as _migrate_router
-
-        app.include_router(_migrate_router)
-        logger.warning("admin.migrate_endpoint_active: remove MIGRATION_TOKEN after use")
 
     return app
 

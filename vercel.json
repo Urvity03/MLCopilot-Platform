@@ -18,10 +18,6 @@
       "dest": "api/index.py"
     },
     {
-      "src": "/_admin/(.*)",
-      "dest": "api/index.py"
-    },
-    {
       "src": "/(.*)",
       "dest": "apps/web/$1"
     }
