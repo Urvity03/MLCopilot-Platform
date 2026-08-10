@@ -121,6 +121,11 @@ class Settings(BaseSettings):
 
     @model_validator(mode="after")
     def _fail_fast(self) -> Self:
+        if self.database_url.startswith("postgres://"):
+            self.database_url = self.database_url.replace("postgres://", "postgresql+asyncpg://", 1)
+        elif self.database_url.startswith("postgresql://"):
+            self.database_url = self.database_url.replace("postgresql://", "postgresql+asyncpg://", 1)
+
         if not self.database_url.startswith("postgresql+asyncpg://"):
             msg = (
                 "DATABASE_URL must use the async driver "
