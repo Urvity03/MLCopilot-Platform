@@ -53,3 +53,18 @@ def test_repr_never_leaks_secrets() -> None:
     settings = Settings(jwt_secret="super-sensitive-value-000000000000")
     assert "super-sensitive-value" not in repr(settings)
     assert "super-sensitive-value" not in str(settings)
+
+
+def test_strips_sslmode_from_database_url() -> None:
+    """asyncpg rejects sslmode as a connect() kwarg; must be stripped from the URL."""
+    s = Settings(database_url="postgresql://user:pass@host.neon.tech/db?sslmode=require")
+    assert "sslmode" not in s.database_url
+    assert s.database_url.startswith("postgresql+asyncpg://")
+
+
+def test_strips_sslmode_preserves_other_query_params() -> None:
+    """Other query params (besides sslmode) must be left intact."""
+    s = Settings(database_url="postgresql://user:pass@host/db?sslmode=require&options=foo")
+    assert "sslmode" not in s.database_url
+    assert "options=foo" in s.database_url
+

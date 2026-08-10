@@ -126,6 +126,18 @@ class Settings(BaseSettings):
         elif self.database_url.startswith("postgresql://"):
             self.database_url = self.database_url.replace("postgresql://", "postgresql+asyncpg://", 1)
 
+        # asyncpg does not accept sslmode as a connect keyword — strip it from
+        # the URL query string.  SSL is instead forwarded via connect_args in
+        # engine.py (ssl="require").
+        if "sslmode=" in self.database_url:
+            from urllib.parse import urlparse, urlunparse, urlencode, parse_qs
+
+            parsed = urlparse(self.database_url)
+            query_params = parse_qs(parsed.query, keep_blank_values=True)
+            query_params.pop("sslmode", None)
+            new_query = urlencode({k: v[0] for k, v in query_params.items()})
+            self.database_url = urlunparse(parsed._replace(query=new_query))
+
         if not self.database_url.startswith("postgresql+asyncpg://"):
             msg = (
                 "DATABASE_URL must use the async driver "
