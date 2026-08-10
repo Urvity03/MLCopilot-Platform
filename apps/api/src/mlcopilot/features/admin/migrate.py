@@ -40,19 +40,17 @@ async def run_migrations(x_migration_token: str = Header(...)) -> dict:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Invalid migration token")
 
     try:
-        # Run alembic from the api directory; sys.executable ensures we use the
-        # same Python interpreter that is running the FastAPI app.
+        # Run alembic from the api directory where alembic.ini lives.
+        # sys.executable ensures we use the same Python as the FastAPI app.
         proc = await asyncio.create_subprocess_exec(
             sys.executable,
             "-m",
             "alembic",
-            "--config",
-            "apps/api/alembic.ini",
             "upgrade",
             "head",
             stdout=asyncio.subprocess.PIPE,
             stderr=asyncio.subprocess.STDOUT,
-            cwd="/var/task",  # Vercel task root
+            cwd="/var/task/apps/api",  # directory containing alembic.ini
         )
         stdout, _ = await asyncio.wait_for(proc.communicate(), timeout=120)
         output = stdout.decode("utf-8", errors="replace")
