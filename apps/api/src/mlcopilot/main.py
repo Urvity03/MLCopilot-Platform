@@ -89,8 +89,16 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     try:
         yield
     finally:
-        await app.state.redis.aclose()
-        await engine.dispose()
+        try:
+            if hasattr(app.state, 'redis') and app.state.redis:
+                await app.state.redis.aclose()
+        except Exception:
+            pass
+        try:
+            if hasattr(app.state, 'db_engine') and app.state.db_engine:
+                await engine.dispose()
+        except Exception:
+            pass
         logger.info("shutdown.complete")
 
 
