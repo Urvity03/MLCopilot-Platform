@@ -35,6 +35,7 @@ if TYPE_CHECKING:
     from mlcopilot.infrastructure.security.password import PasswordHasher
 
 _REFRESH_TOKEN_EXPIRE_DAYS = 14
+_DUMMY_HASH = "$argon2id$v=19$m=65536,t=3,p=4$HS/ai22Eyc6JtOXpVqwVPQ$05qm/FfJYagtGBTLp8df0qRKaJk+5C57/aCDAL9rMno"
 
 
 class AuthService:
@@ -59,9 +60,6 @@ class AuthService:
         self._api_key_mgr = api_key_manager
         self._oauth = oauth_repo
         self._password_resets = password_reset_repo
-
-        # Pre-compute a dummy hash so timing-safe login always runs a verify.
-        self._dummy_hash = password_hasher.hash("dummy-timing-safe")
 
     # ── Registration ──────────────────────────────────────────────────
 
@@ -114,12 +112,12 @@ class AuthService:
         user = await self._users.get_by_email(email)
 
         if user is None:
-            self._passwords.verify("dummy", self._dummy_hash)
+            self._passwords.verify("dummy", _DUMMY_HASH)
             raise AuthenticationError("Invalid email or password", code="unauthenticated")
 
         if user.password_hash is None:
             # User registered with OAuth and has no password set
-            self._passwords.verify("dummy", self._dummy_hash)
+            self._passwords.verify("dummy", _DUMMY_HASH)
             raise AuthenticationError(
                 "Account created via OAuth. Please sign in with Google or GitHub.",
                 code="oauth_only_user",
