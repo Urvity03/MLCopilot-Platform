@@ -1,0 +1,54 @@
+# ==============================================================================
+# MLCopilot Platform — Production Docker Compose Override
+# Usage: docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
+# ==============================================================================
+
+services:
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8000/api/v1}
+    ports:
+      - "127.0.0.1:3000:3000"
+    restart: always
+
+  api:
+    command: uvicorn mlcopilot.main:app --host 0.0.0.0 --port 8000 --workers 4
+    volumes: []
+    ports:
+      - "127.0.0.1:8000:8000"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    restart: always
+
+  worker:
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    restart: always
+
+  beat:
+    restart: always
+
+  postgres:
+    ports:
+      - "127.0.0.1:5432:5432"
+    restart: always
+
+  neo4j:
+    ports:
+      - "127.0.0.1:7474:7474"
+      - "127.0.0.1:7687:7687"
+    restart: always
+
+  redis:
+    ports:
+      - "127.0.0.1:6379:6379"
+    restart: always
+
+  minio:
+    ports:
+      - "127.0.0.1:9000:9000"
+      - "127.0.0.1:9001:9001"
+    restart: always

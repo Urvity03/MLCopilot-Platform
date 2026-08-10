@@ -18,6 +18,10 @@ RUN pnpm install --frozen-lockfile
 COPY apps/web ./apps/web
 COPY packages/contracts ./packages/contracts
 
+# Accept build-time API URL argument for Next.js client bundle
+ARG NEXT_PUBLIC_API_URL
+ENV NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
+
 # Build the project (generates standalone output inside apps/web/.next/standalone)
 RUN pnpm --filter @mlcopilot/web build
 
