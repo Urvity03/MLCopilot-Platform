@@ -31,4 +31,26 @@ def ensure_serverless_state():
             app.state.redis = None
 
 
-ensure_serverless_state()
+class VercelPathMiddleware:
+    """ASGI Middleware to normalize request paths for Vercel Python Serverless Functions."""
+
+    def __init__(self, app):
+        self.app = app
+
+    async def __call__(self, scope, receive, send):
+        if scope["type"] == "http":
+            try:
+                ensure_serverless_state()
+            except Exception:
+                pass
+            path = scope.get("path", "")
+            # Clean Vercel script path artifacts if present
+            if "index.py" in path:
+                path = path.replace("/api/index.py", "").replace("index.py", "")
+            if path and not path.startswith("/api/v1"):
+                scope["path"] = f"/api/v1{path if path.startswith('/') else '/' + path}"
+        await self.app(scope, receive, send)
+
+
+# Export handler for Vercel Serverless Function
+handler = VercelPathMiddleware(app)
