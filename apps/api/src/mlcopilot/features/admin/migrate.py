@@ -74,7 +74,9 @@ async def run_migrations(x_migration_token: str = Header(...)) -> dict:
         from alembic import command as alembic_command
 
         alembic_cfg = Config("/var/task/apps/api/alembic.ini")
-        # Ensure alembic can find our source modules
+        # Override relative paths from alembic.ini with absolute paths so
+        # Alembic works correctly regardless of the lambda's working directory.
+        alembic_cfg.set_main_option("script_location", "/var/task/apps/api/alembic")
         alembic_cfg.set_main_option("prepend_sys_path", "/var/task/apps/api/src")
 
         # Run in a thread executor to avoid blocking the event loop
