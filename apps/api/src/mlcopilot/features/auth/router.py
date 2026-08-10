@@ -191,26 +191,23 @@ async def oauth_google_callback(
     settings: Annotated[Settings, Depends(get_settings)],
 ) -> RedirectResponse:
     """Google OAuth callback handler."""
+    import urllib.parse
     from mlcopilot.core.logging import get_logger
     logger = get_logger("mlcopilot.features.auth.router")
 
     try:
         access_token, refresh_token = await oauth_service.handle_google_callback(code, state)
-    except Exception:
-        raise
-
-    redirect_url = f"{settings.frontend_url}/auth/callback"
-    resp = RedirectResponse(url=redirect_url, status_code=status.HTTP_302_FOUND)
-
-    try:
+        redirect_url = f"{settings.frontend_url}/auth/callback"
+        resp = RedirectResponse(url=redirect_url, status_code=status.HTTP_302_FOUND)
         _set_refresh_cookie(resp, refresh_token, settings, remember_me=True)
-    except Exception:
-        raise
-
-    try:
         return resp
-    except Exception:
-        raise
+    except Exception as e:
+        logger.error("oauth.google.callback_error", error=str(e))
+        error_msg = str(e) or "Google OAuth authentication failed"
+        return RedirectResponse(
+            url=f"{settings.frontend_url}/login?error={urllib.parse.quote(error_msg)}",
+            status_code=status.HTTP_302_FOUND,
+        )
 
 
 @router.get("/oauth/github")
@@ -237,6 +234,10 @@ async def oauth_github_callback(
     settings: Annotated[Settings, Depends(get_settings)],
 ) -> RedirectResponse:
     """GitHub OAuth callback handler."""
+    import urllib.parse
+    from mlcopilot.core.logging import get_logger
+    logger = get_logger("mlcopilot.features.auth.router")
+
     try:
         access_token, refresh_token = await oauth_service.handle_github_callback(code, state)
         redirect_url = f"{settings.frontend_url}/auth/callback"
@@ -244,16 +245,7 @@ async def oauth_github_callback(
         _set_refresh_cookie(resp, refresh_token, settings, remember_me=True)
         return resp
     except Exception as e:
-        import traceback
-        import sys
-        print("\n=================== RAW GITHUB CALLBACK EXCEPTION TRACEBACK ===================", flush=True)
-        print(f"EXCEPTION TYPE: {type(e).__name__}", flush=True)
-        print(f"EXCEPTION STR : {e}", flush=True)
-        print(f"LOCALS        : {locals()}", flush=True)
-        print("===============================================================================\n", flush=True)
-        from mlcopilot.core.logging import get_logger
-        logger = get_logger("mlcopilot.features.auth.router")
-        logger.error("oauth.github.callback_error", error=str(e), traceback=traceback.format_exc())
+        logger.error("oauth.github.callback_error", error=str(e))
         error_msg = str(e) or "GitHub OAuth authentication failed"
         return RedirectResponse(
             url=f"{settings.frontend_url}/login?error={urllib.parse.quote(error_msg)}",

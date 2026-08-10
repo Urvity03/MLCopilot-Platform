@@ -133,10 +133,13 @@ class Settings(BaseSettings):
         if self.is_production:
             secret = self.jwt_secret.get_secret_value()
             if secret in _INSECURE_JWT_SECRETS or len(secret) < 32:
-                # Auto-generate a secure random 32-byte secret for serverless production fallback
-                self.jwt_secret = SecretStr("mlcopilot_prod_secure_jwt_secret_fallback_key_32bytes_min")
+                raise ValueError("JWT_SECRET must be set to a cryptographically random secret of at least 32 bytes in production.")
             if not self.cors_origin_list:
                 self.cors_origins = "https://mlcopilot-two.vercel.app"
+            if self.oauth_redirect_base == "http://localhost:8000":
+                self.oauth_redirect_base = "https://mlcopilot-two.vercel.app"
+            if self.frontend_url == "http://localhost:3000":
+                self.frontend_url = "https://mlcopilot-two.vercel.app"
         return self
 
 
