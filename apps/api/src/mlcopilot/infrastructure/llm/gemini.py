@@ -18,6 +18,15 @@ if TYPE_CHECKING:
 logger = get_logger("mlcopilot.infrastructure.llm.gemini")
 
 
+_GEMINI_FALLBACK_MODELS = [
+    "gemini-2.0-flash",
+    "gemini-1.5-flash-latest",
+    "gemini-2.5-flash",
+    "gemini-2.0-flash-exp",
+    "gemini-1.5-pro",
+]
+
+
 class GeminiProvider(BaseLLMProvider):
     """Concrete implementation of BaseLLMProvider using direct async REST HTTP calls to Google Gemini API."""
 
@@ -112,20 +121,26 @@ class GeminiProvider(BaseLLMProvider):
                     headers={"Content-Type": "application/json"},
                 )
 
-                # Fallback to gemini-2.5-flash if requested model returned 404 Not Found
-                if response.status_code == 404 and model_id != "gemini-2.5-flash":
-                    logger.warning(
-                        "llm.gemini.model_404_fallback",
-                        requested_model=model_id,
-                        fallback_model="gemini-2.5-flash",
-                    )
-                    fallback_url = f"{self._base_url}/v1beta/models/gemini-2.5-flash:generateContent"
-                    response = await client.post(
-                        fallback_url,
-                        params=params,
-                        json=payload,
-                        headers={"Content-Type": "application/json"},
-                    )
+                # If requested model returned 404 Not Found, try candidates
+                if response.status_code == 404:
+                    for candidate in _GEMINI_FALLBACK_MODELS:
+                        if candidate == model_id:
+                            continue
+                        logger.warning(
+                            "llm.gemini.model_404_trying_candidate",
+                            requested_model=model_id,
+                            candidate_model=candidate,
+                        )
+                        fallback_url = f"{self._base_url}/v1beta/models/{candidate}:generateContent"
+                        fallback_resp = await client.post(
+                            fallback_url,
+                            params=params,
+                            json=payload,
+                            headers={"Content-Type": "application/json"},
+                        )
+                        if fallback_resp.status_code == 200:
+                            response = fallback_resp
+                            break
 
                 logger.info(
                     "llm.gemini.http_response",
@@ -178,41 +193,42 @@ class GeminiProvider(BaseLLMProvider):
                     json=payload,
                     headers={"Content-Type": "application/json"},
                 ) as response:
-                    if response.status_code == 404 and model_id != "gemini-2.5-flash":
-                        logger.warning(
-                            "llm.gemini.model_404_fallback_stream",
-                            requested_model=model_id,
-                            fallback_model="gemini-2.5-flash",
-                        )
-                        fallback_url = f"{self._base_url}/v1beta/models/gemini-2.5-flash:streamGenerateContent"
-                        async with client.stream(
-                            "POST",
-                            fallback_url,
-                            params=params,
-                            json=payload,
-                            headers={"Content-Type": "application/json"},
-                        ) as fallback_response:
-                            if fallback_response.is_error:
-                                await fallback_response.aread()
-                                fallback_response.raise_for_status()
-                            async for line in fallback_response.aiter_lines():
-                                line = line.strip()
-                                if not line or not line.startswith("data:"):
-                                    continue
-                                raw_json = line[len("data:") :].strip()
-                                if not raw_json or raw_json == "[DONE]":
-                                    continue
-                                try:
-                                    data = json.loads(raw_json)
-                                    candidates = data.get("candidates", [])
-                                    if candidates:
-                                        parts = candidates[0].get("content", {}).get("parts", [])
-                                        chunk_text = "".join(p.get("text", "") for p in parts if "text" in p)
-                                        if chunk_text:
-                                            yield chunk_text
-                                except json.JSONDecodeError:
-                                    continue
-                        return
+                    if response.status_code == 404:
+                        for candidate in _GEMINI_FALLBACK_MODELS:
+                            if candidate == model_id:
+                                continue
+                            logger.warning(
+                                "llm.gemini.model_404_trying_candidate_stream",
+                                requested_model=model_id,
+                                candidate_model=candidate,
+                            )
+                            fallback_url = f"{self._base_url}/v1beta/models/{candidate}:streamGenerateContent"
+                            async with client.stream(
+                                "POST",
+                                fallback_url,
+                                params=params,
+                                json=payload,
+                                headers={"Content-Type": "application/json"},
+                            ) as fallback_response:
+                                if fallback_response.status_code == 200:
+                                    async for line in fallback_response.aiter_lines():
+                                        line = line.strip()
+                                        if not line or not line.startswith("data:"):
+                                            continue
+                                        raw_json = line[len("data:") :].strip()
+                                        if not raw_json or raw_json == "[DONE]":
+                                            continue
+                                        try:
+                                            data = json.loads(raw_json)
+                                            candidates = data.get("candidates", [])
+                                            if candidates:
+                                                parts = candidates[0].get("content", {}).get("parts", [])
+                                                chunk_text = "".join(p.get("text", "") for p in parts if "text" in p)
+                                                if chunk_text:
+                                                    yield chunk_text
+                                        except json.JSONDecodeError:
+                                            continue
+                                    return
 
                     if response.is_error:
                         await response.aread()
