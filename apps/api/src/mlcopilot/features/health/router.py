@@ -48,6 +48,74 @@ async def get_llm_info(
     )
 
 
+@router.get("/llm/check")
+async def check_llm_models(
+    settings: Annotated[Settings, Depends(get_settings)],
+) -> dict:
+    """Diagnostic check: query Google Generative AI API model list and test candidate models."""
+    import httpx
+
+    key = settings.effective_gemini_api_key.get_secret_value().strip()
+    if not key:
+        return {"error": "No GEMINI_API_KEY set", "has_key": False}
+
+    has_key = bool(key)
+    masked_key = f"{key[:4]}...{key[-3:]}" if len(key) > 7 else "SET"
+
+    models_url = f"https://generativelanguage.googleapis.com/v1beta/models?key={key}"
+    models_list = []
+    models_status_code = 0
+
+    try:
+        async with httpx.AsyncClient(timeout=10.0) as client:
+            resp = await client.get(models_url)
+            models_status_code = resp.status_code
+            if resp.status_code == 200:
+                data = resp.json()
+                for m in data.get("models", []):
+                    name = m.get("name", "").removeprefix("models/")
+                    methods = m.get("supportedGenerationMethods", [])
+                    if "generateContent" in methods:
+                        models_list.append(name)
+    except Exception as exc:  # noqa: BLE001
+        models_list = [f"Error listing models: {exc}"]
+
+    # Test candidates for generateContent
+    candidates_to_test = [
+        "gemini-2.5-flash",
+        "gemini-2.0-flash",
+        "gemini-1.5-flash-latest",
+        "gemini-1.5-flash",
+        "gemini-1.5-pro",
+    ]
+    test_results = {}
+
+    try:
+        async with httpx.AsyncClient(timeout=10.0) as client:
+            for cand in candidates_to_test:
+                test_url = f"https://generativelanguage.googleapis.com/v1beta/models/{cand}:generateContent?key={key}"
+                body = {
+                    "contents": [{"role": "user", "parts": [{"text": "Hello"}]}]
+                }
+                t_resp = await client.post(test_url, json=body, headers={"Content-Type": "application/json"})
+                test_results[cand] = {
+                    "status_code": t_resp.status_code,
+                    "ok": t_resp.status_code == 200,
+                    "sample_text": t_resp.json().get("candidates", [{}])[0].get("content", {}).get("parts", [{}])[0].get("text", "")[:50] if t_resp.status_code == 200 else t_resp.text[:100],
+                }
+    except Exception as exc:  # noqa: BLE001
+        test_results["error"] = str(exc)
+
+    return {
+        "has_key": has_key,
+        "masked_key": masked_key,
+        "configured_model": settings.gemini_model,
+        "models_list_status": models_status_code,
+        "available_generate_content_models": models_list,
+        "candidate_tests": test_results,
+    }
+
+
 @router.get("/live", response_model=LivenessResponse)
 async def live() -> LivenessResponse:
     """Liveness: the process is running and can serve responses."""
