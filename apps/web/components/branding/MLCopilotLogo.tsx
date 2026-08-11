@@ -36,21 +36,28 @@ export function MLCopilotLogo({
         <defs>
           <linearGradient id={gradientId} x1="0%" y1="0%" x2="100%" y2="100%">
             <stop offset="0%" stopColor="#A855F7" />
-            <stop offset="45%" stopColor="#7C5CFC" />
+            <stop offset="50%" stopColor="#7C5CFC" />
             <stop offset="100%" stopColor="#3B82F6" />
           </linearGradient>
         </defs>
+        {/* ML monogram — M with right leg extending into L baseline */}
         <path
-          d="M 18 76 V 24 L 45 54 L 72 24 V 76"
-          stroke={`url(#${gradientId})`}
-          strokeWidth="12"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-        <circle
-          cx="88"
-          cy="70"
-          r="6.5"
+          d={[
+            // Outer contour (clockwise)
+            'M 10 82',        // bottom-left of left leg
+            'L 10 14',        // top of left leg
+            'L 40 48',        // center valley (outer)
+            'L 70 14',        // top of right leg
+            'L 70 62',        // right leg goes down partway
+            'L 92 62',        // L horizontal extends right
+            'L 92 82',        // bottom of L extension
+            'L 58 82',        // back left along bottom of L
+            'L 58 30',        // right leg inner goes up
+            'L 40 52',        // center valley (inner)
+            'L 22 30',        // left leg inner goes up
+            'L 22 82',        // left leg inner goes down
+            'Z',              // close
+          ].join(' ')}
           fill={`url(#${gradientId})`}
         />
       </svg>

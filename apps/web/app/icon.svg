@@ -2,12 +2,12 @@
   <defs>
     <linearGradient id="ml-icon-grad" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" stop-color="#A855F7"/>
-      <stop offset="45%" stop-color="#7C5CFC"/>
+      <stop offset="50%" stop-color="#7C5CFC"/>
       <stop offset="100%" stop-color="#3B82F6"/>
     </linearGradient>
   </defs>
   <rect width="180" height="180" rx="40" fill="#09090B"/>
   <rect width="180" height="180" rx="40" stroke="rgba(255,255,255,0.08)" stroke-width="2"/>
-  <path d="M 32 136 V 44 L 80 96 L 128 44 V 136" stroke="url(#ml-icon-grad)" stroke-width="22" stroke-linecap="round" stroke-linejoin="round"/>
-  <circle cx="156" cy="126" r="12" fill="url(#ml-icon-grad)"/>
+  <!-- ML monogram: M with right leg extending into L baseline -->
+  <path d="M 18 148 L 18 25 L 72 86 L 126 25 L 126 112 L 166 112 L 166 148 L 104 148 L 104 54 L 72 92 L 40 54 L 40 148 Z" fill="url(#ml-icon-grad)"/>
 </svg>
