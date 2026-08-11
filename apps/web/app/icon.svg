@@ -6,8 +6,8 @@
       <stop offset="100%" stop-color="#3B82F6"/>
     </linearGradient>
   </defs>
-  <rect width="180" height="180" rx="40" fill="#09090B"/>
-  <rect width="180" height="180" rx="40" stroke="rgba(255,255,255,0.08)" stroke-width="2"/>
-  <!-- ML monogram: M with right leg extending into L baseline -->
-  <path d="M 18 148 L 18 25 L 72 86 L 126 25 L 126 112 L 166 112 L 166 148 L 104 148 L 104 54 L 72 92 L 40 54 L 40 148 Z" fill="url(#ml-icon-grad)"/>
+  <rect width="180" height="180" rx="36" fill="#F8F7FC"/>
+  <rect x="1" y="1" width="178" height="178" rx="35" stroke="rgba(168,85,247,0.12)" stroke-width="2"/>
+  <!-- ML monogram -->
+  <path d="M 30 142 L 30 34 L 72 82 L 114 34 L 114 106 L 152 106 L 152 142 L 98 142 L 98 56 L 72 86 L 46 56 L 46 142 Z" fill="url(#ml-icon-grad)"/>
 </svg>
