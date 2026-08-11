@@ -47,21 +47,30 @@ Key highlights:
 
 ## 📸 Screenshots
 
-### 1. Workspace Dashboard & Overview
-![MLCopilot Workspace Dashboard](docs/screenshots/dashboard.png)
-*Centralized workspace management, document ingestion status, active projects, and system telemetry.*
+### Authentication
+![MLCopilot Login](docs/screenshots/login.png)
 
-### 2. Real-time AI Chat & Hybrid RAG Pipeline
-![MLCopilot AI Chat & RAG Pipeline](docs/screenshots/chat.png)
-*Interactive streaming AI conversations with dynamic confidence routing, model indicator, and RAG context citations.*
+MLCopilot authentication with email/password and Google/GitHub OAuth.
 
-### 3. Authentication & Account Access
-![MLCopilot Authentication Screen](docs/screenshots/login.png)
-*Secure Argon2id login with JWT session management, Google OAuth 2.0, and GitHub OAuth 2.0 integration.*
+### Dashboard
+![MLCopilot Dashboard](docs/screenshots/dashboard.png)
 
-### 4. Workspace Settings & Administration
-![MLCopilot Workspace Settings](docs/screenshots/settings.png)
-*Comprehensive project configuration, model preferences, API key management, and environment administration.*
+Workspace overview with system status, active workspaces, AI insights, and quick actions.
+
+### AI Workspace
+![MLCopilot Workspace](docs/screenshots/workspace-overview.png)
+
+Knowledge-base and RAG workspace overview.
+
+### AI Chat
+![MLCopilot AI Chat](docs/screenshots/ai-chat.png)
+
+Conversational RAG interface for interacting with the workspace knowledge base.
+
+### Workspace Settings
+![MLCopilot Settings](docs/screenshots/settings.png)
+
+Workspace configuration and AI/RAG infrastructure settings.
 
 ---
 
