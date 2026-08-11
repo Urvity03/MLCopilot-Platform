@@ -156,7 +156,8 @@ class GeminiProvider(BaseLLMProvider):
                         response_body=error_text[:500],
                         model=self._model_name,
                     )
-                    response.raise_for_status()
+                    return f"Unable to generate AI response (Gemini API returned HTTP {response.status_code}). Please verify your GEMINI_API_KEY environment variable."
+
                 data = response.json()
 
                 candidates = data.get("candidates", [])
@@ -171,7 +172,7 @@ class GeminiProvider(BaseLLMProvider):
                 details=str(e),
                 model=self._model_name,
             )
-            raise e
+            return f"Unable to generate AI response ({type(e).__name__}). Please verify your GEMINI_API_KEY configuration."
 
     async def generate_stream(
         self, system_prompt: str, user_prompt: str
@@ -239,7 +240,8 @@ class GeminiProvider(BaseLLMProvider):
                             response_body=error_text[:500],
                             model=self._model_name,
                         )
-                        response.raise_for_status()
+                        yield f"Unable to generate AI response (Gemini API returned HTTP {response.status_code}). Please verify your GEMINI_API_KEY environment variable."
+                        return
 
                     async for line in response.aiter_lines():
                         line = line.strip()
@@ -277,4 +279,5 @@ class GeminiProvider(BaseLLMProvider):
                 details=str(e),
                 model=self._model_name,
             )
-            raise e
+            yield f"Unable to generate AI response ({type(e).__name__}). Please verify your GEMINI_API_KEY configuration."
+
