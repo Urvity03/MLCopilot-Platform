@@ -22,7 +22,8 @@ COPY src ./src
 COPY tests ./tests
 COPY README.md ./
 RUN uv sync --frozen --no-editable
-RUN /opt/venv/bin/python -c "from sentence_transformers import SentenceTransformer; SentenceTransformer('all-MiniLM-L6-v2')"
+RUN mkdir -p /root/.cache/huggingface
+RUN /opt/venv/bin/python -c "import importlib.util; importlib.util.find_spec('sentence_transformers') and __import__('sentence_transformers').SentenceTransformer('all-MiniLM-L6-v2')"
 
 # ── Runtime ────────────────────────────────────────────────────────────
 FROM python:3.12-slim AS runtime
