@@ -148,8 +148,12 @@ class GeminiProvider(BaseLLMProvider):
                     response_body=response.text[:1000],
                 )
 
-                if response.is_error:
-                    error_text = response.text
+                is_err = getattr(response, "is_error", False) is True or (
+                    isinstance(getattr(response, "status_code", None), int)
+                    and response.status_code >= 400
+                )
+                if is_err:
+                    error_text = getattr(response, "text", "")
                     logger.error(
                         "llm.gemini.generation.http_error",
                         status_code=response.status_code,
@@ -231,9 +235,13 @@ class GeminiProvider(BaseLLMProvider):
                                             continue
                                     return
 
-                    if response.is_error:
+                    is_err = getattr(response, "is_error", False) is True or (
+                        isinstance(getattr(response, "status_code", None), int)
+                        and response.status_code >= 400
+                    )
+                    if is_err:
                         await response.aread()
-                        error_text = response.text
+                        error_text = getattr(response, "text", "")
                         logger.error(
                             "llm.gemini.generation_stream.http_error",
                             status_code=response.status_code,

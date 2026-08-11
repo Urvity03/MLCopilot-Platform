@@ -77,6 +77,8 @@ async def test_gemini_rest_generate_stream():
     provider = GeminiProvider(api_key="test-key", model_name="gemini-2.0-flash")
 
     mock_stream = AsyncMock()
+    mock_stream.__aenter__.return_value.status_code = 200
+    mock_stream.__aenter__.return_value.is_error = False
     mock_stream.__aenter__.return_value.raise_for_status = MagicMock()
 
     async def mock_aiter_lines():
