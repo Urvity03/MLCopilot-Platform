@@ -89,11 +89,12 @@ class GeminiProvider(BaseLLMProvider):
     async def generate(self, system_prompt: str, user_prompt: str) -> str:
         """Execute a blocking text generation call via Gemini REST generateContent API."""
         api_key = self._get_effective_key()
-        url = f"{self._base_url}/v1beta/models/{self._model_name}:generateContent"
+        model_id = self._model_name.removeprefix("models/")
+        url = f"{self._base_url}/v1beta/models/{model_id}:generateContent"
         params = {"key": api_key}
 
         payload = self._build_payload(system_prompt, user_prompt)
-        safe_url = f"{self._base_url}/v1beta/models/{self._model_name}:generateContent?key=[MASKED]"
+        safe_url = f"{self._base_url}/v1beta/models/{model_id}:generateContent?key=[MASKED]"
 
         logger.info(
             "llm.gemini.http_request",
@@ -110,6 +111,21 @@ class GeminiProvider(BaseLLMProvider):
                     json=payload,
                     headers={"Content-Type": "application/json"},
                 )
+
+                # Fallback to gemini-2.5-flash if requested model returned 404 Not Found
+                if response.status_code == 404 and model_id != "gemini-2.5-flash":
+                    logger.warning(
+                        "llm.gemini.model_404_fallback",
+                        requested_model=model_id,
+                        fallback_model="gemini-2.5-flash",
+                    )
+                    fallback_url = f"{self._base_url}/v1beta/models/gemini-2.5-flash:generateContent"
+                    response = await client.post(
+                        fallback_url,
+                        params=params,
+                        json=payload,
+                        headers={"Content-Type": "application/json"},
+                    )
 
                 logger.info(
                     "llm.gemini.http_response",
@@ -147,7 +163,8 @@ class GeminiProvider(BaseLLMProvider):
     ) -> AsyncIterator[str]:
         """Execute a streaming text generation call returning token chunks via Gemini REST SSE API."""
         api_key = self._get_effective_key()
-        url = f"{self._base_url}/v1beta/models/{self._model_name}:streamGenerateContent"
+        model_id = self._model_name.removeprefix("models/")
+        url = f"{self._base_url}/v1beta/models/{model_id}:streamGenerateContent"
         params = {"alt": "sse", "key": api_key}
 
         payload = self._build_payload(system_prompt, user_prompt)
@@ -161,6 +178,42 @@ class GeminiProvider(BaseLLMProvider):
                     json=payload,
                     headers={"Content-Type": "application/json"},
                 ) as response:
+                    if response.status_code == 404 and model_id != "gemini-2.5-flash":
+                        logger.warning(
+                            "llm.gemini.model_404_fallback_stream",
+                            requested_model=model_id,
+                            fallback_model="gemini-2.5-flash",
+                        )
+                        fallback_url = f"{self._base_url}/v1beta/models/gemini-2.5-flash:streamGenerateContent"
+                        async with client.stream(
+                            "POST",
+                            fallback_url,
+                            params=params,
+                            json=payload,
+                            headers={"Content-Type": "application/json"},
+                        ) as fallback_response:
+                            if fallback_response.is_error:
+                                await fallback_response.aread()
+                                fallback_response.raise_for_status()
+                            async for line in fallback_response.aiter_lines():
+                                line = line.strip()
+                                if not line or not line.startswith("data:"):
+                                    continue
+                                raw_json = line[len("data:") :].strip()
+                                if not raw_json or raw_json == "[DONE]":
+                                    continue
+                                try:
+                                    data = json.loads(raw_json)
+                                    candidates = data.get("candidates", [])
+                                    if candidates:
+                                        parts = candidates[0].get("content", {}).get("parts", [])
+                                        chunk_text = "".join(p.get("text", "") for p in parts if "text" in p)
+                                        if chunk_text:
+                                            yield chunk_text
+                                except json.JSONDecodeError:
+                                    continue
+                        return
+
                     if response.is_error:
                         await response.aread()
                         error_text = response.text
