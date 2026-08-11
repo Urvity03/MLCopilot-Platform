@@ -13,6 +13,7 @@
     <img src="https://img.shields.io/badge/FastAPI-0.115-009688?logo=fastapi&logoColor=white" alt="FastAPI" />
     <img src="https://img.shields.io/badge/Next.js-16-black?logo=nextdotjs" alt="Next.js" />
     <img src="https://img.shields.io/badge/TypeScript-5.x-3178C6?logo=typescript&logoColor=white" alt="TypeScript" />
+    <a href="https://deepmind.google/technologies/gemini/"><img src="https://img.shields.io/badge/LLM-Google%20Gemini-8E75B2?logo=google&logoColor=white" alt="Google Gemini LLM" /></a>
     <img src="https://img.shields.io/badge/PostgreSQL-pgvector-4169E1?logo=postgresql&logoColor=white" alt="PostgreSQL pgvector" />
     <img src="https://img.shields.io/badge/Docker-Ready-2496ED?logo=docker&logoColor=white" alt="Docker Ready" />
     <img src="https://img.shields.io/badge/License-Apache%202.0-blue" alt="License" />
@@ -46,11 +47,21 @@ Key highlights:
 
 ## 📸 Screenshots
 
-| Workspace Dashboard | Real-time AI Chat |
-|---|---|
-| Projects overview, document status, and workspace activity | SSE streaming responses, confidence routing, and RAG citations |
+### 1. Workspace Dashboard & Overview
+![MLCopilot Workspace Dashboard](docs/screenshots/dashboard.png)
+*Centralized workspace management, document ingestion status, active projects, and system telemetry.*
 
-*Application screenshot assets and architecture diagrams are located in [`docs/`](./docs/).*
+### 2. Real-time AI Chat & Hybrid RAG Pipeline
+![MLCopilot AI Chat & RAG Pipeline](docs/screenshots/chat.png)
+*Interactive streaming AI conversations with dynamic confidence routing, model indicator, and RAG context citations.*
+
+### 3. Authentication & Account Access
+![MLCopilot Authentication Screen](docs/screenshots/login.png)
+*Secure Argon2id login with JWT session management, Google OAuth 2.0, and GitHub OAuth 2.0 integration.*
+
+### 4. Workspace Settings & Administration
+![MLCopilot Workspace Settings](docs/screenshots/settings.png)
+*Comprehensive project configuration, model preferences, API key management, and environment administration.*
 
 ---
 
