@@ -54,7 +54,7 @@ jobs:
           POSTGRES_HOST: localhost
           POSTGRES_PORT: 5432
           DATABASE_URL: postgresql+asyncpg://mlcopilot:test_password@localhost:5432/mlcopilot_test_db
-          JWT_SECRET_KEY: ci_test_secret_key_minimum_64_characters_length_for_valid_security_assurance_hash
+          JWT_SECRET: ci_test_secret_key_minimum_64_characters_length_for_valid_security_assurance_hash
           ENVIRONMENT: test
         run: |
           cd apps/api

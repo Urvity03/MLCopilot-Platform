@@ -37,7 +37,7 @@ This guide provides step-by-step instructions for deploying MLCopilot to product
    ```bash
    openssl rand -hex 32
    ```
-   Update `JWT_SECRET_KEY` and `POSTGRES_PASSWORD` in `.env`.
+   Update `JWT_SECRET` and `POSTGRES_PASSWORD` in `.env`.
 
 ---
 

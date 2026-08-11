@@ -188,7 +188,7 @@ cp .env.example .env
 | Variable | Description | Default / Format |
 |---|---|---|
 | `DATABASE_URL` | PostgreSQL Async connection string | `postgresql+asyncpg://user:pass@localhost:5432/mlcopilot` |
-| `JWT_SECRET_KEY` | Secret key for signing JWT tokens | 64-character hex string |
+| `JWT_SECRET` | Secret key for signing JWT tokens | 64-character hex string |
 | `GEMINI_API_KEY` | Google Gemini API Key | `AIzaSy...` |
 | `GEMINI_MODEL` | Active Gemini Model name | `gemini-3.6-flash` |
 | `OLLAMA_BASE_URL` | Local Ollama endpoint | `http://localhost:11434` |
