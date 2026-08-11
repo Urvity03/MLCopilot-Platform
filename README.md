@@ -331,7 +331,7 @@ MLCopilot-Platform/
 
 ## 📜 License
 
-This project is licensed under the **Apache 2.0 License**. See [`LICENSE`](./LICENSE) for details.
+Licensed under the Apache License, Version 2.0. See [Apache License 2.0](LICENSE) for details.
 
 ---
 
