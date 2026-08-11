@@ -41,11 +41,17 @@ export function MLCopilotLogo({
           </linearGradient>
         </defs>
         <path
-          d="M 22 78 V 26 L 47 53 L 64 26 V 62 C 64 71 71 78 80 78 H 92"
+          d="M 18 76 V 24 L 45 54 L 72 24 V 76"
           stroke={`url(#${gradientId})`}
-          strokeWidth="11"
+          strokeWidth="12"
           strokeLinecap="round"
           strokeLinejoin="round"
+        />
+        <circle
+          cx="88"
+          cy="70"
+          r="6.5"
+          fill={`url(#${gradientId})`}
         />
       </svg>
       {showText && (

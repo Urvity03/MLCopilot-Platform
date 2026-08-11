@@ -8,5 +8,6 @@
   </defs>
   <rect width="180" height="180" rx="40" fill="#09090B"/>
   <rect width="180" height="180" rx="40" stroke="rgba(255,255,255,0.08)" stroke-width="2"/>
-  <path d="M 40 140 V 46 L 85 95 L 115 46 V 111 C 115 127 127 140 143 140 H 165" stroke="url(#ml-icon-grad)" stroke-width="20" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M 32 136 V 44 L 80 96 L 128 44 V 136" stroke="url(#ml-icon-grad)" stroke-width="22" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="156" cy="126" r="12" fill="url(#ml-icon-grad)"/>
 </svg>
