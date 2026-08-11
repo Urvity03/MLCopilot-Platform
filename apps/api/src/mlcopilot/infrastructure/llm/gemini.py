@@ -19,12 +19,25 @@ logger = get_logger("mlcopilot.infrastructure.llm.gemini")
 
 
 _GEMINI_FALLBACK_MODELS = [
-    "gemini-2.0-flash",
-    "gemini-1.5-flash-latest",
+    "gemini-3.6-flash",
+    "gemini-3.5-flash",
+    "gemini-flash-latest",
     "gemini-2.5-flash",
-    "gemini-2.0-flash-exp",
-    "gemini-1.5-pro",
+    "gemini-2.0-flash",
 ]
+
+
+def _format_http_error_message(status_code: int, model_name: str) -> str:
+    """Format user-facing error message based on exact HTTP status code."""
+    if status_code == 404:
+        return f"Unable to generate AI response: The configured model '{model_name}' is unavailable or deprecated on Google Gemini API (HTTP 404)."
+    if status_code in (401, 403):
+        return f"Unable to generate AI response: Gemini API key authentication failed (HTTP {status_code}). Please verify your GEMINI_API_KEY environment variable."
+    if status_code == 429:
+        return "Unable to generate AI response: Gemini API rate limit or quota exceeded (HTTP 429). Please try again later."
+    if status_code >= 500:
+        return f"Unable to generate AI response: Google Gemini API server error (HTTP {status_code}). Please try again later."
+    return f"Unable to generate AI response (Gemini API returned HTTP {status_code})."
 
 
 class GeminiProvider(BaseLLMProvider):
@@ -160,7 +173,7 @@ class GeminiProvider(BaseLLMProvider):
                         response_body=error_text[:500],
                         model=self._model_name,
                     )
-                    return f"Unable to generate AI response (Gemini API returned HTTP {response.status_code}). Please verify your GEMINI_API_KEY environment variable."
+                    return _format_http_error_message(response.status_code, self._model_name)
 
                 data = response.json()
 
@@ -248,7 +261,7 @@ class GeminiProvider(BaseLLMProvider):
                             response_body=error_text[:500],
                             model=self._model_name,
                         )
-                        yield f"Unable to generate AI response (Gemini API returned HTTP {response.status_code}). Please verify your GEMINI_API_KEY environment variable."
+                        yield _format_http_error_message(response.status_code, self._model_name)
                         return
 
                     async for line in response.aiter_lines():
