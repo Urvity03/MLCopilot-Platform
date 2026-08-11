@@ -8,7 +8,9 @@ __v0_jsx-dev-runtime.ts
 
 # Environment variables
 .env
-.env*.local
+.env.*
+!.env.example
+!production.env.example
 
 # Dependencies
 node_modules
@@ -45,5 +47,3 @@ apps/api/openapi.json
 apps/api/scripts/
 rag_verification_report.json
 test_gemini.py
-.vercel
-.env*
