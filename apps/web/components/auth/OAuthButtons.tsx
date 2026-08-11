@@ -2,6 +2,7 @@
 
 import * as React from 'react';
 import { motion } from 'framer-motion';
+import { getApiBaseUrl } from '../../lib/config';
 
 // Google "G" logo as inline SVG (official colors)
 const GoogleIcon = () => (
@@ -27,12 +28,10 @@ interface OAuthButtonsProps {
 export function OAuthButtons({ disabled = false }: OAuthButtonsProps) {
   const [loadingProvider, setLoadingProvider] = React.useState<string | null>(null);
 
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000/api/v1';
-
   const handleOAuth = (provider: 'google' | 'github') => {
     if (disabled || loadingProvider) return;
     setLoadingProvider(provider);
-    window.location.href = `${apiUrl}/auth/oauth/${provider}`;
+    window.location.href = `${getApiBaseUrl()}/auth/oauth/${provider}`;
   };
 
   return (

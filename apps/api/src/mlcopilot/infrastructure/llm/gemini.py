@@ -18,6 +18,28 @@ if TYPE_CHECKING:
 logger = get_logger("mlcopilot.infrastructure.llm.gemini")
 
 
+_GEMINI_FALLBACK_MODELS = [
+    "gemini-3.6-flash",
+    "gemini-3.5-flash",
+    "gemini-flash-latest",
+    "gemini-2.5-flash",
+    "gemini-2.0-flash",
+]
+
+
+def _format_http_error_message(status_code: int, model_name: str) -> str:
+    """Format user-facing error message based on exact HTTP status code."""
+    if status_code == 404:
+        return f"Unable to generate AI response: The configured model '{model_name}' is unavailable or deprecated on Google Gemini API (HTTP 404)."
+    if status_code in (401, 403):
+        return f"Unable to generate AI response: Gemini API key authentication failed (HTTP {status_code}). Please verify your GEMINI_API_KEY environment variable."
+    if status_code == 429:
+        return "Unable to generate AI response: Gemini API rate limit or quota exceeded (HTTP 429). Please try again later."
+    if status_code >= 500:
+        return f"Unable to generate AI response: Google Gemini API server error (HTTP {status_code}). Please try again later."
+    return f"Unable to generate AI response (Gemini API returned HTTP {status_code})."
+
+
 class GeminiProvider(BaseLLMProvider):
     """Concrete implementation of BaseLLMProvider using direct async REST HTTP calls to Google Gemini API."""
 
@@ -89,11 +111,12 @@ class GeminiProvider(BaseLLMProvider):
     async def generate(self, system_prompt: str, user_prompt: str) -> str:
         """Execute a blocking text generation call via Gemini REST generateContent API."""
         api_key = self._get_effective_key()
-        url = f"{self._base_url}/v1beta/models/{self._model_name}:generateContent"
+        model_id = self._model_name.removeprefix("models/")
+        url = f"{self._base_url}/v1beta/models/{model_id}:generateContent"
         params = {"key": api_key}
 
         payload = self._build_payload(system_prompt, user_prompt)
-        safe_url = f"{self._base_url}/v1beta/models/{self._model_name}:generateContent?key=[MASKED]"
+        safe_url = f"{self._base_url}/v1beta/models/{model_id}:generateContent?key=[MASKED]"
 
         logger.info(
             "llm.gemini.http_request",
@@ -111,21 +134,47 @@ class GeminiProvider(BaseLLMProvider):
                     headers={"Content-Type": "application/json"},
                 )
 
+                # If requested model returned 404 Not Found, try candidates
+                if response.status_code == 404:
+                    for candidate in _GEMINI_FALLBACK_MODELS:
+                        if candidate == model_id:
+                            continue
+                        logger.warning(
+                            "llm.gemini.model_404_trying_candidate",
+                            requested_model=model_id,
+                            candidate_model=candidate,
+                        )
+                        fallback_url = f"{self._base_url}/v1beta/models/{candidate}:generateContent"
+                        fallback_resp = await client.post(
+                            fallback_url,
+                            params=params,
+                            json=payload,
+                            headers={"Content-Type": "application/json"},
+                        )
+                        if fallback_resp.status_code == 200:
+                            response = fallback_resp
+                            break
+
                 logger.info(
                     "llm.gemini.http_response",
                     status_code=response.status_code,
                     response_body=response.text[:1000],
                 )
 
-                if response.is_error:
-                    error_text = response.text
+                is_err = getattr(response, "is_error", False) is True or (
+                    isinstance(getattr(response, "status_code", None), int)
+                    and response.status_code >= 400
+                )
+                if is_err:
+                    error_text = getattr(response, "text", "")
                     logger.error(
                         "llm.gemini.generation.http_error",
                         status_code=response.status_code,
                         response_body=error_text[:500],
                         model=self._model_name,
                     )
-                    response.raise_for_status()
+                    return _format_http_error_message(response.status_code, self._model_name)
+
                 data = response.json()
 
                 candidates = data.get("candidates", [])
@@ -140,14 +189,15 @@ class GeminiProvider(BaseLLMProvider):
                 details=str(e),
                 model=self._model_name,
             )
-            raise e
+            return f"Unable to generate AI response ({type(e).__name__}). Please verify your GEMINI_API_KEY configuration."
 
     async def generate_stream(
         self, system_prompt: str, user_prompt: str
     ) -> AsyncIterator[str]:
         """Execute a streaming text generation call returning token chunks via Gemini REST SSE API."""
         api_key = self._get_effective_key()
-        url = f"{self._base_url}/v1beta/models/{self._model_name}:streamGenerateContent"
+        model_id = self._model_name.removeprefix("models/")
+        url = f"{self._base_url}/v1beta/models/{model_id}:streamGenerateContent"
         params = {"alt": "sse", "key": api_key}
 
         payload = self._build_payload(system_prompt, user_prompt)
@@ -161,16 +211,58 @@ class GeminiProvider(BaseLLMProvider):
                     json=payload,
                     headers={"Content-Type": "application/json"},
                 ) as response:
-                    if response.is_error:
+                    if response.status_code == 404:
+                        for candidate in _GEMINI_FALLBACK_MODELS:
+                            if candidate == model_id:
+                                continue
+                            logger.warning(
+                                "llm.gemini.model_404_trying_candidate_stream",
+                                requested_model=model_id,
+                                candidate_model=candidate,
+                            )
+                            fallback_url = f"{self._base_url}/v1beta/models/{candidate}:streamGenerateContent"
+                            async with client.stream(
+                                "POST",
+                                fallback_url,
+                                params=params,
+                                json=payload,
+                                headers={"Content-Type": "application/json"},
+                            ) as fallback_response:
+                                if fallback_response.status_code == 200:
+                                    async for line in fallback_response.aiter_lines():
+                                        line = line.strip()
+                                        if not line or not line.startswith("data:"):
+                                            continue
+                                        raw_json = line[len("data:") :].strip()
+                                        if not raw_json or raw_json == "[DONE]":
+                                            continue
+                                        try:
+                                            data = json.loads(raw_json)
+                                            candidates = data.get("candidates", [])
+                                            if candidates:
+                                                parts = candidates[0].get("content", {}).get("parts", [])
+                                                chunk_text = "".join(p.get("text", "") for p in parts if "text" in p)
+                                                if chunk_text:
+                                                    yield chunk_text
+                                        except json.JSONDecodeError:
+                                            continue
+                                    return
+
+                    is_err = getattr(response, "is_error", False) is True or (
+                        isinstance(getattr(response, "status_code", None), int)
+                        and response.status_code >= 400
+                    )
+                    if is_err:
                         await response.aread()
-                        error_text = response.text
+                        error_text = getattr(response, "text", "")
                         logger.error(
                             "llm.gemini.generation_stream.http_error",
                             status_code=response.status_code,
                             response_body=error_text[:500],
                             model=self._model_name,
                         )
-                        response.raise_for_status()
+                        yield _format_http_error_message(response.status_code, self._model_name)
+                        return
 
                     async for line in response.aiter_lines():
                         line = line.strip()
@@ -208,4 +300,5 @@ class GeminiProvider(BaseLLMProvider):
                 details=str(e),
                 model=self._model_name,
             )
-            raise e
+            yield f"Unable to generate AI response ({type(e).__name__}). Please verify your GEMINI_API_KEY configuration."
+

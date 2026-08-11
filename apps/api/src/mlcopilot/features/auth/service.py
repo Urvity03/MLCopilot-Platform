@@ -12,12 +12,15 @@ import uuid
 from datetime import UTC, datetime, timedelta
 from typing import TYPE_CHECKING
 
+from mlcopilot.core.logging import get_logger
 from mlcopilot.domain.api_key import ApiKey
 from mlcopilot.domain.errors import AuthenticationError, ConflictError
 from mlcopilot.domain.oauth_account import OAuthAccount
 from mlcopilot.domain.password_reset_token import PasswordResetToken
 from mlcopilot.domain.refresh_token import RefreshToken
 from mlcopilot.domain.user import User
+
+logger = get_logger("mlcopilot.features.auth.service")
 
 if TYPE_CHECKING:
     from mlcopilot.features.auth.repository import (
@@ -32,6 +35,7 @@ if TYPE_CHECKING:
     from mlcopilot.infrastructure.security.password import PasswordHasher
 
 _REFRESH_TOKEN_EXPIRE_DAYS = 14
+_DUMMY_HASH = "$argon2id$v=19$m=65536,t=3,p=4$HS/ai22Eyc6JtOXpVqwVPQ$05qm/FfJYagtGBTLp8df0qRKaJk+5C57/aCDAL9rMno"
 
 
 class AuthService:
@@ -56,9 +60,6 @@ class AuthService:
         self._api_key_mgr = api_key_manager
         self._oauth = oauth_repo
         self._password_resets = password_reset_repo
-
-        # Pre-compute a dummy hash so timing-safe login always runs a verify.
-        self._dummy_hash = password_hasher.hash("dummy-timing-safe")
 
     # ── Registration ──────────────────────────────────────────────────
 
@@ -111,12 +112,12 @@ class AuthService:
         user = await self._users.get_by_email(email)
 
         if user is None:
-            self._passwords.verify("dummy", self._dummy_hash)
+            self._passwords.verify("dummy", _DUMMY_HASH)
             raise AuthenticationError("Invalid email or password", code="unauthenticated")
 
         if user.password_hash is None:
             # User registered with OAuth and has no password set
-            self._passwords.verify("dummy", self._dummy_hash)
+            self._passwords.verify("dummy", _DUMMY_HASH)
             raise AuthenticationError(
                 "Account created via OAuth. Please sign in with Google or GitHub.",
                 code="oauth_only_user",
@@ -208,40 +209,17 @@ class AuthService:
         now = datetime.now(UTC)
 
         # DB OP 1: get_by_email
-        try:
-            print("DB OP 1: executing users.get_by_email...", flush=True)
-            existing = await self._users.get_by_email(email)
-            print(f"DB OP 1 OK: existing={existing}", flush=True)
-        except Exception:
-            logger.exception("DB OP 1 FAILED: users.get_by_email")
-            print("DB OP 1 FAILED: users.get_by_email", flush=True)
-            raise
+        existing = await self._users.get_by_email(email)
 
         if existing is not None:
             existing.avatar_url = avatar_url or existing.avatar_url
             existing.last_login = now
             existing.updated_at = now
 
-            # DB OP 2: users.update
-            try:
-                print("DB OP 2: executing users.update...", flush=True)
-                await self._users.update(existing)
-                print("DB OP 2 OK", flush=True)
-            except Exception:
-                logger.exception("DB OP 2 FAILED: users.update")
-                print("DB OP 2 FAILED: users.update", flush=True)
-                raise
+            await self._users.update(existing)
 
             if self._oauth is not None:
-                # DB OP 3: oauth.get_by_provider_and_id
-                try:
-                    print("DB OP 3: executing oauth.get_by_provider_and_id...", flush=True)
-                    linked = await self._oauth.get_by_provider_and_id(provider, provider_account_id)
-                    print(f"DB OP 3 OK: linked={linked}", flush=True)
-                except Exception:
-                    logger.exception("DB OP 3 FAILED: oauth.get_by_provider_and_id")
-                    print("DB OP 3 FAILED: oauth.get_by_provider_and_id", flush=True)
-                    raise
+                linked = await self._oauth.get_by_provider_and_id(provider, provider_account_id)
 
                 if linked is None:
                     oauth_account = OAuthAccount(
@@ -254,15 +232,7 @@ class AuthService:
                         provider_avatar=avatar_url,
                         created_at=now,
                     )
-                    # DB OP 4: oauth.add
-                    try:
-                        print("DB OP 4: executing oauth.add...", flush=True)
-                        await self._oauth.add(oauth_account)
-                        print("DB OP 4 OK", flush=True)
-                    except Exception:
-                        logger.exception("DB OP 4 FAILED: oauth.add")
-                        print("DB OP 4 FAILED: oauth.add", flush=True)
-                        raise
+                    await self._oauth.add(oauth_account)
 
             return existing
 
@@ -279,15 +249,7 @@ class AuthService:
             last_login=now,
         )
 
-        # DB OP 5: users.add
-        try:
-            print("DB OP 5: executing users.add...", flush=True)
-            await self._users.add(user)
-            print("DB OP 5 OK", flush=True)
-        except Exception:
-            logger.exception("DB OP 5 FAILED: users.add")
-            print("DB OP 5 FAILED: users.add", flush=True)
-            raise
+        await self._users.add(user)
 
         if self._oauth is not None:
             oauth_account = OAuthAccount(
@@ -301,16 +263,9 @@ class AuthService:
                 created_at=now,
             )
 
-            # DB OP 6: oauth.add for new user
-            try:
-                print("DB OP 6: executing oauth.add for new user...", flush=True)
-                await self._oauth.add(oauth_account)
-                print("DB OP 6 OK", flush=True)
-            except Exception:
-                logger.exception("DB OP 6 FAILED: oauth.add for new user")
-                print("DB OP 6 FAILED: oauth.add for new user", flush=True)
-                raise
+            await self._oauth.add(oauth_account)
 
+        logger.info("auth.service.oauth_user_processed", user_id=str(user.id), provider=provider)
         return user
 
     # ── OAuth Account Management ─────────────────────────────────────

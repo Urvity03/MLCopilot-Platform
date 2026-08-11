@@ -103,149 +103,80 @@ class OAuthService:
 
     async def handle_google_callback(self, code: str, state: str) -> tuple[str, str]:
         """Exchange Google authorization code for tokens and link/create user."""
-        # STEP 2: state validated
-        try:
-            print("STEP 2: state validating...", flush=True)
-            state_payload = self._verify_state_token(state)
-            code_verifier = str(state_payload.get("code_verifier", ""))
-            logger.info("STEP 2 OK")
-            print("STEP 2 OK", flush=True)
-        except Exception:
-            logger.exception("STEP 2 FAILED")
-            print("STEP 2 FAILED", flush=True)
-            raise
+        logger.info("oauth.google.callback_started", code_length=len(code))
+        state_payload = self._verify_state_token(state)
+        code_verifier = str(state_payload.get("code_verifier", ""))
 
-        # STEP 3: authorization code received
-        try:
-            print(f"STEP 3: authorization code received (len={len(code)})", flush=True)
-            if not code:
-                raise AuthenticationError("Missing authorization code", code="oauth_failed")
-            logger.info("STEP 3 OK")
-            print("STEP 3 OK", flush=True)
-        except Exception:
-            logger.exception("STEP 3 FAILED")
-            print("STEP 3 FAILED", flush=True)
-            raise
+        if not code:
+            raise AuthenticationError("Missing authorization code", code="oauth_failed")
 
         redirect_uri = f"{self._settings.oauth_redirect_base}{self._settings.api_v1_prefix}/auth/oauth/google/callback"
         client_secret = self._settings.google_client_secret.get_secret_value()
 
-        # STEP 4 & 5: exchanging code with Google & token response
         async with httpx.AsyncClient(timeout=10.0) as client:
-            try:
-                print("STEP 4: exchanging code with Google...", flush=True)
-                token_resp = await client.post(
-                    "https://oauth2.googleapis.com/token",
-                    data={
-                        "code": code,
-                        "client_id": self._settings.google_client_id,
-                        "client_secret": client_secret,
-                        "redirect_uri": redirect_uri,
-                        "grant_type": "authorization_code",
-                        "code_verifier": code_verifier,
-                    },
-                )
-                logger.info("STEP 4 OK")
-                print("STEP 4 OK", flush=True)
-            except Exception:
-                logger.exception("STEP 4 FAILED")
-                print("STEP 4 FAILED", flush=True)
-                raise
-
-            try:
-                print(f"STEP 5: Google token response received (status={token_resp.status_code})", flush=True)
-                if token_resp.status_code != 200:
-                    raise AuthenticationError(f"Google token exchange failed ({token_resp.status_code}): {token_resp.text}", code="oauth_failed")
-                token_data = token_resp.json()
-                google_access_token = token_data.get("access_token")
-                logger.info("STEP 5 OK")
-                print("STEP 5 OK", flush=True)
-            except Exception:
-                logger.exception("STEP 5 FAILED")
-                print("STEP 5 FAILED", flush=True)
-                raise
-
-            # STEP 6 & 7: requesting userinfo & userinfo received
-            try:
-                print("STEP 6: requesting userinfo...", flush=True)
-                userinfo_resp = await client.get(
-                    "https://www.googleapis.com/oauth2/v2/userinfo",
-                    headers={"Authorization": f"Bearer {google_access_token}"},
-                )
-                logger.info("STEP 6 OK")
-                print("STEP 6 OK", flush=True)
-            except Exception:
-                logger.exception("STEP 6 FAILED")
-                print("STEP 6 FAILED", flush=True)
-                raise
-
-            try:
-                print(f"STEP 7: userinfo received (status={userinfo_resp.status_code})", flush=True)
-                if userinfo_resp.status_code != 200:
-                    raise AuthenticationError(f"Failed to fetch Google user profile ({userinfo_resp.status_code})", code="oauth_failed")
-                info = userinfo_resp.json()
-                email = info.get("email")
-                provider_account_id = info.get("id")
-                full_name = info.get("name") or (email.split("@")[0] if email else "Google User")
-                avatar_url = info.get("picture")
-                if not email or not provider_account_id:
-                    raise AuthenticationError("Invalid Google profile response: missing email or id", code="oauth_failed")
-                logger.info("STEP 7 OK")
-                print("STEP 7 OK", flush=True)
-            except Exception:
-                logger.exception("STEP 7 FAILED")
-                print("STEP 7 FAILED", flush=True)
-                raise
-
-        # STEP 8 & 9: calling find_or_create_oauth_user & user created/found
-        try:
-            print("STEP 8: calling find_or_create_oauth_user()...", flush=True)
-            user = await self._auth_service.find_or_create_oauth_user(
-                email=email,
-                full_name=full_name,
-                avatar_url=avatar_url,
-                provider="google",
-                provider_account_id=str(provider_account_id),
+            token_resp = await client.post(
+                "https://oauth2.googleapis.com/token",
+                data={
+                    "code": code,
+                    "client_id": self._settings.google_client_id,
+                    "client_secret": client_secret,
+                    "redirect_uri": redirect_uri,
+                    "grant_type": "authorization_code",
+                    "code_verifier": code_verifier,
+                },
             )
-            logger.info("STEP 8 OK")
-            print("STEP 8 OK", flush=True)
-        except Exception:
-            logger.exception("STEP 8 FAILED")
-            print("STEP 8 FAILED", flush=True)
-            raise
+            logger.info("oauth.google.token_exchange_status", status=token_resp.status_code)
+            if token_resp.status_code != 200:
+                logger.error(
+                    "oauth.google.token_exchange_failed",
+                    status=token_resp.status_code,
+                    body=token_resp.text,
+                )
+                raise AuthenticationError(
+                    f"Google token exchange failed ({token_resp.status_code}): {token_resp.text}",
+                    code="oauth_failed",
+                )
 
-        try:
-            print(f"STEP 9: user created/found (user_id={user.id})", flush=True)
-            logger.info("STEP 9 OK")
-            print("STEP 9 OK", flush=True)
-        except Exception:
-            logger.exception("STEP 9 FAILED")
-            print("STEP 9 FAILED", flush=True)
-            raise
+            token_data = token_resp.json()
+            google_access_token = token_data.get("access_token")
 
-        # STEP 10: creating JWT
-        try:
-            print("STEP 10: creating JWT...", flush=True)
-            access_token = self._jwt.create_access_token(user.id)
-            raw_refresh, refresh_entity = self._auth_service._create_refresh_token(user.id)
-            logger.info("STEP 10 OK")
-            print("STEP 10 OK", flush=True)
-        except Exception:
-            logger.exception("STEP 10 FAILED")
-            print("STEP 10 FAILED", flush=True)
-            raise
+            userinfo_resp = await client.get(
+                "https://www.googleapis.com/oauth2/v2/userinfo",
+                headers={"Authorization": f"Bearer {google_access_token}"},
+            )
+            if userinfo_resp.status_code != 200:
+                logger.error(
+                    "oauth.google.user_profile_failed",
+                    status=userinfo_resp.status_code,
+                    body=userinfo_resp.text,
+                )
+                raise AuthenticationError(
+                    f"Failed to fetch Google user profile ({userinfo_resp.status_code})",
+                    code="oauth_failed",
+                )
 
-        # STEP 11: storing refresh token
-        try:
-            print("STEP 11: storing refresh token...", flush=True)
-            await self._auth_service._refresh_tokens.add(refresh_entity)
-            logger.info("STEP 11 OK")
-            print("STEP 11 OK", flush=True)
-        except Exception:
-            logger.exception("STEP 11 FAILED")
-            print("STEP 11 FAILED", flush=True)
-            raise
+            info = userinfo_resp.json()
+            email = info.get("email")
+            provider_account_id = info.get("id")
+            full_name = info.get("name") or (email.split("@")[0] if email else "Google User")
+            avatar_url = info.get("picture")
 
+            if not email or not provider_account_id:
+                raise AuthenticationError("Invalid Google profile response: missing email or id", code="oauth_failed")
+
+        user = await self._auth_service.find_or_create_oauth_user(
+            email=email,
+            full_name=full_name,
+            avatar_url=avatar_url,
+            provider="google",
+            provider_account_id=str(provider_account_id),
+        )
+
+        access_token = self._jwt.create_access_token(user.id)
+        raw_refresh, refresh_entity = self._auth_service._create_refresh_token(user.id)
+        await self._auth_service._refresh_tokens.add(refresh_entity)
+
+        logger.info("oauth.google.callback_success", user_id=str(user.id), email=user.email)
         return access_token, raw_refresh
 
     # ── GitHub OAuth ──────────────────────────────────────────────────

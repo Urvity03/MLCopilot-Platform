@@ -3,7 +3,6 @@
 from typing import Annotated
 
 from fastapi import Depends
-from minio import Minio
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from mlcopilot.core.config import get_settings
@@ -17,7 +16,15 @@ from mlcopilot.infrastructure.storage.minio import MinioBlobStorage
 
 def get_blob_storage() -> BlobStorage:
     """Dependency to provide a configured BlobStorage client."""
+    try:
+        from minio import Minio
+    except ImportError:
+        Minio = None  # type: ignore[assignment, misc]
+
     settings = get_settings()
+    if Minio is None:
+        raise RuntimeError("minio package is not installed.")
+
     client = Minio(
         settings.minio_endpoint,
         access_key=settings.minio_access_key,

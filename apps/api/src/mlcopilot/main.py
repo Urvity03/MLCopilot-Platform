@@ -89,8 +89,16 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     try:
         yield
     finally:
-        await app.state.redis.aclose()
-        await engine.dispose()
+        try:
+            if hasattr(app.state, 'redis') and app.state.redis:
+                await app.state.redis.aclose()
+        except Exception:
+            pass
+        try:
+            if hasattr(app.state, 'db_engine') and app.state.db_engine:
+                await engine.dispose()
+        except Exception:
+            pass
         logger.info("shutdown.complete")
 
 
@@ -125,14 +133,20 @@ def create_app(settings: Settings | None = None) -> FastAPI:
 
     register_exception_handlers(app)
 
-    app.include_router(health_router, prefix=settings.api_v1_prefix)
-    app.include_router(auth_router, prefix=settings.api_v1_prefix)
-    app.include_router(api_keys_router, prefix=settings.api_v1_prefix)
-    app.include_router(chat_router, prefix=settings.api_v1_prefix)
-    app.include_router(projects_router, prefix=settings.api_v1_prefix)
-    app.include_router(uploads_router, prefix=settings.api_v1_prefix)
-    app.include_router(memory_router, prefix=settings.api_v1_prefix)
-    app.include_router(search_router, prefix=settings.api_v1_prefix)
+    routers = [
+        health_router,
+        auth_router,
+        api_keys_router,
+        chat_router,
+        projects_router,
+        uploads_router,
+        memory_router,
+        search_router,
+    ]
+    for r in routers:
+        app.include_router(r, prefix=settings.api_v1_prefix)
+        if settings.api_v1_prefix:
+            app.include_router(r, prefix="")
 
     return app
 

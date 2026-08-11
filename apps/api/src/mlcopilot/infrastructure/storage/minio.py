@@ -1,16 +1,19 @@
 """MinIO implementation of the BlobStorage protocol."""
 
-from typing import BinaryIO
+from typing import Any, BinaryIO
 from uuid import UUID
 
 from anyio.to_thread import run_sync
-from minio import Minio
+try:
+    from minio import Minio
+except ImportError:
+    Minio = None  # type: ignore[assignment, misc]
 
 
 class MinioBlobStorage:
     """MinIO-backed implementation of the BlobStorage protocol."""
 
-    def __init__(self, client: Minio, bucket_name: str) -> None:
+    def __init__(self, client: Any, bucket_name: str) -> None:
         self._client = client
         self._bucket_name = bucket_name
 

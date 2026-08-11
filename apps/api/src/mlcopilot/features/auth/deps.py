@@ -65,27 +65,19 @@ async def get_password_reset_token_repository(
 
 
 async def get_auth_service(
-    user_repo: Annotated[UserRepository, Depends(get_user_repository)],
-    refresh_token_repo: Annotated[
-        RefreshTokenRepository, Depends(get_refresh_token_repository)
-    ],
-    api_key_repo: Annotated[ApiKeyRepository, Depends(get_api_key_repository)],
-    oauth_repo: Annotated[OAuthAccountRepository, Depends(get_oauth_account_repository)],
-    password_reset_repo: Annotated[
-        PasswordResetTokenRepository, Depends(get_password_reset_token_repository)
-    ],
+    session: Annotated[AsyncSession, Depends(get_db_session)],
     settings: Annotated[Settings, Depends(get_settings)],
 ) -> AuthService:
     """FastAPI dependency to resolve AuthService with all its collaborators."""
     return AuthService(
-        user_repo=user_repo,
-        refresh_token_repo=refresh_token_repo,
-        api_key_repo=api_key_repo,
+        user_repo=SqlAlchemyUserRepository(session),
+        refresh_token_repo=SqlAlchemyRefreshTokenRepository(session),
+        api_key_repo=SqlAlchemyApiKeyRepository(session),
         password_hasher=PasswordHasher(),
         jwt_manager=JWTManager(secret=settings.jwt_secret.get_secret_value()),
         api_key_manager=ApiKeyManager(),
-        oauth_repo=oauth_repo,
-        password_reset_repo=password_reset_repo,
+        oauth_repo=SqlAlchemyOAuthAccountRepository(session),
+        password_reset_repo=SqlAlchemyPasswordResetTokenRepository(session),
     )
 
 

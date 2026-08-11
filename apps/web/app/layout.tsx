@@ -14,7 +14,11 @@ export const metadata: Metadata = {
   description: 'Enterprise AI platform for document intelligence, semantic search, and RAG-powered conversations.',
   applicationName: 'MLCopilot',
   icons: {
-    icon: '/icon.svg',
+    icon: [
+      { url: '/mlcopilot-favicon-v3.png', type: 'image/png' },
+      { url: '/favicon-32x32.png', sizes: '32x32', type: 'image/png' },
+    ],
+    apple: '/apple-touch-icon.png',
   },
 }
 

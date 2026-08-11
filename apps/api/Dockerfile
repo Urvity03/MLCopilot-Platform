@@ -22,7 +22,8 @@ COPY src ./src
 COPY tests ./tests
 COPY README.md ./
 RUN uv sync --frozen --no-editable
-RUN /opt/venv/bin/python -c "from sentence_transformers import SentenceTransformer; SentenceTransformer('all-MiniLM-L6-v2')"
+RUN mkdir -p /root/.cache/huggingface
+RUN /opt/venv/bin/python -c "import importlib.util; importlib.util.find_spec('sentence_transformers') and __import__('sentence_transformers').SentenceTransformer('all-MiniLM-L6-v2')"
 
 # ── Runtime ────────────────────────────────────────────────────────────
 FROM python:3.12-slim AS runtime
@@ -48,10 +49,10 @@ RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 
 USER app
 
-EXPOSE 8000
+EXPOSE 7860
 
 HEALTHCHECK --interval=10s --timeout=5s --retries=12 CMD \
-    python -c "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/v1/health/live')"
+    python -c "import os, urllib.request; urllib.request.urlopen('http://localhost:' + str(os.environ.get('PORT', 7860)) + '/api/v1/health/live')"
 
 ENTRYPOINT ["docker-entrypoint.sh"]
-CMD ["uvicorn", "mlcopilot.main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["sh", "-c", "uvicorn mlcopilot.main:app --host 0.0.0.0 --port ${PORT:-7860}"]

@@ -1,20 +1,18 @@
 import axios, { AxiosRequestConfig, AxiosResponse } from 'axios';
 import { useAuthStore } from '../store/auth';
-
-const rawBaseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1';
-const API_BASE_URL = rawBaseUrl.endsWith('/api/v1') ? rawBaseUrl : `${rawBaseUrl.replace(/\/+$/, '')}/api/v1`;
+import { getApiBaseUrl } from '../lib/config';
 
 export const client = axios.create({
-  baseURL: API_BASE_URL,
   headers: {
     'Content-Type': 'application/json',
   },
   withCredentials: true,
 });
 
-// Request Interceptor: Inject Authorization Bearer Token
+// Request Interceptor: Inject Authorization Bearer Token & Dynamic API Base URL
 client.interceptors.request.use(
   (config) => {
+    config.baseURL = getApiBaseUrl();
     const token = useAuthStore.getState().accessToken;
     if (token && config.headers) {
       config.headers.Authorization = `Bearer ${token}`;
@@ -79,7 +77,7 @@ client.interceptors.response.use(
 
     try {
       const refreshResponse = await axios.post(
-        `${API_BASE_URL || 'http://localhost:8000/api/v1'}/auth/refresh`,
+        `${getApiBaseUrl()}/auth/refresh`,
         {},
         { withCredentials: true }
       );

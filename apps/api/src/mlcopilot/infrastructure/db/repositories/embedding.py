@@ -67,6 +67,8 @@ class PostgresEmbeddingRepository(EmbeddingRepository):
         top_k: int,
     ) -> list[SearchResult]:
         """Execute project-isolated cosine similarity query."""
+        from sqlalchemy import text
+
         # Cosine distance in pgvector is <=> operator. Cosine similarity = 1 - cosine_distance.
         distance_expr = ChunkEmbeddingModel.embedding.cosine_distance(query_vector)
         stmt = (
@@ -84,7 +86,19 @@ class PostgresEmbeddingRepository(EmbeddingRepository):
             .order_by(distance_expr.asc())
             .limit(top_k)
         )
-        res = await self._session.execute(stmt)
+        try:
+            res = await self._session.execute(stmt)
+        except Exception as e:
+            if "vector" in str(e).lower() or "undefinedfunctionerror" in str(e).lower():
+                try:
+                    await self._session.execute(text("CREATE EXTENSION IF NOT EXISTS vector"))
+                    res = await self._session.execute(stmt)
+                except Exception as inner_exc:
+                    logger.warning("embedding.search.vector_extension_failed", error=str(inner_exc))
+                    return []
+            else:
+                raise e
+
         results = []
         for row in res.all():
             meta = dict(row.metadata or {})

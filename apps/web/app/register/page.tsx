@@ -11,6 +11,7 @@ import { useAuthStore } from '../../store/auth';
 import { ShieldAlert, Check, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { OAuthButtons } from '../../components/auth/OAuthButtons';
+import { MLCopilotLogo } from '../../components/branding/MLCopilotLogo';
 
 const registerSchema = z.object({
   full_name: z.string().min(1, { message: 'Display name is required.' }),
@@ -67,16 +68,15 @@ export default function RegisterPage() {
         transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
         className="w-full max-w-[400px] flex flex-col items-center"
       >
-        {/* Animated Logo */}
-        <div className="flex flex-col items-center mb-8 select-none">
-          <div className="relative mb-3">
-            <div className="h-12 w-12 rounded-2xl bg-[var(--primary)]/10 border border-[var(--primary)]/20 flex items-center justify-center text-[var(--primary)] font-bold text-xl shadow-[0_0_30px_rgba(124,92,252,0.15)]">
-              M
-            </div>
-            <div className="absolute inset-0 rounded-2xl border border-[var(--primary)]/10 animate-ping opacity-20 pointer-events-none" />
-          </div>
-          <span className="text-[#F0F0F3] font-semibold text-base tracking-tight">MLCopilot</span>
-          <span className="text-xs text-[#8B8D98] mt-0.5">AI Knowledge Operating System</span>
+        {/* Brand Logo */}
+        <div className="mb-8">
+          <MLCopilotLogo
+            size={44}
+            showText
+            showSubtext
+            textClassName="text-base font-semibold text-[#F0F0F3] tracking-tight"
+            subtextClassName="text-xs text-[#8B8D98] mt-0.5"
+          />
         </div>
 
         {/* Glass Card */}

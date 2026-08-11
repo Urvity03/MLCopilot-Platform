@@ -121,6 +121,23 @@ class Settings(BaseSettings):
 
     @model_validator(mode="after")
     def _fail_fast(self) -> Self:
+        if self.database_url.startswith("postgres://"):
+            self.database_url = self.database_url.replace("postgres://", "postgresql+asyncpg://", 1)
+        elif self.database_url.startswith("postgresql://"):
+            self.database_url = self.database_url.replace("postgresql://", "postgresql+asyncpg://", 1)
+
+        # asyncpg does not accept sslmode as a connect keyword — strip it from
+        # the URL query string.  SSL is instead forwarded via connect_args in
+        # engine.py (ssl="require").
+        if "sslmode=" in self.database_url:
+            from urllib.parse import urlparse, urlunparse, urlencode, parse_qs
+
+            parsed = urlparse(self.database_url)
+            query_params = parse_qs(parsed.query, keep_blank_values=True)
+            query_params.pop("sslmode", None)
+            new_query = urlencode({k: v[0] for k, v in query_params.items()})
+            self.database_url = urlunparse(parsed._replace(query=new_query))
+
         if not self.database_url.startswith("postgresql+asyncpg://"):
             msg = (
                 "DATABASE_URL must use the async driver "
@@ -133,14 +150,13 @@ class Settings(BaseSettings):
         if self.is_production:
             secret = self.jwt_secret.get_secret_value()
             if secret in _INSECURE_JWT_SECRETS or len(secret) < 32:
-                msg = (
-                    "JWT_SECRET is unset or insecure for production. "
-                    "Generate one with: openssl rand -hex 32"
-                )
-                raise ValueError(msg)
+                raise ValueError("JWT_SECRET must be set to a cryptographically random secret of at least 32 bytes in production.")
             if not self.cors_origin_list:
-                msg = "CORS_ORIGINS must list at least one exact origin in production."
-                raise ValueError(msg)
+                self.cors_origins = "https://mlcopilot-two.vercel.app"
+            if self.oauth_redirect_base == "http://localhost:8000":
+                self.oauth_redirect_base = "https://mlcopilot-two.vercel.app"
+            if self.frontend_url == "http://localhost:3000":
+                self.frontend_url = "https://mlcopilot-two.vercel.app"
         return self
 
 
