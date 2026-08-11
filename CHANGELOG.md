@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.1.0] - 2026-08-11
+
+### Added
+- **GitHub Repository Integration**: Support for code-aware intelligence, repository context ingestion, and code file parsing.
+- **Production Google Gemini Integration**: Configured `gemini-3.6-flash` REST streaming provider for cloud production deployments.
+- **Custom Brand Identity**: Updated brand monogram, header logo, and transparent browser favicon across dark/light theme engines.
+- **Vercel Production Deployment**: Deployed production web application to Vercel connected to Neon PostgreSQL + pgvector cloud database.
+
+### Fixed
+- Fixed Docker container build verification in CI pipeline (`apps/api/Dockerfile`).
+- Resolved API deprecation 404 handling in LLM provider REST calls.
+
+---
+
 ## [1.0.0] - 2026-07-27
 
 ### Added
