@@ -15,7 +15,7 @@ export const metadata: Metadata = {
   applicationName: 'MLCopilot',
   icons: {
     icon: [
-      { url: '/mlcopilot-favicon-v2.png', type: 'image/png' },
+      { url: '/mlcopilot-favicon-v3.png', type: 'image/png' },
       { url: '/favicon-32x32.png', sizes: '32x32', type: 'image/png' },
     ],
     apple: '/apple-touch-icon.png',

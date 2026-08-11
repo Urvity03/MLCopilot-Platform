@@ -19,41 +19,16 @@ export function MLCopilotLogo({
   subtextClassName = 'text-xs text-[var(--muted-foreground)] mt-0.5',
   showSubtext = false,
 }: MLCopilotLogoProps) {
-  const logoId = React.useId();
-  const gradientId = `ml-logo-grad-${logoId.replace(/:/g, '')}`;
-
   return (
     <div className={`inline-flex items-center gap-3 select-none ${className}`}>
-      <svg
-        width={size}
-        height={size}
-        viewBox="0 0 100 100"
-        fill="none"
-        xmlns="http://www.w3.org/2000/svg"
-        className="shrink-0 transition-transform duration-200"
-        aria-label="MLCopilot Logo"
-      >
-        <defs>
-          <linearGradient id={gradientId} x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#A855F7" />
-            <stop offset="45%" stopColor="#7C5CFC" />
-            <stop offset="100%" stopColor="#3B82F6" />
-          </linearGradient>
-        </defs>
-        <path
-          d="M 18 76 V 24 L 45 54 L 72 24 V 76"
-          stroke={`url(#${gradientId})`}
-          strokeWidth="12"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-        <circle
-          cx="88"
-          cy="70"
-          r="6.5"
-          fill={`url(#${gradientId})`}
-        />
-      </svg>
+      <img
+        src="/mlcopilot-favicon-v3.png"
+        width={typeof size === 'number' ? size : 32}
+        height={typeof size === 'number' ? size : 32}
+        style={{ width: size, height: size }}
+        alt="MLCopilot Logo"
+        className="shrink-0 object-contain transition-transform duration-200"
+      />
       {showText && (
         <div className="flex flex-col min-w-0">
           <span className={textClassName}>MLCopilot</span>
