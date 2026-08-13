@@ -164,7 +164,7 @@ flowchart TD
 - [x] Dark & Light Theme Engine with Glassmorphism Design
 - [x] Vercel Production Deployment & Automated CI/CD Pipeline
 
-### 🗺️ Future Roadmap
+###  Future Roadmap
 - [ ] Model Context Protocol (MCP) server & tool integrations
 - [ ] Multi-modal image, diagram & chart ingestion
 - [ ] Hybrid BM25 keyword + dense vector re-ranking (Cross-Encoders)
@@ -200,7 +200,7 @@ cp .env.example .env
 
 ---
 
-## 💻 Local Development Setup
+##  Local Development Setup
 
 ### Prerequisites
 - **Python**: 3.12+
@@ -249,7 +249,7 @@ docker compose up --build
 
 ---
 
-## 🧪 Testing & Quality Assurance
+##  Testing & Quality Assurance
 
 ### Backend Unit Tests & Linting
 ```bash
@@ -273,7 +273,7 @@ pnpm build
 
 ---
 
-## 🔄 CI/CD Pipeline
+##  CI/CD Pipeline
 
 The repository includes an automated GitHub Actions quality pipeline defined in [`.github/workflows/ci.yml`](./.github/workflows/ci.yml):
 
