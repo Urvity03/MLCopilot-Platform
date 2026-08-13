@@ -22,7 +22,7 @@
 
 ---
 
-## 🚀 Live Demo
+##  Live Demo
 
 - **Production URL**: [https://mlcopilot-two.vercel.app](https://mlcopilot-two.vercel.app)
 
@@ -30,7 +30,7 @@ MLCopilot is deployed live on Vercel with a Neon PostgreSQL/pgvector cloud datab
 
 ---
 
-## 📌 Overview
+##  Overview
 
 MLCopilot is an enterprise-grade AI workspace designed to help developers, data scientists, and ML engineers organize research, analyze technical documentation, and collaborate with an AI assistant.
 
@@ -45,7 +45,7 @@ Key highlights:
 
 ---
 
-## 📸 Screenshots
+##  Screenshots
 
 ### Authentication
 ![MLCopilot Login](docs/screenshots/login.png)
