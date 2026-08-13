@@ -121,7 +121,7 @@ flowchart TD
 
 ---
 
-## ⚡ How It Works
+##  How It Works
 
 1. **Workspace Creation**: The user creates or selects an isolated project workspace.
 2. **Document Ingestion**: The user uploads technical documents (PDF, DOCX, TXT, MD, `.ipynb`) or repository files.
@@ -137,7 +137,7 @@ flowchart TD
 
 ---
 
-## 🔐 Authentication & Security
+##  Authentication & Security
 
 - **Email & Password**: Registration and login using Argon2id password hashing.
 - **JWT Sessions**: Access tokens and refresh tokens signed with strong SHA-256 HMAC keys.
