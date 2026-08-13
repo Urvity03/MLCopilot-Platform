@@ -148,9 +148,9 @@ flowchart TD
 
 ---
 
-## 📋 Implemented Features vs. Roadmap
+##  Implemented Features vs. Roadmap
 
-### ✅ Implemented Capabilities
+###  Implemented Capabilities
 - [x] Full-Stack Next.js 16 + FastAPI architecture
 - [x] AI Chat UI with real-time SSE token streaming
 - [x] Hybrid RAG & confidence-based similarity routing
