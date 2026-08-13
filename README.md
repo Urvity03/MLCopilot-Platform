@@ -329,13 +329,13 @@ MLCopilot-Platform/
 
 ---
 
-## 📜 License
+##  License
 
 Licensed under the Apache License, Version 2.0. See [Apache License 2.0](LICENSE) for details.
 
 ---
 
-## 👩‍💻 Author & Maintainer
+##  Author & Maintainer
 
 **Urvi Tyagi**
 *B.Tech in Artificial Intelligence & Machine Learning*
