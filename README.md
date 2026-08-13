@@ -74,7 +74,7 @@ Workspace configuration and AI/RAG infrastructure settings.
 
 ---
 
-## 🛠️ Technology Stack
+##  Technology Stack
 
 ### Frontend
 - **Framework**: Next.js 16 (App Router, Turbopack)
@@ -96,7 +96,7 @@ Workspace configuration and AI/RAG infrastructure settings.
 
 ---
 
-## 🏗️ Architecture & Data Flow
+##  Architecture & Data Flow
 
 ```mermaid
 flowchart TD
