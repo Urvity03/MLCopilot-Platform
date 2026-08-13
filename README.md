@@ -173,7 +173,7 @@ flowchart TD
 
 ---
 
-## ⚙️ Environment Configuration
+##  Environment Configuration
 
 Copy the sample environment file to configure your local setup:
 
@@ -181,7 +181,7 @@ Copy the sample environment file to configure your local setup:
 cp .env.example .env
 ```
 
-> ⚠️ **CRITICAL SECURITY NOTE**: Never commit `.env` files, production database URLs, API keys, or OAuth secrets to Git.
+>  **CRITICAL SECURITY NOTE**: Never commit `.env` files, production database URLs, API keys, or OAuth secrets to Git.
 
 ### Key Environment Variables
 
