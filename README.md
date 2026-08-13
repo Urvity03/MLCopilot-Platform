@@ -284,7 +284,7 @@ The repository includes an automated GitHub Actions quality pipeline defined in 
 
 ---
 
-## 🚀 Production Deployment
+##  Production Deployment
 
 Refer to [`DEPLOYMENT.md`](./DEPLOYMENT.md) for full production deployment guidelines.
 
@@ -293,7 +293,7 @@ The frontend is currently deployed to Vercel Production:
 
 ---
 
-## 📂 Project Structure
+##  Project Structure
 
 ```text
 MLCopilot-Platform/
